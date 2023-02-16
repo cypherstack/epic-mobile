@@ -98,6 +98,15 @@ Future<void> executeNative(Map<String, dynamic> arguments) async {
         sendPort.send(result);
         return;
       }
+    } else if (function == "getTransaction") {
+      final txSlateId = arguments['txSlateId'] as String?;
+      Map<String, dynamic> result = {};
+      if (!(txSlateId == null)) {
+        var res = await getTransaction(txSlateId);
+        result['result'] = res;
+        sendPort.send(result);
+        return;
+      }
     } else if (function == "getTransactions") {
       final wallet = arguments['wallet'] as String?;
       final refreshFromNode = arguments['refreshFromNode'] as int?;
@@ -1616,6 +1625,29 @@ class EpicCashWallet extends CoinServiceAPI {
     double awaiting = jsonBalances['amount_awaiting_finalization'] as double;
     total = total + awaiting;
     return Decimal.parse(total.toString());
+  }
+
+  Future<void> getTransaction(String txSlateId) async {
+    await m.protect(() async {
+      ReceivePort receivePort = await getIsolate({
+        "function": "getTransaction",
+        "txSlateId": txSlateId,
+      }, name: walletName);
+
+      var message = await receivePort.first;
+      // if (message is String) {
+      //   Logging.instance
+      //       .log("this is a string $message", level: LogLevel.Error);
+      //   stop(receivePort);
+      //   throw Exception("getTransactionFees isolate failed");
+      // }
+      stop(receivePort);
+      Logging.instance
+          .log('Closing getTransaction!\n  $message', level: LogLevel.Info);
+      // return message;
+      print('result');
+      print(message);
+    });
   }
 
   Future<TransactionData> _fetchTransactionData() async {
