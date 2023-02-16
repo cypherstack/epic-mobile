@@ -56,6 +56,18 @@ class _TransactionDetailsViewState
     Color color;
     String label;
 
+    // example get transaction info ... this probably shouldn't actually be done here, but rather when the tx in hive memory are placed there
+    final Manager manager = ref.read(walletProvider)!;
+    if (manager.wallet is EpicCashWallet) {
+      if (_transaction.slateId == null) {
+        throw Exception('Cannot transaction, slateId null');
+      }
+      String txSlateId = _transaction.slateId ?? '';
+      final result =
+          (manager.wallet as EpicCashWallet).getTransaction(txSlateId);
+      print(result);
+    }
+
     if (_transaction.isCancelled) {
       color = Theme.of(context).extension<StackColors>()!.accentColorRed;
       label = "Cancelled";
