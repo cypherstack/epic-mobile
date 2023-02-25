@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:ffi';
 import 'dart:io';
 import 'dart:isolate';
 
@@ -175,17 +176,6 @@ Future<void> executeNative(Map<String, dynamic> arguments) async {
           address == null)) {
         var res = await txHttpSend(wallet, selectionStrategyIsAll,
             minimumConfirmations, message, amount, address);
-        result['result'] = res;
-        sendPort.send(result);
-        return;
-      }
-    } else if (function == "listenForSlates") {
-      final wallet = arguments['wallet'] as String?;
-      final epicboxConfig = arguments['epicboxConfig'] as String?;
-
-      Map<String, dynamic> result = {};
-      if (!(wallet == null || epicboxConfig == null)) {
-        var res = await epicboxListen(wallet, epicboxConfig);
         result['result'] = res;
         sendPort.send(result);
         return;
@@ -800,7 +790,8 @@ class EpicCashWallet extends CoinServiceAPI {
       txCount = data.getAllTransactions().length;
     }
     //Open Epicbox listener in the background
-    await listenForSlates();
+    await listenToEpicbox();
+    await isEpicboxListening();
     // TODO: is there anything else that should be set up here whenever this wallet is first loaded again?
   }
 
@@ -931,7 +922,7 @@ class EpicCashWallet extends CoinServiceAPI {
         .put<dynamic>(boxName: walletId, key: "isFavorite", value: false);
 
     //Open Epicbox listener in the background
-    await listenForSlates();
+    await listenToEpicbox();
   }
 
   bool refreshMutex = false;
@@ -1344,12 +1335,29 @@ class EpicCashWallet extends CoinServiceAPI {
       await storeEpicboxInfo();
 
       //Open Epicbox listener in the background
-      await listenForSlates();
+      await listenToEpicbox();
     } catch (e, s) {
       Logging.instance
           .log("Error recovering wallet $e\n$s", level: LogLevel.Error);
       rethrow;
     }
+  }
+
+  Future<void> listenToEpicbox() async {
+    final wallet = await _secureStore.read(key: '${_walletId}_wallet');
+    final epicboxConfig = await getEpicBoxConfig();
+
+    final handler = epicboxListen(wallet!, epicboxConfig);
+
+    await _secureStore.write(
+        key: '${_walletId}_epicboxHandler', value: handler.toString());
+  }
+
+  Future<String> isEpicboxListening() async {
+    final epicboxHandler =
+        await _secureStore.read(key: '${_walletId}_epicboxHandler');
+
+    return pollBoxCancelled(epicboxHandler!);
   }
 
   Future<int> getRestoreHeight() async {
@@ -1521,28 +1529,28 @@ class EpicCashWallet extends CoinServiceAPI {
     }
   }
 
-  Future<void> listenForSlates() async {
-    final wallet = await _secureStore.read(key: '${_walletId}_wallet');
-    final epicboxConfig = await getEpicBoxConfig();
-
-    await m.protect(() async {
-      Logging.instance.log("CALLING LISTEN FOR SLATES", level: LogLevel.Info);
-      ReceivePort receivePort = await getIsolate({
-        "function": "listenForSlates",
-        "wallet": wallet,
-        "epicboxConfig": epicboxConfig,
-      }, name: walletName);
-
-      var result = await receivePort.first;
-      if (result is String) {
-        Logging.instance
-            .log("this is a message $result", level: LogLevel.Error);
-        stop(receivePort);
-        throw Exception("subscribeRequest isolate failed");
-      }
-      stop(receivePort);
-    });
-  }
+  // Future<void> listenForSlates() async {
+  //   final wallet = await _secureStore.read(key: '${_walletId}_wallet');
+  //   final epicboxConfig = await getEpicBoxConfig();
+  //
+  //   await m.protect(() async {
+  //     Logging.instance.log("CALLING LISTEN FOR SLATES", level: LogLevel.Info);
+  //     ReceivePort receivePort = await getIsolate({
+  //       "function": "listenForSlates",
+  //       "wallet": wallet,
+  //       "epicboxConfig": epicboxConfig,
+  //     }, name: walletName);
+  //
+  //     var result = await receivePort.first;
+  //     if (result is String) {
+  //       Logging.instance
+  //           .log("this is a message $result", level: LogLevel.Error);
+  //       stop(receivePort);
+  //       throw Exception("subscribeRequest isolate failed");
+  //     }
+  //     stop(receivePort);
+  //   });
+  // }
 
   /// Refreshes display data for the wallet
   @override
