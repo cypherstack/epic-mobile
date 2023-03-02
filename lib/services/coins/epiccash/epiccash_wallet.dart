@@ -58,6 +58,10 @@ class BadEpicHttpAddressException implements Exception {
   }
 }
 
+abstract class EpicboxListenerManager {
+  static Pointer<Void>? pointer;
+}
+
 // isolate
 
 Map<ReceivePort, Isolate> isolates = {};
@@ -791,7 +795,7 @@ class EpicCashWallet extends CoinServiceAPI {
     }
     //Open Epicbox listener in the background
     await listenToEpicbox();
-    await isEpicboxListening();
+    // await isEpicboxListening();
     // TODO: is there anything else that should be set up here whenever this wallet is first loaded again?
   }
 
@@ -1361,18 +1365,22 @@ class EpicCashWallet extends CoinServiceAPI {
     final wallet = await _secureStore.read(key: '${_walletId}_wallet');
     final epicboxConfig = await getEpicBoxConfig();
 
-    final handler = epicboxListen(wallet!, epicboxConfig);
+    EpicboxListenerManager.pointer = epicboxListen(wallet!, epicboxConfig);
+    // print("TYPE OF HANDLER IS ${handler.runtimeType}");
 
-    await _secureStore.write(
-        key: '${_walletId}_epicboxHandler', value: handler.toString());
+    final handleCancelled =
+        await pollBoxCancelled(EpicboxListenerManager.pointer as Pointer<Void>);
+    print("HANDLER CANCELLED RESPONSE IS $handleCancelled");
+    // await _secureStore.write(
+    //     key: '${_walletId}_epicboxHandler', value: handler);
   }
 
-  Future<String> isEpicboxListening() async {
-    final epicboxHandler =
-        await _secureStore.read(key: '${_walletId}_epicboxHandler');
-
-    return pollBoxCancelled(epicboxHandler!);
-  }
+  // Future<String> isEpicboxListening() async {
+  //   final epicboxHandler =
+  //       await _secureStore.read(key: '${_walletId}_epicboxHandler');
+  //
+  //   return pollBoxCancelled(epicboxHandler!);
+  // }
 
   Future<int> getRestoreHeight() async {
     if (DB.instance
