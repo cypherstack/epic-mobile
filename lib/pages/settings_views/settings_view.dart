@@ -172,18 +172,16 @@ class SettingsView extends StatelessWidget {
                             },
                           ),
                           const _Div(),
-                          Consumer(builder: (context, ref, __) {
-                            return SettingsListButton(
-                              iconAssetName: Assets.svg.globe,
-                              iconSize: 16,
-                              title: "Epic Box Server",
-                              onPressed: () {
-                                Navigator.of(context).pushNamed(
-                                  EpicBoxSettingsView.routeName,
-                                );
-                              },
-                            );
-                          }),
+                          SettingsListButton(
+                            iconAssetName: Assets.svg.globe,
+                            iconSize: 16,
+                            title: "Epic Box Server",
+                            onPressed: () {
+                              Navigator.of(context).pushNamed(
+                                EpicBoxSettingsView.routeName,
+                              );
+                            },
+                          ),
                           const _Div(),
                           SettingsListButton(
                             iconAssetName: Assets.svg.dollarSign,
