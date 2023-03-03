@@ -286,9 +286,9 @@ Future<String> _recoverWrapper(
   return recoverWallet(data.item1, data.item2, data.item3, data.item4);
 }
 
-Future<int> _getChainHeightWrapper(String config) async {
+Future<int?> _getChainHeightWrapper(String config) async {
   try {
-    final int chainHeight = getChainHeight(config);
+    final int? chainHeight = getChainHeight(config);
     return chainHeight;
   } catch (_) {
     rethrow;
@@ -1217,9 +1217,14 @@ class EpicCashWallet extends CoinServiceAPI {
     try {
       final wallet = await _secureStore.read(key: '${_walletId}_wallet');
 
-      var restoreHeight =
-          DB.instance.get<dynamic>(boxName: walletId, key: "restoreHeight");
-      var chainHeight = await this.chainHeight;
+      int? cachedHeight = int.tryParse(
+          "${DB.instance.get<dynamic>(boxName: walletId, key: 'restoreHeight')}");
+      if (cachedHeight == null) {
+        Logging.instance.log("wallet restoreHeight not found, defaulting to 0",
+            level: LogLevel.Warning);
+      }
+      int restoreHeight = cachedHeight ?? 0;
+      int chainHeight = await this.chainHeight;
       if (!DB.instance.containsKey<dynamic>(
               boxName: walletId, key: 'lastScannedBlock') ||
           DB.instance
@@ -1397,7 +1402,11 @@ class EpicCashWallet extends CoinServiceAPI {
     } catch (e, s) {
       Logging.instance.log("$e $s", level: LogLevel.Error);
     }
-    return latestHeight!;
+    if (latestHeight == null) {
+      Logging.instance.log("wallet latestHeight not found, defaulting to 0",
+          level: LogLevel.Warning);
+    }
+    return latestHeight ?? 0; // TODO set better default response
   }
 
   int get storedChainHeight {
@@ -1661,8 +1670,8 @@ class EpicCashWallet extends CoinServiceAPI {
       );
       refreshMutex = false;
       if (shouldAutoSync) {
-        timer ??= Timer.periodic(
-            Duration(seconds: _prefs.refreshPeriod ?? 60), (timer) async {
+        timer ??= Timer.periodic(Duration(seconds: _prefs.refreshPeriod ?? 60),
+            (timer) async {
           Logging.instance.log(
               "Periodic refresh check for $walletId $walletName in object instance: $hashCode",
               level: LogLevel.Info);
