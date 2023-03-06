@@ -449,6 +449,7 @@ class EpicCashWallet extends CoinServiceAPI {
   Future<Decimal> get balanceMinusMaxFee => throw UnimplementedError();
 
   Timer? timer;
+  int? timerPeriod;
   late Coin _coin;
 
   @override
@@ -1661,21 +1662,30 @@ class EpicCashWallet extends CoinServiceAPI {
       );
       refreshMutex = false;
       if (shouldAutoSync) {
-        timer ??= Timer.periodic(Duration(seconds: _prefs.refreshPeriod ?? 60),
-            (timer) async {
-          Logging.instance.log(
-              "Periodic refresh check for $walletId $walletName in object instance: $hashCode (${_prefs.refreshPeriod ?? 60}s)",
-              level: LogLevel.Info);
-          // chain height check currently broken
-          // if ((await chainHeight) != (await storedChainHeight)) {
-          if (await refreshIfThereIsNewData()) {
-            await refresh();
-            GlobalEventBus.instance.fire(UpdatedInBackgroundEvent(
-                "New data found in $walletId $walletName in background!",
-                walletId));
+        // if a timer hasn't been started or our refresh period pref has changed since the last one was started, start a new one
+        if (timer == null || timerPeriod != _prefs.refreshPeriod) {
+          // if a timer exists, cancel it before starting a new one
+          if (timer != null) {
+            timer!.cancel();
           }
+          timer = Timer.periodic(Duration(seconds: _prefs.refreshPeriod ?? 60),
+              (timer) async {
+            Logging.instance.log(
+                "Periodic refresh check for $walletId $walletName in object instance: $hashCode (${_prefs.refreshPeriod ?? 60}s)",
+                level: LogLevel.Info);
+            // chain height check currently broken
+            // if ((await chainHeight) != (await storedChainHeight)) {
+            if (await refreshIfThereIsNewData()) {
+              await refresh();
+              GlobalEventBus.instance.fire(UpdatedInBackgroundEvent(
+                  "New data found in $walletId $walletName in background!",
+                  walletId));
+            }
+          });
           // }
-        });
+          // set timerPeriod helper var: if _prefs.refreshPeriod is changed and thus differs from this, we cancel the old timer and create a new one
+          timerPeriod = _prefs.refreshPeriod ?? 60;
+        }
       }
     } catch (error, strace) {
       refreshMutex = false;
