@@ -1664,7 +1664,7 @@ class EpicCashWallet extends CoinServiceAPI {
         timer ??= Timer.periodic(Duration(seconds: _prefs.refreshPeriod ?? 60),
             (timer) async {
           Logging.instance.log(
-              "Periodic refresh check for $walletId $walletName in object instance: $hashCode",
+              "Periodic refresh check for $walletId $walletName in object instance: $hashCode (${_prefs.refreshPeriod ?? 60}s)",
               level: LogLevel.Info);
           // chain height check currently broken
           // if ((await chainHeight) != (await storedChainHeight)) {
