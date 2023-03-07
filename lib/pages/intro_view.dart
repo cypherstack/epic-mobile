@@ -1,14 +1,16 @@
 import 'package:epicpay/pages/add_wallet_views/create_restore_wallet_view.dart';
+import 'package:epicpay/pages/settings_views/advanced_views/debug_view.dart';
+import 'package:epicpay/providers/ui/intro_view_index_provider.dart';
 import 'package:epicpay/utilities/assets.dart';
 import 'package:epicpay/utilities/text_styles.dart';
 import 'package:epicpay/utilities/theme/stack_colors.dart';
 import 'package:epicpay/utilities/util.dart';
 import 'package:epicpay/widgets/background.dart';
+import 'package:epicpay/widgets/custom_buttons/app_bar_icon_button.dart';
 import 'package:epicpay/widgets/desktop/primary_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import '../providers/ui/intro_view_index_provider.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class IntroView extends ConsumerStatefulWidget {
   const IntroView({Key? key}) : super(key: key);
@@ -53,6 +55,19 @@ class _IntroViewState extends ConsumerState<IntroView> {
         child: SafeArea(
           child: Column(
             children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  AppBarIconButton(
+                      icon: SvgPicture.asset(
+                        Assets.svg.circleInfo,
+                        color: Colors.white,
+                      ),
+                      onPressed: () {
+                        Navigator.of(context).pushNamed(DebugView.routeName);
+                      })
+                ],
+              ),
               Expanded(
                 child: GestureDetector(
                   onHorizontalDragEnd: (DragEndDetails details) {
