@@ -40,4 +40,5 @@ abstract class DefaultEpicBoxes {
       );
 
   static final defaultEpicBoxConfig = americas;
+  static final defaultEpicBoxServer = americas;
 }
