@@ -657,11 +657,8 @@ class EpicCashWallet extends CoinServiceAPI {
         final slateId = txLogEntryFirst['tx_slate_id'] as String;
         slateToAddresses[slateId] = txData['addresss'];
         await wallet.put('slate_to_address', slateToAddresses);
-        final slatesToCommits = await getSlatesToCommits();
-        String? commitId = slatesToCommits[slateId]?['commitId'] as String?;
-        Logging.instance.log("sent commitId: $commitId", level: LogLevel.Info);
-        return commitId!;
-        // return txLogEntryFirst['tx_slate_id'] as String;
+        await getSlatesToCommits();
+        return txLogEntryFirst['tx_slate_id'] as String;
       }
     } catch (e, s) {
       Logging.instance.log("Error sending $e - $s", level: LogLevel.Error);
