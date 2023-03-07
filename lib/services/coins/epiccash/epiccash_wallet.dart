@@ -6,7 +6,8 @@ import 'dart:isolate';
 
 import 'package:decimal/decimal.dart';
 import 'package:epicpay/hive/db.dart';
-import 'package:epicpay/models/epicbox_model.dart';
+import 'package:epicpay/models/epicbox_config_model.dart';
+import 'package:epicpay/models/epicbox_server_model.dart';
 import 'package:epicpay/models/node_model.dart';
 import 'package:epicpay/models/paymint/fee_object_model.dart';
 import 'package:epicpay/models/paymint/transactions_model.dart';
@@ -30,7 +31,6 @@ import 'package:epicpay/utilities/flutter_secure_storage_interface.dart';
 import 'package:epicpay/utilities/logger.dart';
 import 'package:epicpay/utilities/prefs.dart';
 import 'package:epicpay/utilities/test_epic_node_connection.dart';
-// import 'package:epicpay/utilities/test_epic_box_connection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_libepiccash/epic_cash.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -216,8 +216,8 @@ Future<String> _cancelTransactionWrapper(Tuple2<String, String> data) async {
   return cancelTransaction(data.item1, data.item2);
 }
 
-Future<String> _deleteWalletWrapper(String wallet) async {
-  return deleteWallet(wallet);
+Future<String> _deleteWalletWrapper(Tuple2<String, String> data) async {
+  return deleteWallet(data.item1, data.item2);
 }
 
 Future<String> deleteEpicWallet({
@@ -245,7 +245,16 @@ Future<String> deleteEpicWallet({
 
   final wallet = await secureStore.read(key: '${walletId}_wallet');
 
-  return compute(_deleteWalletWrapper, wallet!);
+  if (wallet == null) {
+    return "Tried to delete non existent epic wallet file with walletId=$walletId";
+  } else {
+    try {
+      return _deleteWalletWrapper(Tuple2(wallet, config!));
+    } catch (e, s) {
+      Logging.instance.log("$e\n$s", level: LogLevel.Error);
+      return "deleteEpicWallet($walletId) failed...";
+    }
+  }
 }
 
 Future<String> _initWalletWrapper(
@@ -434,6 +443,7 @@ class EpicCashWallet extends CoinServiceAPI {
   Future<Decimal> get balanceMinusMaxFee => throw UnimplementedError();
 
   Timer? timer;
+  int? timerPeriod;
   late Coin _coin;
 
   @override
@@ -547,7 +557,7 @@ class EpicCashWallet extends CoinServiceAPI {
   @override
   Future<String> confirmSend({required Map<String, dynamic> txData}) async {
     try {
-      final epicboxConfig = await getEpicBoxConfig();
+      EpicBoxConfigModel epicboxConfig = await getEpicBoxConfig();
 
       final wallet = await _secureStore.read(key: '${_walletId}_wallet');
 
@@ -558,10 +568,8 @@ class EpicCashWallet extends CoinServiceAPI {
 
       if (!receiverAddress.startsWith("http://") ||
           !receiverAddress.startsWith("https://")) {
-        final decoded = json.decode(epicboxConfig);
         bool isEpicboxConnected = await testEpicboxServer(
-            decoded["epicbox_domain"] as String,
-            decoded["epicbox_port"] as int);
+            epicboxConfig.host, epicboxConfig.port ?? 443);
         if (!isEpicboxConnected) {
           throw Exception("Failed to send TX : Unable to reach epicbox server");
         }
@@ -595,7 +603,7 @@ class EpicCashWallet extends CoinServiceAPI {
             "amount": txData['recipientAmt'],
             "address": txData['addresss'],
             "secretKeyIndex": 0,
-            "epicboxConfig": epicboxConfig!,
+            "epicboxConfig": epicboxConfig.toString(),
             "minimumConfirmations": MINIMUM_CONFIRMATIONS,
           }, name: walletName);
 
@@ -643,11 +651,8 @@ class EpicCashWallet extends CoinServiceAPI {
         final slateId = txLogEntryFirst['tx_slate_id'] as String;
         slateToAddresses[slateId] = txData['addresss'];
         await wallet.put('slate_to_address', slateToAddresses);
-        final slatesToCommits = await getSlatesToCommits();
-        String? commitId = slatesToCommits[slateId]?['commitId'] as String?;
-        Logging.instance.log("sent commitId: $commitId", level: LogLevel.Info);
-        return commitId!;
-        // return txLogEntryFirst['tx_slate_id'] as String;
+        await getSlatesToCommits();
+        return txLogEntryFirst['tx_slate_id'] as String;
       }
     } catch (e, s) {
       Logging.instance.log("Error sending $e - $s", level: LogLevel.Error);
@@ -663,13 +668,13 @@ class EpicCashWallet extends CoinServiceAPI {
   ) async {
     final wallet = await _secureStore.read(key: '${_walletId}_wallet');
 
-    final epicboxConfig = await getEpicBoxConfig();
+    EpicBoxConfigModel epicboxConfig = await getEpicBoxConfig();
 
     String? walletAddress;
     await m.protect(() async {
       walletAddress = await compute(
         _initGetAddressInfoWrapper,
-        Tuple3(wallet!, chain, epicboxConfig!),
+        Tuple3(wallet!, chain, epicboxConfig.toString()),
       );
     });
     Logging.instance
@@ -822,13 +827,13 @@ class EpicCashWallet extends CoinServiceAPI {
     int index = 0;
 
     Logging.instance.log("This index is $index", level: LogLevel.Info);
-    final epicboxConfig = await getEpicBoxConfig();
+    EpicBoxConfigModel epicboxConfig = await getEpicBoxConfig();
 
     String? walletAddress;
     await m.protect(() async {
       walletAddress = await compute(
         _initGetAddressInfoWrapper,
-        Tuple3(wallet!, index, epicboxConfig!),
+        Tuple3(wallet!, index, epicboxConfig.toString()),
       );
     });
     Logging.instance
@@ -865,7 +870,7 @@ class EpicCashWallet extends CoinServiceAPI {
 
     final String password = generatePassword();
     String stringConfig = await getConfig();
-    String epicboxConfig = await getEpicBoxConfig();
+    EpicBoxConfigModel epicboxConfig = await getEpicBoxConfig();
 
     await _secureStore.write(
         key: '${_walletId}_mnemonic', value: mnemonicString);
@@ -874,7 +879,7 @@ class EpicCashWallet extends CoinServiceAPI {
     Logging.instance.log("Saving ${_walletId}_epicboxConfig: $epicboxConfig",
         level: LogLevel.Info);
     await _secureStore.write(
-        key: '${_walletId}_epicboxConfig', value: epicboxConfig);
+        key: '${_walletId}_epicboxConfig', value: epicboxConfig.toString());
 
     String name = _walletId;
 
@@ -1108,70 +1113,49 @@ class EpicCashWallet extends CoinServiceAPI {
     return stringConfig;
   }
 
-  Future<String> getEpicBoxConfig({EpicBoxModel? epicBox}) async {
-    EpicBoxModel? _epicBox = epicBox ??
-        DB.instance.get<EpicBoxModel>(
-            boxName: DB.boxNamePrimaryEpicBox, key: 'primary');
-    Logging.instance.log(
-        "Read primary Epic Box config: ${jsonEncode(_epicBox)}",
-        level: LogLevel.Info);
+  Future<EpicBoxConfigModel> getEpicBoxConfig() async {
+    EpicBoxConfigModel? _epicBoxConfig;
+    // read epicbox config from secure store
+    String? storedConfig =
+        await _secureStore.read(key: '${_walletId}_epicboxConfig');
 
-    if (_epicBox == null) {
-      Logging.instance.log(
-          "Using default Epic Box config: ${jsonEncode(DefaultEpicBoxes.defaultEpicBoxConfig)}",
-          level: LogLevel.Info);
-      _epicBox = DefaultEpicBoxes.defaultEpicBoxConfig;
+    // we should move to storing the primary server model like we do with nodes, and build the config from that (see epic-mobile)
+    // EpicBoxServerModel? _epicBox = epicBox ??
+    //     DB.instance.get<EpicBoxServerModel>(
+    //         boxName: DB.boxNamePrimaryEpicBox, key: 'primary');
+    // Logging.instance.log(
+    //     "Read primary Epic Box config: ${jsonEncode(_epicBox)}",
+    //     level: LogLevel.Info);
+
+    if (storedConfig == null) {
+      // if no config stored, use the default epicbox server as config
+      _epicBoxConfig =
+          EpicBoxConfigModel.fromServer(DefaultEpicBoxes.defaultEpicBoxServer);
+    } else {
+      // if a config is stored, test it
+
+      _epicBoxConfig = EpicBoxConfigModel.fromString(
+          storedConfig); // fromString handles checking old config formats
     }
 
-    //First check if the default box is up
-    final connected =
-        await testEpicboxServer(_epicBox.host, _epicBox.port as int);
+    bool isEpicboxConnected = await testEpicboxServer(
+        _epicBoxConfig.host, _epicBoxConfig.port ?? 443);
 
-    if (!connected) {
-      //Default Epic Box is not connected, iterate through list of defaults
-      Logging.instance.log("Default Epic Box server not connected",
-          level: LogLevel.Warning);
+    if (!isEpicboxConnected) {
+      // default Epicbox is not connected, default to Europe
+      _epicBoxConfig = EpicBoxConfigModel.fromServer(DefaultEpicBoxes.europe);
 
-      //Get all available hosts
-      final allBoxes = DefaultEpicBoxes.all;
-      final List<EpicBoxModel> alternativeServers = [];
+      // example of selecting another random server from the default list
+      // alternative servers: copy list of all default EB servers but remove the default default
+      // List<EpicBoxServerModel> alternativeServers = DefaultEpicBoxes.all;
+      // alternativeServers.removeWhere((opt) => opt.name == DefaultEpicBoxes.defaultEpicBoxServer.name);
+      // alternativeServers.shuffle(); // randomize which server is used
+      // _epicBoxConfig = EpicBoxConfigModel.fromServer(alternativeServers.first);
 
-      for (var i = 0; i < allBoxes.length; i++) {
-        if (allBoxes[i].name != _epicBox?.name) {
-          alternativeServers.add(allBoxes[i]);
-        }
-      }
-
-      bool altConnected = false;
-      int i = 1;
-      while (i < alternativeServers.length) {
-        while (altConnected == false) {
-          altConnected = await testEpicboxServer(
-              alternativeServers[i].host, alternativeServers[i].port as int);
-          if (altConnected == true) {
-            _epicBox = alternativeServers[i];
-            Logging.instance.log(
-                "Connected to alternate Epic Box server ${json.encode(_epicBox)}",
-                level: LogLevel.Info);
-            break;
-          }
-        }
-        i++;
-      }
-      if (!altConnected) {
-        Logging.instance
-            .log("No Epic Box server connected!", level: LogLevel.Error);
-      }
+      // TODO test this connection before returning it
     }
 
-    Map<String, dynamic> _config = {
-      'epicbox_domain': _epicBox?.host,
-      'epicbox_port': _epicBox?.port,
-      'epicbox_protocol_unsecure': false,
-      'epicbox_address_index': 0,
-    };
-
-    return jsonEncode(_config);
+    return _epicBoxConfig;
   }
 
   // Used to update receiving address when updating epic box config
@@ -1296,7 +1280,7 @@ class EpicCashWallet extends CoinServiceAPI {
       final String password = generatePassword();
 
       String stringConfig = await getConfig();
-      String epicboxConfig = await getEpicBoxConfig();
+      EpicBoxConfigModel epicboxConfig = await getEpicBoxConfig();
       final String name = _walletName.trim();
 
       await _secureStore.write(key: '${_walletId}_mnemonic', value: mnemonic);
@@ -1305,7 +1289,7 @@ class EpicCashWallet extends CoinServiceAPI {
       Logging.instance.log("Saving ${_walletId}_epicboxConfig: $stringConfig",
           level: LogLevel.Info);
       await _secureStore.write(
-          key: '${_walletId}_epicboxConfig', value: epicboxConfig);
+          key: '${_walletId}_epicboxConfig', value: epicboxConfig.toString());
 
       await compute(
         _recoverWrapper,
@@ -1669,20 +1653,30 @@ class EpicCashWallet extends CoinServiceAPI {
       );
       refreshMutex = false;
       if (shouldAutoSync) {
-        timer ??= Timer.periodic(const Duration(seconds: 60), (timer) async {
-          Logging.instance.log(
-              "Periodic refresh check for $walletId $walletName in object instance: $hashCode",
-              level: LogLevel.Info);
-          // chain height check currently broken
-          // if ((await chainHeight) != (await storedChainHeight)) {
-          if (await refreshIfThereIsNewData()) {
-            await refresh();
-            GlobalEventBus.instance.fire(UpdatedInBackgroundEvent(
-                "New data found in $walletId $walletName in background!",
-                walletId));
+        // if a timer hasn't been started or our refresh period pref has changed since the last one was started, start a new one
+        if (timer == null || timerPeriod != _prefs.refreshPeriod) {
+          // if a timer exists, cancel it before starting a new one
+          if (timer != null) {
+            timer!.cancel();
           }
+          timer = Timer.periodic(Duration(seconds: _prefs.refreshPeriod ?? 60),
+              (timer) async {
+            Logging.instance.log(
+                "Periodic refresh check for $walletId $walletName in object instance: $hashCode (${_prefs.refreshPeriod ?? 60}s)",
+                level: LogLevel.Info);
+            // chain height check currently broken
+            // if ((await chainHeight) != (await storedChainHeight)) {
+            if (await refreshIfThereIsNewData()) {
+              await refresh();
+              GlobalEventBus.instance.fire(UpdatedInBackgroundEvent(
+                  "New data found in $walletId $walletName in background!",
+                  walletId));
+            }
+          });
           // }
-        });
+          // set timerPeriod helper var: if _prefs.refreshPeriod is changed and thus differs from this, we cancel the old timer and create a new one
+          timerPeriod = _prefs.refreshPeriod ?? 60;
+        }
       }
     } catch (error, strace) {
       refreshMutex = false;

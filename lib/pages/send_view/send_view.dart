@@ -97,6 +97,19 @@ class _SendViewState extends ConsumerState<SendView> {
 
   @override
   Widget build(BuildContext context) {
+    sendToController.addListener(() {
+      _address = sendToController.text;
+
+      if (_address != null && _address!.isNotEmpty) {
+        _address = _address!.trim();
+        if (_address!.contains("\n")) {
+          _address = _address!.substring(0, _address!.indexOf("\n"));
+        }
+
+        sendToController.text = httpXOREpicBox(_address!);
+      }
+    });
+
     debugPrint("BUILD: $runtimeType");
 
     _fillData = ref.watch(sendViewFillDataProvider.state).state;
@@ -238,16 +251,7 @@ class _SendViewState extends ConsumerState<SendView> {
                                                 content = content.substring(
                                                     0, content.indexOf("\n"));
                                               }
-                                              if ((content.startsWith(
-                                                          "http://") ||
-                                                      content.startsWith(
-                                                          "https://")) &&
-                                                  content.contains("@")) {
-                                                content = content.replaceAll(
-                                                    "http://", "");
-                                                content = content.replaceAll(
-                                                    "https://", "");
-                                              }
+                                              content = httpXOREpicBox(content);
 
                                               sendToController.text = content;
                                               _address = content;
@@ -466,4 +470,14 @@ class _SendViewState extends ConsumerState<SendView> {
       ),
     );
   }
+}
+
+String httpXOREpicBox(String epicAddress) {
+  if ((epicAddress.startsWith("http://") ||
+          epicAddress.startsWith("https://")) &&
+      epicAddress.contains("@")) {
+    epicAddress = epicAddress.replaceAll("http://", "");
+    epicAddress = epicAddress.replaceAll("https://", "");
+  }
+  return epicAddress;
 }
