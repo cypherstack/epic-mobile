@@ -106,7 +106,7 @@ class _SendViewState extends ConsumerState<SendView> {
           _address = _address!.substring(0, _address!.indexOf("\n"));
         }
 
-        sendToController.text = httpXOREpicBox(_address!);
+        sendToController.text = formatAddress(_address!);
       }
     });
 
@@ -251,7 +251,7 @@ class _SendViewState extends ConsumerState<SendView> {
                                                 content = content.substring(
                                                     0, content.indexOf("\n"));
                                               }
-                                              content = httpXOREpicBox(content);
+                                              content = formatAddress(content);
 
                                               sendToController.text = content;
                                               _address = content;
@@ -472,7 +472,8 @@ class _SendViewState extends ConsumerState<SendView> {
   }
 }
 
-String httpXOREpicBox(String epicAddress) {
+String formatAddress(String epicAddress) {
+  // strip http:// or https:// prefixes if the address contains an @ symbol (and is thus an epicbox address)
   if ((epicAddress.startsWith("http://") ||
           epicAddress.startsWith("https://")) &&
       epicAddress.contains("@")) {
