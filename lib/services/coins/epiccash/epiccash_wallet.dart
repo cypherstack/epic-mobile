@@ -146,11 +146,9 @@ Future<void> executeNative(Map<String, dynamic> arguments) async {
       final secretKeyIndex = arguments['secretKeyIndex'] as int?;
       final epicboxConfig = arguments['epicboxConfig'] as String?;
       final minimumConfirmations = arguments['minimumConfirmations'] as int?;
-      print('okokok');
-      print(arguments['epicboxHandler'].runtimeType);
       final epicboxHandler =
           Pointer.fromAddress(arguments['epicboxHandler'] as int)
-              as Pointer<Void>;
+              as Pointer<Void>?;
 
       print("ARGUMENTS IS $arguments");
       Map<String, dynamic> result = {};
@@ -172,7 +170,7 @@ Future<void> executeNative(Map<String, dynamic> arguments) async {
         result['result'] = res;
         sendPort.send(result);
         return;
-      }
+      } // TODO else throw error
     } else if (function == "txHttpSend") {
       final wallet = arguments['wallet'] as String?;
       final selectionStrategyIsAll =
