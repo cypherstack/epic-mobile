@@ -147,6 +147,7 @@ Future<void> executeNative(Map<String, dynamic> arguments) async {
       final epicboxConfig = arguments['epicboxConfig'] as String?;
       final minimumConfirmations = arguments['minimumConfirmations'] as int?;
       print('okokok');
+      print(arguments['epicboxHandler'].runtimeType);
       final epicboxHandler =
           Pointer.fromAddress(arguments['epicboxHandler'] as int)
               as Pointer<Void>;
@@ -158,7 +159,8 @@ Future<void> executeNative(Map<String, dynamic> arguments) async {
           address == null ||
           secretKeyIndex == null ||
           epicboxConfig == null ||
-          minimumConfirmations == null)) {
+          minimumConfirmations == null ||
+          epicboxHandler == null)) {
         var res = await createTransaction(
             wallet,
             amount,
@@ -227,7 +229,7 @@ Future<String> _cancelTransactionWrapper(Tuple2<String, String> data) async {
 }
 
 Future<String> _deleteWalletWrapper(Tuple2<String, String> data) async {
-  return deleteWallet(data.item1, data.item2);
+  return deleteWallet(data.item1 /*, data.item2*/);
 }
 
 Future<String> deleteEpicWallet({
@@ -1538,30 +1540,9 @@ class EpicCashWallet extends CoinServiceAPI {
   }
 
   Pointer<Void> listenForSlates(String wallet, String epicboxConfig) {
-    // final wallet = await _secureStore.read(key: '${_walletId}_wallet');
-    // EpicBoxConfigModel epicboxConfig = await getEpicBoxConfig();
-
     Logging.instance.log("CALLING LISTEN FOR SLATES", level: LogLevel.Info);
 
     return epicboxListen(wallet!, epicboxConfig.toString());
-    // EpicboxListenerManager.listenerHandler = result;
-    // await m.protect(() async {
-    //   Logging.instance.log("CALLING LISTEN FOR SLATES", level: LogLevel.Info);
-    //   ReceivePort receivePort = await getIsolate({
-    //     "function": "listenForSlates",
-    //     "wallet": wallet,
-    //     "epicboxConfig": epicboxConfig.toString(),
-    //   }, name: walletName);
-    //
-    //   var result = await receivePort.first;
-    //   if (result is String) {
-    //     Logging.instance
-    //         .log("this is a message $result", level: LogLevel.Error);
-    //     stop(receivePort);
-    //     throw Exception("subscribeRequest isolate failed");
-    //   }
-    //   stop(receivePort);
-    // });
   }
 
   /// Refreshes display data for the wallet
