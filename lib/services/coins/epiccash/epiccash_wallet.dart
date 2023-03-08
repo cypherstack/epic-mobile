@@ -147,7 +147,9 @@ Future<void> executeNative(Map<String, dynamic> arguments) async {
       final secretKeyIndex = arguments['secretKeyIndex'] as int?;
       final epicboxConfig = arguments['epicboxConfig'] as String?;
       final minimumConfirmations = arguments['minimumConfirmations'] as int?;
+      final epicboxHandler = arguments['epicboxHandler'] as Pointer<Void>;
 
+      print("ARGUMENTS IS $arguments");
       Map<String, dynamic> result = {};
       if (!(wallet == null ||
           amount == null ||
@@ -155,8 +157,14 @@ Future<void> executeNative(Map<String, dynamic> arguments) async {
           secretKeyIndex == null ||
           epicboxConfig == null ||
           minimumConfirmations == null)) {
-        var res = await createTransaction(wallet, amount, address,
-            secretKeyIndex, epicboxConfig, minimumConfirmations);
+        var res = await createTransaction(
+            wallet,
+            amount,
+            address,
+            secretKeyIndex,
+            epicboxConfig,
+            minimumConfirmations,
+            epicboxHandler);
         result['result'] = res;
         sendPort.send(result);
         return;
@@ -217,8 +225,7 @@ Future<String> _cancelTransactionWrapper(Tuple2<String, String> data) async {
 }
 
 Future<String> _deleteWalletWrapper(Tuple2<String, String> data) async {
-  // return deleteWallet(data.item1, data.item2);
-  return deleteWallet(data.item1);
+  return deleteWallet(data.item1, data.item2);
 }
 
 Future<String> deleteEpicWallet({
@@ -598,6 +605,8 @@ class EpicCashWallet extends CoinServiceAPI {
           Logging.instance
               .log('Closing txHttpSend!\n  $message', level: LogLevel.Info);
         } else {
+          print(
+              "LISTENER HANDLER AT THIS POINT IS ${EpicboxListenerManager.listenerHandler}");
           ReceivePort receivePort = await getIsolate({
             "function": "createTransaction",
             "wallet": wallet!,
@@ -606,6 +615,7 @@ class EpicCashWallet extends CoinServiceAPI {
             "secretKeyIndex": 0,
             "epicboxConfig": epicboxConfig.toString(),
             "minimumConfirmations": MINIMUM_CONFIRMATIONS,
+            "epicboxHandler": EpicboxListenerManager.listenerHandler,
           }, name: walletName);
 
           message = await receivePort.first;
