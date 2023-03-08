@@ -146,7 +146,10 @@ Future<void> executeNative(Map<String, dynamic> arguments) async {
       final secretKeyIndex = arguments['secretKeyIndex'] as int?;
       final epicboxConfig = arguments['epicboxConfig'] as String?;
       final minimumConfirmations = arguments['minimumConfirmations'] as int?;
-      final epicboxHandler = arguments['epicboxHandler'] as Pointer<Void>;
+      print('okokok');
+      final epicboxHandler =
+          Pointer.fromAddress(arguments['epicboxHandler'] as int)
+              as Pointer<Void>;
 
       print("ARGUMENTS IS $arguments");
       Map<String, dynamic> result = {};
@@ -614,7 +617,8 @@ class EpicCashWallet extends CoinServiceAPI {
             "secretKeyIndex": 0,
             "epicboxConfig": epicboxConfig.toString(),
             "minimumConfirmations": MINIMUM_CONFIRMATIONS,
-            "epicboxHandler": EpicboxListenerManager.listenerHandler,
+            "epicboxHandler": EpicboxListenerManager
+                .listenerHandler?.address, // TODO handle if null
           }, name: walletName);
 
           message = await receivePort.first;
