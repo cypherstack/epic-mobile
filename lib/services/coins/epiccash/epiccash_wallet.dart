@@ -7,7 +7,6 @@ import 'dart:isolate';
 import 'package:decimal/decimal.dart';
 import 'package:epicpay/hive/db.dart';
 import 'package:epicpay/models/epicbox_config_model.dart';
-import 'package:epicpay/models/epicbox_server_model.dart';
 import 'package:epicpay/models/node_model.dart';
 import 'package:epicpay/models/paymint/fee_object_model.dart';
 import 'package:epicpay/models/paymint/transactions_model.dart';
@@ -1349,7 +1348,8 @@ class EpicCashWallet extends CoinServiceAPI {
     final wallet = await _secureStore.read(key: '${_walletId}_wallet');
     final epicboxConfig = await getEpicBoxConfig();
 
-    EpicboxListenerManager.pointer = epicboxListen(wallet!, epicboxConfig);
+    EpicboxListenerManager.pointer =
+        epicboxListen(wallet!, epicboxConfig.toString());
     // print("TYPE OF HANDLER IS ${handler.runtimeType}");
 
     final handleCancelled =
