@@ -612,7 +612,8 @@ class EpicCashWallet extends CoinServiceAPI {
           print(
               "LISTENER HANDLER AT THIS POINT IS ${EpicboxListenerManager.listenerHandler}");
 
-          // TODO stop listener
+          // TODO try-catch / handle error
+          epicboxListenerStop(EpicboxListenerManager.listenerHandler!);
 
           ReceivePort receivePort = await getIsolate({
             "function": "createTransaction",
