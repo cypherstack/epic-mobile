@@ -587,6 +587,7 @@ class EpicCashWallet extends CoinServiceAPI {
       await m.protect(() async {
         if (receiverAddress.startsWith("http://") ||
             receiverAddress.startsWith("https://")) {
+          // http/https send
           const int selectionStrategyIsAll = 0;
           ReceivePort receivePort = await getIsolate({
             "function": "txHttpSend",
@@ -607,8 +608,12 @@ class EpicCashWallet extends CoinServiceAPI {
           Logging.instance
               .log('Closing txHttpSend!\n  $message', level: LogLevel.Info);
         } else {
+          // send to epicbox address
           print(
               "LISTENER HANDLER AT THIS POINT IS ${EpicboxListenerManager.listenerHandler}");
+
+          // TODO stop listener
+
           ReceivePort receivePort = await getIsolate({
             "function": "createTransaction",
             "wallet": wallet!,
@@ -629,6 +634,8 @@ class EpicCashWallet extends CoinServiceAPI {
             throw Exception("createTransaction isolate failed");
           }
           stop(receivePort);
+
+          // TODO start listener
           Logging.instance.log('Closing createTransaction!\n  $message',
               level: LogLevel.Info);
         }
@@ -1540,7 +1547,27 @@ class EpicCashWallet extends CoinServiceAPI {
   Pointer<Void> listenForSlates(String wallet, String epicboxConfig) {
     Logging.instance.log("CALLING LISTEN FOR SLATES", level: LogLevel.Info);
 
-    return epicboxListen(wallet!, epicboxConfig.toString());
+    return epicboxListenerStart(wallet!, epicboxConfig.toString());
+  }
+
+  // TODO set better response model
+  // returns bool where true = success, false = error
+  bool epicBoxListenerStop() {
+    Logging.instance.log("STOPPING EPICBOX LISTENER", level: LogLevel.Info);
+
+    bool result;
+    try {
+      // TODO validate EpicboxListenerManager.listenerHandler
+      result = epicboxListenerStop(EpicboxListenerManager.listenerHandler!);
+      if (!result) {
+        throw Exception(
+            "epicboxListenerStop returned false (rust_epicbox_listener_stop == 0)");
+      }
+    } catch (e, s) {
+      Logging.instance.log("Error stopping EpicBox listener\n\n$e\n$s",
+          level: LogLevel.Error);
+    }
+    return epicboxListenerStop(EpicboxListenerManager.listenerHandler!);
   }
 
   /// Refreshes display data for the wallet
