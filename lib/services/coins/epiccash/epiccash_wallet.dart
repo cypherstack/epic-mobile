@@ -825,7 +825,7 @@ class EpicCashWallet extends CoinServiceAPI {
 
     final listener = listenForSlates(wallet!, epicboxConfig.toString());
     print("VALUE OF LISTENER IS $listener");
-    EpicboxListenerManager.listenerHandler = listener;
+    // EpicboxListenerManager.listenerHandler = listener; // done in listenForSlates directly now
 
     // TODO: is there anything else that should be set up here whenever this wallet is first loaded again?
   }
@@ -959,7 +959,7 @@ class EpicCashWallet extends CoinServiceAPI {
     //Open Epicbox listener in the background
     final wallet = await _secureStore.read(key: '${_walletId}_wallet');
     final listener = listenForSlates(wallet!, epicboxConfig.toString());
-    EpicboxListenerManager.listenerHandler = listener;
+    // EpicboxListenerManager.listenerHandler = listener; // done in listenForSlates directly now
   }
 
   bool refreshMutex = false;
@@ -1545,9 +1545,14 @@ class EpicCashWallet extends CoinServiceAPI {
   }
 
   Pointer<Void> listenForSlates(String wallet, String epicboxConfig) {
+    // epicBoxListenerStart
     Logging.instance.log("CALLING LISTEN FOR SLATES", level: LogLevel.Info);
 
-    return epicboxListenerStart(wallet!, epicboxConfig.toString());
+    Pointer<Void> listenerHandler =
+        epicboxListenerStart(wallet!, epicboxConfig.toString());
+
+    EpicboxListenerManager.listenerHandler = listenerHandler;
+    return listenerHandler;
   }
 
   // TODO set better response model
