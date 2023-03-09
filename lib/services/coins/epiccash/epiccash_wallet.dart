@@ -1369,7 +1369,8 @@ class EpicCashWallet extends CoinServiceAPI {
 
       //Open Epicbox listener in the background
       final wallet = await _secureStore.read(key: '${_walletId}_wallet');
-      final listener = listenForSlates(wallet!, epicboxConfig.toString());
+      Pointer<void> listener =
+          listenForSlates(wallet!, epicboxConfig.toString());
       EpicboxListenerManager.listenerHandler = listener;
     } catch (e, s) {
       Logging.instance
