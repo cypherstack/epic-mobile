@@ -58,7 +58,7 @@ class BadEpicHttpAddressException implements Exception {
 }
 
 abstract class EpicboxListenerManager {
-  static Pointer<void>? listenerHandler;
+  static Pointer<Void>? listenerHandler;
 }
 
 // isolate
@@ -146,9 +146,9 @@ Future<void> executeNative(Map<String, dynamic> arguments) async {
       final secretKeyIndex = arguments['secretKeyIndex'] as int?;
       final epicboxConfig = arguments['epicboxConfig'] as String?;
       final minimumConfirmations = arguments['minimumConfirmations'] as int?;
-      final epicboxHandler =
-          Pointer.fromAddress(arguments['epicboxHandler'] as int)
-              as Pointer<Void>?;
+      // final epicboxHandler =
+      //     Pointer.fromAddress(arguments['epicboxHandler'] as int)
+      //         as Pointer<Void>?;
 
       print("ARGUMENTS IS $arguments");
       Map<String, dynamic> result = {};
@@ -157,16 +157,9 @@ Future<void> executeNative(Map<String, dynamic> arguments) async {
           address == null ||
           secretKeyIndex == null ||
           epicboxConfig == null ||
-          minimumConfirmations == null ||
-          epicboxHandler == null)) {
-        var res = await createTransaction(
-            wallet,
-            amount,
-            address,
-            secretKeyIndex,
-            epicboxConfig,
-            minimumConfirmations,
-            epicboxHandler);
+          minimumConfirmations == null)) {
+        var res = await createTransaction(wallet, amount, address,
+            secretKeyIndex, epicboxConfig, minimumConfirmations);
         result['result'] = res;
         sendPort.send(result);
         return;
@@ -613,8 +606,10 @@ class EpicCashWallet extends CoinServiceAPI {
               "LISTENER HANDLER AT THIS POINT IS ${EpicboxListenerManager.listenerHandler}");
 
           // TODO try-catch / handle error
-          epicboxListenerStop(EpicboxListenerManager.listenerHandler!);
+          final cancelled = epicboxListenerStop(
+              EpicboxListenerManager.listenerHandler as Pointer<Void>);
 
+          print("RESULT OF CANCEL IS $cancelled");
           ReceivePort receivePort = await getIsolate({
             "function": "createTransaction",
             "wallet": wallet!,
@@ -622,9 +617,7 @@ class EpicCashWallet extends CoinServiceAPI {
             "address": txData['addresss'],
             "secretKeyIndex": 0,
             "epicboxConfig": epicboxConfig.toString(),
-            "minimumConfirmations": MINIMUM_CONFIRMATIONS,
-            "epicboxHandler": EpicboxListenerManager
-                .listenerHandler?.address, // TODO handle if null
+            "minimumConfirmations": MINIMUM_CONFIRMATIONS
           }, name: walletName);
 
           message = await receivePort.first;
@@ -637,7 +630,7 @@ class EpicCashWallet extends CoinServiceAPI {
           stop(receivePort);
 
           // TODO try-catch / handle error
-          listenForSlates(wallet, epicboxConfig.toString());
+          await listenForSlates();
 
           Logging.instance.log('Closing createTransaction!\n  $message',
               level: LogLevel.Info);
@@ -826,9 +819,7 @@ class EpicCashWallet extends CoinServiceAPI {
     final wallet = await _secureStore.read(key: '${_walletId}_wallet');
     EpicBoxConfigModel epicboxConfig = await getEpicBoxConfig();
 
-    final listener = listenForSlates(wallet!, epicboxConfig.toString());
-    print("VALUE OF LISTENER IS $listener");
-    // EpicboxListenerManager.listenerHandler = listener; // done in listenForSlates directly now
+    await listenForSlates();
 
     // TODO: is there anything else that should be set up here whenever this wallet is first loaded again?
   }
@@ -960,9 +951,7 @@ class EpicCashWallet extends CoinServiceAPI {
         .put<dynamic>(boxName: walletId, key: "isFavorite", value: false);
 
     //Open Epicbox listener in the background
-    final wallet = await _secureStore.read(key: '${_walletId}_wallet');
-    final listener = listenForSlates(wallet!, epicboxConfig.toString());
-    // EpicboxListenerManager.listenerHandler = listener; // done in listenForSlates directly now
+    await listenForSlates();
   }
 
   bool refreshMutex = false;
@@ -1368,10 +1357,7 @@ class EpicCashWallet extends CoinServiceAPI {
       await storeEpicboxInfo();
 
       //Open Epicbox listener in the background
-      final wallet = await _secureStore.read(key: '${_walletId}_wallet');
-      Pointer<void> listener =
-          listenForSlates(wallet!, epicboxConfig.toString());
-      EpicboxListenerManager.listenerHandler = listener;
+      await listenForSlates();
     } catch (e, s) {
       Logging.instance
           .log("Error recovering wallet $e\n$s", level: LogLevel.Error);
@@ -1548,7 +1534,9 @@ class EpicCashWallet extends CoinServiceAPI {
     }
   }
 
-  Pointer<Void> listenForSlates(String wallet, String epicboxConfig) {
+  Future<void> listenForSlates() async {
+    EpicBoxConfigModel epicboxConfig = await getEpicBoxConfig();
+    final wallet = await _secureStore.read(key: '${_walletId}_wallet');
     // epicBoxListenerStart
     Logging.instance.log("CALLING LISTEN FOR SLATES", level: LogLevel.Info);
 
@@ -1556,27 +1544,6 @@ class EpicCashWallet extends CoinServiceAPI {
         epicboxListenerStart(wallet!, epicboxConfig.toString());
 
     EpicboxListenerManager.listenerHandler = listenerHandler;
-    return listenerHandler;
-  }
-
-  // TODO set better response model
-  // returns bool where true = success, false = error
-  bool epicBoxListenerStop() {
-    Logging.instance.log("STOPPING EPICBOX LISTENER", level: LogLevel.Info);
-
-    bool result;
-    try {
-      // TODO validate EpicboxListenerManager.listenerHandler
-      result = epicboxListenerStop(EpicboxListenerManager.listenerHandler!);
-      if (!result) {
-        throw Exception(
-            "epicboxListenerStop returned false (rust_epicbox_listener_stop == 0)");
-      }
-    } catch (e, s) {
-      Logging.instance.log("Error stopping EpicBox listener\n\n$e\n$s",
-          level: LogLevel.Error);
-    }
-    return epicboxListenerStop(EpicboxListenerManager.listenerHandler!);
   }
 
   /// Refreshes display data for the wallet

@@ -288,8 +288,8 @@ class Manager with ChangeNotifier {
     try {
       final success = await (_currentWallet as EpicCashWallet).updateEpicBox();
       //TODO - SET PARAMS FOR listener
-      // await (_currentWallet as EpicCashWallet)
-      //     .listenForSlates(); // TODO try-catch this
+      await (_currentWallet as EpicCashWallet)
+          .listenForSlates(); // TODO try-catch this
       // TODO close old listeners, if there are any.
       if (success) {
         notifyListeners();
