@@ -58,7 +58,7 @@ class BadEpicHttpAddressException implements Exception {
 }
 
 abstract class EpicboxListenerManager {
-  static Pointer<Void>? listenerHandler;
+  static Pointer<void>? listenerHandler;
 }
 
 // isolate
