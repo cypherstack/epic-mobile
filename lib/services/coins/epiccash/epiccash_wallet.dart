@@ -636,7 +636,9 @@ class EpicCashWallet extends CoinServiceAPI {
           }
           stop(receivePort);
 
-          // TODO start listener
+          // TODO try-catch / handle error
+          listenForSlates(wallet, epicboxConfig.toString());
+
           Logging.instance.log('Closing createTransaction!\n  $message',
               level: LogLevel.Info);
         }
