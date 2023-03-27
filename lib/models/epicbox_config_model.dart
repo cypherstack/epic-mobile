@@ -16,7 +16,8 @@ class EpicBoxConfigModel {
   final bool? protocolInsecure;
   // @HiveField(4)
   final int? addressIndex;
-  // // @HiveField(5)
+  // @HiveField(5)
+  final int? listenerInterval;
   // final String? id;
   // // @HiveField(6)
   // final String? name;
@@ -26,6 +27,7 @@ class EpicBoxConfigModel {
     this.port,
     this.protocolInsecure,
     this.addressIndex,
+    this.listenerInterval,
     // this.id,
     // this.name,
   });
@@ -42,6 +44,7 @@ class EpicBoxConfigModel {
       port: this.port ?? 443,
       protocolInsecure: this.protocolInsecure ?? false,
       addressIndex: this.addressIndex ?? 0,
+      listenerInterval: this.listenerInterval ?? 50,
       // id: id ?? this.id,
       // name: name ?? this.name,
     );
@@ -51,8 +54,9 @@ class EpicBoxConfigModel {
     Map<String, dynamic> map = {};
     map['epicbox_domain'] = host;
     map['epicbox_port'] = port;
-    map['epicbox_protocol_insecure'] = protocolInsecure;
+    map['epicbox_protocol_unsecure'] = protocolInsecure;
     map['epicbox_address_index'] = addressIndex;
+    map['epicbox_listener_interval'] = 50;
     // map['id'] = id;
     // map['name'] = name;
     return map;
@@ -62,8 +66,9 @@ class EpicBoxConfigModel {
     return {
       'epicbox_domain': host,
       'epicbox_port': port,
-      'epicbox_protocol_insecure': protocolInsecure,
+      'epicbox_protocol_unsecure': protocolInsecure,
       'epicbox_address_index': addressIndex,
+      'epicbox_listener_interval': 50,
       // 'id': id,
       // 'name': name,
     };
@@ -88,7 +93,7 @@ class EpicBoxConfigModel {
     }
     final oldProtocolInsecure = _epicBox["protocol_insecure"] ?? "empty";
     if (oldProtocolInsecure != "empty") {
-      _epicBox['epicbox_protocol_insecure'] = _epicBox['protocol_insecure'];
+      _epicBox['epicbox_protocol_unsecure'] = _epicBox['protocol_insecure'];
     }
     final oldAddressIndex = _epicBox["address_index"] ?? "empty";
     if (oldAddressIndex != "empty") {
@@ -101,8 +106,9 @@ class EpicBoxConfigModel {
     return EpicBoxConfigModel(
       host: _epicBox['epicbox_domain'] as String,
       port: _epicBox['epicbox_port'] as int,
-      protocolInsecure: _epicBox['epicbox_protocol_insecure'] as bool,
+      protocolInsecure: _epicBox['epicbox_protocol_unsecure'] as bool,
       addressIndex: _epicBox['epicbox_address_index'] as int,
+      listenerInterval: _epicBox['epicbox_listener_interval'] as int,
       // name: fields[5] as String,
       // id: fields[6] as String,
     );
@@ -111,12 +117,13 @@ class EpicBoxConfigModel {
   static EpicBoxConfigModel fromServer(EpicBoxServerModel server,
       {bool? protocolInsecure, int? addressIndex}) {
     return EpicBoxConfigModel(
-      host: server.host,
-      port: server.port ?? 443,
-      protocolInsecure: protocolInsecure ?? false,
-      addressIndex: addressIndex ?? 0,
-      // name: fields[5] as String,
-      // id: fields[6] as String,
-    );
+        host: server.host,
+        port: server.port ?? 443,
+        protocolInsecure: protocolInsecure ?? false,
+        addressIndex: addressIndex ?? 0,
+        listenerInterval: 50
+        // name: fields[5] as String,
+        // id: fields[6] as String,
+        );
   }
 }
