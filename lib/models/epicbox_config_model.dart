@@ -102,13 +102,14 @@ class EpicBoxConfigModel {
 
     _epicBox['epicbox_protocol_unsecure'] ??= false;
     _epicBox['epicbox_address_index'] ??= 0;
+    _epicBox['epicbox_listener_interval'] ??= 50;
 
     return EpicBoxConfigModel(
       host: _epicBox['epicbox_domain'] as String,
       port: _epicBox['epicbox_port'] as int,
       protocolInsecure: _epicBox['epicbox_protocol_unsecure'] as bool,
       addressIndex: _epicBox['epicbox_address_index'] as int,
-      listenerInterval: (_epicBox['epicbox_listener_interval'] ?? 50) as int,
+      listenerInterval: _epicBox['epicbox_listener_interval'] as int,
       // name: fields[5] as String,
       // id: fields[6] as String,
     );
