@@ -108,7 +108,7 @@ class EpicBoxConfigModel {
       port: _epicBox['epicbox_port'] as int,
       protocolInsecure: _epicBox['epicbox_protocol_unsecure'] as bool,
       addressIndex: _epicBox['epicbox_address_index'] as int,
-      listenerInterval: _epicBox['epicbox_listener_interval'] as int,
+      listenerInterval: (_epicBox['epicbox_listener_interval'] ?? 50) as int,
       // name: fields[5] as String,
       // id: fields[6] as String,
     );
