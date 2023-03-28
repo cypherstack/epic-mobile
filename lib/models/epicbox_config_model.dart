@@ -44,7 +44,7 @@ class EpicBoxConfigModel {
       port: this.port ?? 443,
       protocolInsecure: this.protocolInsecure ?? false,
       addressIndex: this.addressIndex ?? 0,
-      listenerInterval: this.listenerInterval ?? 50,
+      listenerInterval: listenerInterval ?? 50,
       // id: id ?? this.id,
       // name: name ?? this.name,
     );
@@ -53,10 +53,10 @@ class EpicBoxConfigModel {
   Map<String, dynamic> toMap() {
     Map<String, dynamic> map = {};
     map['epicbox_domain'] = host;
-    map['epicbox_port'] = port;
-    map['epicbox_protocol_unsecure'] = protocolInsecure;
-    map['epicbox_address_index'] = addressIndex;
-    map['epicbox_listener_interval'] = 50;
+    map['epicbox_port'] = port ?? 443;
+    map['epicbox_protocol_unsecure'] = protocolInsecure ?? false;
+    map['epicbox_address_index'] = addressIndex ?? 0;
+    map['epicbox_listener_interval'] = listenerInterval ?? 50;
     // map['id'] = id;
     // map['name'] = name;
     return map;
@@ -65,10 +65,10 @@ class EpicBoxConfigModel {
   Map<String, dynamic> toJson() {
     return {
       'epicbox_domain': host,
-      'epicbox_port': port,
-      'epicbox_protocol_unsecure': protocolInsecure,
-      'epicbox_address_index': addressIndex,
-      'epicbox_listener_interval': 50,
+      'epicbox_port': port ?? 443,
+      'epicbox_protocol_unsecure': protocolInsecure ?? false,
+      'epicbox_address_index': addressIndex ?? 0,
+      'epicbox_listener_interval': listenerInterval ?? 50,
       // 'id': id,
       // 'name': name,
     };
@@ -100,7 +100,7 @@ class EpicBoxConfigModel {
       _epicBox['epicbox_address_index'] = _epicBox['address_index'];
     }
 
-    _epicBox['epicbox_port'] ??= 3413;
+    _epicBox['epicbox_port'] ??= 443;
     _epicBox['epicbox_protocol_unsecure'] ??= false;
     _epicBox['epicbox_address_index'] ??= 0;
     _epicBox['epicbox_listener_interval'] ??= 50;
@@ -123,9 +123,6 @@ class EpicBoxConfigModel {
         port: server.port ?? 443,
         protocolInsecure: protocolInsecure ?? false,
         addressIndex: addressIndex ?? 0,
-        listenerInterval: 50
-        // name: fields[5] as String,
-        // id: fields[6] as String,
-        );
+        listenerInterval: 50);
   }
 }
