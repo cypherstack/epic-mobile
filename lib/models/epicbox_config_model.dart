@@ -100,7 +100,7 @@ class EpicBoxConfigModel {
       _epicBox['epicbox_address_index'] = _epicBox['address_index'];
     }
 
-    _epicBox['epicbox_protocol_insecure'] ??= false;
+    _epicBox['epicbox_protocol_unsecure'] ??= false;
     _epicBox['epicbox_address_index'] ??= 0;
 
     return EpicBoxConfigModel(
