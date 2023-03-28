@@ -100,6 +100,7 @@ class EpicBoxConfigModel {
       _epicBox['epicbox_address_index'] = _epicBox['address_index'];
     }
 
+    _epicBox['epicbox_port'] ??= 3413;
     _epicBox['epicbox_protocol_unsecure'] ??= false;
     _epicBox['epicbox_address_index'] ??= 0;
     _epicBox['epicbox_listener_interval'] ??= 50;
