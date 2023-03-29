@@ -1120,17 +1120,17 @@ class EpicCashWallet extends CoinServiceAPI {
 
   Future<EpicBoxConfigModel> getEpicBoxConfig() async {
     EpicBoxConfigModel? _epicBoxConfig;
-    // read epicbox config from secure store
-    String? storedConfig =
-        await _secureStore.read(key: '${_walletId}_epicboxConfig');
+    // read primary epicbox server from DB
+    EpicBoxServerModel? _primaryEpicBox = DB.instance.get<EpicBoxServerModel>(
+        boxName: DB.boxNamePrimaryEpicBox, key: 'primary');
+    Logging.instance.log(
+        "Read primary Epic Box config: ${jsonEncode(_primaryEpicBox)}",
+        level: LogLevel.Info);
 
-    // we should move to storing the primary server model like we do with nodes, and build the config from that (see epic-mobile)
-    // EpicBoxServerModel? _epicBox = epicBox ??
-    //     DB.instance.get<EpicBoxServerModel>(
-    //         boxName: DB.boxNamePrimaryEpicBox, key: 'primary');
-    // Logging.instance.log(
-    //     "Read primary Epic Box config: ${jsonEncode(_epicBox)}",
-    //     level: LogLevel.Info);
+    // read epicbox config from secure store if primary server is null
+    String? storedConfig = _primaryEpicBox != null
+        ? EpicBoxConfigModel.fromServer(_primaryEpicBox).toString()
+        : await _secureStore.read(key: '${_walletId}_epicboxConfig');
 
     if (storedConfig == null) {
       // if no config stored, use the default epicbox server as config
