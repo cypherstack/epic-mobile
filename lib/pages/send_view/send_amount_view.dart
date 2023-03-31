@@ -831,6 +831,16 @@ class _SendAmountViewState extends ConsumerState<SendAmountView> {
                                 snapshot.hasData) {
                               final feeAmount = snapshot.data!;
 
+                              if (_amountToSend ==
+                                  ref
+                                      .read(walletProvider)!
+                                      .cachedAvailableBalance) {
+                                _amountToSend = ref
+                                        .read(walletProvider)!
+                                        .cachedAvailableBalance -
+                                    feeAmount;
+                              }
+
                               final total =
                                   feeAmount + (_amountToSend ?? Decimal.zero);
 
