@@ -62,7 +62,7 @@ class _WalletEpicBoxSettingsViewState
                 onPressed: () {
                   Navigator.of(context).pushNamed(
                     AddEditEpicBoxView.routeName,
-                    arguments: Tuple3(
+                    arguments: const Tuple3(
                       AddEditEpicBoxViewType.add,
                       null,
                       EpicBoxSettingsView.routeName,
@@ -93,7 +93,7 @@ class _WalletEpicBoxSettingsViewState
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
+                      children: const [
                         EpicBoxList(
                           popBackToRoute: EpicBoxSettingsView.routeName,
                         ),
