@@ -40,6 +40,8 @@ import 'package:stack_wallet_backup/generate_password.dart';
 import 'package:tuple/tuple.dart';
 import 'package:websocket_universal/websocket_universal.dart';
 
+import '../../../utilities/format.dart';
+
 const int MINIMUM_CONFIRMATIONS = 10;
 
 const String GENESIS_HASH_MAINNET = "";
@@ -1031,33 +1033,83 @@ class EpicCashWallet extends CoinServiceAPI {
       });
       // debugPrint(transactionFees);
       dynamic decodeData;
-      try {
-        decodeData = json.decode(transactionFees!);
-      } catch (e) {
-        if (ifErrorEstimateFee) {
-          //Error Not enough funds. Required: 0.56500000, Available: 0.56200000
-          if (transactionFees!.contains("Required")) {
-            var splits = transactionFees!.split(" ");
-            Decimal required = Decimal.zero;
-            Decimal available = Decimal.zero;
-            for (int i = 0; i < splits.length; i++) {
-              var word = splits[i];
-              if (word == "Required:") {
-                required = Decimal.parse(splits[i + 1].replaceAll(",", ""));
-              } else if (word == "Available:") {
-                available = Decimal.parse(splits[i + 1].replaceAll(",", ""));
-              }
+
+      final available = await availableBalance;
+      final availableSat = Format.decimalAmountToSatoshis(available);
+
+      if (satoshiAmount == availableSat) {
+        if (transactionFees!.contains("Required")) {
+          var splits = transactionFees!.split(" ");
+          Decimal required = Decimal.zero;
+          Decimal available = Decimal.zero;
+          for (int i = 0; i < splits.length; i++) {
+            var word = splits[i];
+            if (word == "Required:") {
+              required = Decimal.parse(splits[i + 1].replaceAll(",", ""));
+            } else if (word == "Available:") {
+              available = Decimal.parse(splits[i + 1].replaceAll(",", ""));
             }
-            int largestSatoshiFee =
-                ((required - available) * Decimal.fromInt(100000000))
-                    .toBigInt()
-                    .toInt();
-            Logging.instance.log("largestSatoshiFee $largestSatoshiFee",
-                level: LogLevel.Info);
-            return largestSatoshiFee;
           }
+          int largestSatoshiFee =
+              ((required - available) * Decimal.fromInt(100000000))
+                  .toBigInt()
+                  .toInt();
+          var amountSending = satoshiAmount - largestSatoshiFee;
+          //Get fees for this new amount
+
+          // String? transactionFees;
+          await m.protect(() async {
+            ReceivePort receivePort = await getIsolate({
+              "function": "getTransactionFees",
+              "wallet": wallet!,
+              "amount": amountSending,
+              "minimumConfirmations": MINIMUM_CONFIRMATIONS,
+            }, name: walletName);
+
+            var message = await receivePort.first;
+            if (message is String) {
+              Logging.instance
+                  .log("this is a string $message", level: LogLevel.Error);
+              stop(receivePort);
+              throw Exception("getTransactionFees isolate failed");
+            }
+            stop(receivePort);
+            Logging.instance.log('Closing getTransactionFees!\n  $message',
+                level: LogLevel.Info);
+            // return message;
+            transactionFees = message['result'] as String;
+          });
         }
-        rethrow;
+        decodeData = json.decode(transactionFees!);
+      } else {
+        try {
+          decodeData = json.decode(transactionFees!);
+        } catch (e) {
+          if (ifErrorEstimateFee) {
+            //Error Not enough funds. Required: 0.56500000, Available: 0.56200000
+            if (transactionFees!.contains("Required")) {
+              var splits = transactionFees!.split(" ");
+              Decimal required = Decimal.zero;
+              Decimal available = Decimal.zero;
+              for (int i = 0; i < splits.length; i++) {
+                var word = splits[i];
+                if (word == "Required:") {
+                  required = Decimal.parse(splits[i + 1].replaceAll(",", ""));
+                } else if (word == "Available:") {
+                  available = Decimal.parse(splits[i + 1].replaceAll(",", ""));
+                }
+              }
+              int largestSatoshiFee =
+                  ((required - available) * Decimal.fromInt(100000000))
+                      .toBigInt()
+                      .toInt();
+              Logging.instance.log("largestSatoshiFee $largestSatoshiFee",
+                  level: LogLevel.Info);
+              return largestSatoshiFee;
+            }
+          }
+          rethrow;
+        }
       }
 
       //TODO: first problem
