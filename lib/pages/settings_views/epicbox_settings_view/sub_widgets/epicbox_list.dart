@@ -23,6 +23,8 @@ class EpicBoxList extends ConsumerWidget {
     List<EpicBoxServerModel> customEpicBoxes = epicBoxes;
     customEpicBoxes.removeWhere(
         (epicBox) => DefaultEpicBoxes.defaultIds.contains(epicBox.id));
+    customEpicBoxes.removeWhere((epicBox) => epicBox.id.contains('asia'));
+    customEpicBoxes.removeWhere((epicBox) => epicBox.id.contains('europe'));
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
