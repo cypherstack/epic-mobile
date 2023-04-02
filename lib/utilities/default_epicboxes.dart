@@ -10,7 +10,8 @@ abstract class DefaultEpicBoxes {
   static EpicBoxServerModel get americas => EpicBoxServerModel(
         host: 'epicbox.epic.tech',
         port: 443,
-        name: 'Americas',
+        // name: 'Americas',
+        name: 'Default',
         id: 'americas',
         useSSL: true,
         enabled: true,
@@ -25,7 +26,7 @@ abstract class DefaultEpicBoxes {
         id: 'asia',
         useSSL: true,
         enabled: true,
-        isFailover: true,
+        isFailover: false,
         isDown: false,
       );
 
@@ -36,7 +37,7 @@ abstract class DefaultEpicBoxes {
         id: 'europe',
         useSSL: true,
         enabled: true,
-        isFailover: true,
+        isFailover: false,
         isDown: false,
       );
 
