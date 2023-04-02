@@ -6,7 +6,6 @@ import 'dart:isolate';
 import 'package:decimal/decimal.dart';
 import 'package:epicpay/hive/db.dart';
 import 'package:epicpay/models/epicbox_config_model.dart';
-import 'package:epicpay/models/epicbox_server_model.dart';
 import 'package:epicpay/models/node_model.dart';
 import 'package:epicpay/models/paymint/fee_object_model.dart';
 import 'package:epicpay/models/paymint/transactions_model.dart';
@@ -1147,17 +1146,18 @@ class EpicCashWallet extends CoinServiceAPI {
         _epicBoxConfig.host, _epicBoxConfig.port ?? 443);
 
     if (!isEpicboxConnected) {
-      // default Epicbox is not connected, default to Europe
-      _epicBoxConfig = EpicBoxConfigModel.fromServer(DefaultEpicBoxes.europe);
+      //   // failover to another random server from the default list
+      //   List<EpicBoxServerModel> alternativeServers = DefaultEpicBoxes.all;
+      //   alternativeServers.removeWhere((opt) => opt.name == DefaultEpicBoxes.defaultEpicBoxServer.name);
+      //   alternativeServers.shuffle(); // randomize which server is used
+      //   _epicBoxConfig = EpicBoxConfigModel.fromServer(alternativeServers.first);
+      //   // TODO test this connection before returning it
 
-      // example of selecting another random server from the default list
-      // alternative servers: copy list of all default EB servers but remove the default default
-      // List<EpicBoxServerModel> alternativeServers = DefaultEpicBoxes.all;
-      // alternativeServers.removeWhere((opt) => opt.name == DefaultEpicBoxes.defaultEpicBoxServer.name);
-      // alternativeServers.shuffle(); // randomize which server is used
-      // _epicBoxConfig = EpicBoxConfigModel.fromServer(alternativeServers.first);
-
-      // TODO test this connection before returning it
+      Logging.instance.log(
+          "Error in getEpicBoxConfig (not connected to epicbox server)",
+          level: LogLevel.Error);
+      throw Exception(
+          "Error in getEpicBoxConfig (not connected to epicbox server)");
     }
 
     return _epicBoxConfig;
