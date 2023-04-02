@@ -49,21 +49,21 @@ class EpicBoxList extends ConsumerWidget {
               ),
             )
             .toList(),
-        if (customEpicBoxes.length > 0)
+        if (customEpicBoxes.isNotEmpty)
           const SizedBox(
             height: 14,
           ),
-        if (customEpicBoxes.length > 0)
+        if (customEpicBoxes.isNotEmpty)
           Text(
             "CUSTOM EPIC BOX SERVERS",
             textAlign: TextAlign.left,
             style: STextStyles.overLineBold(context),
           ),
-        if (customEpicBoxes.length > 0)
+        if (customEpicBoxes.isNotEmpty)
           const SizedBox(
             height: 14,
           ),
-        if (customEpicBoxes.length > 0)
+        if (customEpicBoxes.isNotEmpty)
           ...customEpicBoxes
               .map(
                 (epicBox) => Padding(
