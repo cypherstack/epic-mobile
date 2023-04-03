@@ -23,6 +23,8 @@ class EpicBoxList extends ConsumerWidget {
     List<EpicBoxServerModel> customEpicBoxes = epicBoxes;
     customEpicBoxes.removeWhere(
         (epicBox) => DefaultEpicBoxes.defaultIds.contains(epicBox.id));
+    customEpicBoxes.removeWhere((epicBox) => epicBox.id.contains('asia'));
+    customEpicBoxes.removeWhere((epicBox) => epicBox.id.contains('europe'));
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -47,21 +49,21 @@ class EpicBoxList extends ConsumerWidget {
               ),
             )
             .toList(),
-        if (customEpicBoxes.length > 0)
+        if (customEpicBoxes.isNotEmpty)
           const SizedBox(
             height: 14,
           ),
-        if (customEpicBoxes.length > 0)
+        if (customEpicBoxes.isNotEmpty)
           Text(
             "CUSTOM EPIC BOX SERVERS",
             textAlign: TextAlign.left,
             style: STextStyles.overLineBold(context),
           ),
-        if (customEpicBoxes.length > 0)
+        if (customEpicBoxes.isNotEmpty)
           const SizedBox(
             height: 14,
           ),
-        if (customEpicBoxes.length > 0)
+        if (customEpicBoxes.isNotEmpty)
           ...customEpicBoxes
               .map(
                 (epicBox) => Padding(

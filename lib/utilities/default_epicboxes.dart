@@ -3,13 +3,15 @@ import 'package:epicpay/models/epicbox_server_model.dart';
 abstract class DefaultEpicBoxes {
   static const String defaultName = "Default";
 
-  static List<EpicBoxServerModel> get all => [americas, asia, europe];
-  static List<String> get defaultIds => ['americas', 'asia', 'europe'];
+  static List<EpicBoxServerModel> get all =>
+      [americas /*, asia, europe*/]; // Temporarily disable non-americas regions
+  static List<String> get defaultIds => ['americas' /*, 'asia', 'europe'*/];
 
   static EpicBoxServerModel get americas => EpicBoxServerModel(
         host: 'epicbox.epic.tech',
         port: 443,
-        name: 'Americas',
+        // name: 'Americas',
+        name: 'Default',
         id: 'americas',
         useSSL: true,
         enabled: true,
@@ -24,7 +26,7 @@ abstract class DefaultEpicBoxes {
         id: 'asia',
         useSSL: true,
         enabled: true,
-        isFailover: true,
+        isFailover: false,
         isDown: false,
       );
 
@@ -35,7 +37,7 @@ abstract class DefaultEpicBoxes {
         id: 'europe',
         useSSL: true,
         enabled: true,
-        isFailover: true,
+        isFailover: false,
         isDown: false,
       );
 
