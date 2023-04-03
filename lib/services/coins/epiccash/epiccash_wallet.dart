@@ -42,7 +42,7 @@ import 'package:websocket_universal/websocket_universal.dart';
 
 import '../../../utilities/format.dart';
 
-const int MINIMUM_CONFIRMATIONS = 10;
+const int MINIMUM_CONFIRMATIONS = 3;
 
 const String GENESIS_HASH_MAINNET = "";
 const String GENESIS_HASH_TESTNET = "";
