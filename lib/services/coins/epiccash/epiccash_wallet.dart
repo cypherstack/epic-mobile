@@ -40,6 +40,7 @@ import 'package:stack_wallet_backup/generate_password.dart';
 import 'package:tuple/tuple.dart';
 import 'package:websocket_universal/websocket_universal.dart';
 
+import '../../../models/epicbox_server_model.dart';
 import '../../../utilities/format.dart';
 
 const int MINIMUM_CONFIRMATIONS = 10;
@@ -1175,23 +1176,29 @@ class EpicCashWallet extends CoinServiceAPI {
     String? storedConfig =
         await _secureStore.read(key: '${_walletId}_epicboxConfig');
 
-    // we should move to storing the primary server model like we do with nodes, and build the config from that (see epic-mobile)
-    // EpicBoxServerModel? _epicBox = epicBox ??
-    //     DB.instance.get<EpicBoxServerModel>(
-    //         boxName: DB.boxNamePrimaryEpicBox, key: 'primary');
-    // Logging.instance.log(
-    //     "Read primary Epic Box config: ${jsonEncode(_epicBox)}",
-    //     level: LogLevel.Info);
-
     if (storedConfig == null) {
-      // if no config stored, use the default epicbox server as config
+      // if no config stored, use the default epicbox server as config, this is on first creation/ restore
       _epicBoxConfig =
           EpicBoxConfigModel.fromServer(DefaultEpicBoxes.defaultEpicBoxServer);
+      //Update secureStore
+      await _secureStore.write(
+          key: '${_walletId}_epicboxConfig', value: _epicBoxConfig.toString());
     } else {
       // if a config is stored, test it
-
       _epicBoxConfig = EpicBoxConfigModel.fromString(
           storedConfig); // fromString handles checking old config formats
+    }
+    //Now check if secureStoreConfig is the same as the Hive one
+    EpicBoxServerModel? _epicBox = DB.instance.get<EpicBoxServerModel>(
+        boxName: DB.boxNamePrimaryEpicBox, key: 'primary');
+
+    if (_epicBox != null) {
+      if (_epicBoxConfig.host != _epicBox?.host) {
+        _epicBoxConfig = EpicBoxConfigModel.fromServer(_epicBox!);
+        await _secureStore.write(
+            key: '${_walletId}_epicboxConfig',
+            value: _epicBoxConfig.toString());
+      }
     }
 
     bool isEpicboxConnected = await testEpicboxServer(
