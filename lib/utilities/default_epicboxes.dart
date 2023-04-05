@@ -3,8 +3,9 @@ import 'package:epicpay/models/epicbox_server_model.dart';
 abstract class DefaultEpicBoxes {
   static const String defaultName = "Default";
 
-  static List<EpicBoxServerModel> get all =>
-      [americas /*, asia, europe*/]; // Temporarily disable non-americas regions
+  static List<EpicBoxServerModel> get all => [
+        americas /*, asia, europe*/
+      ]; // Temporarily disable non-americas regions
   static List<String> get defaultIds => ['americas' /*, 'asia', 'europe'*/];
 
   static EpicBoxServerModel get americas => EpicBoxServerModel(
