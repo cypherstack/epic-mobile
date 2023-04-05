@@ -173,6 +173,11 @@ class _TransactionCardState extends ConsumerState<TransactionCard> {
                                       if (subStr.isNotEmpty) {
                                         amountString = subStr;
                                       }
+                                      // remove trailing decimals
+                                      if (amountString.endsWith('.')) {
+                                        amountString = amountString.substring(
+                                            0, amountString.length - 1);
+                                      }
                                       break;
                                     }
                                   }
