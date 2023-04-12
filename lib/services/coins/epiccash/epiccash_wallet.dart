@@ -566,12 +566,10 @@ class EpicCashWallet extends CoinServiceAPI {
   Future<String> confirmSend({required Map<String, dynamic> txData}) async {
     try {
       EpicBoxConfigModel epicboxConfig = await getEpicBoxConfig();
-
       final wallet = await _secureStore.read(key: '${_walletId}_wallet');
 
       // TODO determine whether it is worth sending change to a change address.
       dynamic message;
-
       String receiverAddress = txData['addresss'] as String;
 
       if (!receiverAddress.startsWith("http://") ||
@@ -628,13 +626,15 @@ class EpicCashWallet extends CoinServiceAPI {
         }
       });
 
-      // return message;
       final String sendTx = message['result'] as String;
       if (sendTx.contains("Error")) {
         throw BadEpicHttpAddressException(message: sendTx);
       }
 
-      await putSendToAddresses(sendTx);
+      Map<String, String> txAddressInfo = {};
+      txAddressInfo['from'] = await _getCurrentAddressForChain(0);
+      txAddressInfo['to'] = txData['addresss'] as String;
+      await putSendToAddresses(sendTx, txAddressInfo);
 
       Logging.instance.log("CONFIRM_RESULT_IS $sendTx", level: LogLevel.Info);
 
@@ -648,16 +648,16 @@ class EpicCashWallet extends CoinServiceAPI {
         // //TODO: second problem
         final transaction = json.decode(txCreateResult as String);
 
-        Logger.print("TX_IS $transaction");
         final tx = transaction[0];
         final txLogEntry = json.decode(tx as String);
         final txLogEntryFirst = txLogEntry[0];
-        Logger.print("TX_LOG_ENTRY_IS $txLogEntryFirst");
+
         final wallet = await Hive.openBox<dynamic>(_walletId);
         final slateToAddresses =
             (await wallet.get("slate_to_address")) as Map? ?? {};
         final slateId = txLogEntryFirst['tx_slate_id'] as String;
         slateToAddresses[slateId] = txData['addresss'];
+
         await wallet.put('slate_to_address', slateToAddresses);
         await getSlatesToCommits();
         return txLogEntryFirst['tx_slate_id'] as String;
@@ -1518,7 +1518,8 @@ class EpicCashWallet extends CoinServiceAPI {
     }
   }
 
-  Future<bool> putSendToAddresses(String slateMessage) async {
+  Future<bool> putSendToAddresses(
+      String slateMessage, Map<String, String> txAddressInfo) async {
     try {
       var slatesToCommits = await getSlatesToCommits();
       final slate0 = jsonDecode(slateMessage);
@@ -1528,10 +1529,8 @@ class EpicCashWallet extends CoinServiceAPI {
       final slateId = part1[0]['tx_slate_id'];
       final commitId = part2['tx']['body']['outputs'][0]['commit'];
 
-      final toFromInfoString = jsonDecode(slateMessage);
-      final toFromInfo = jsonDecode(toFromInfoString[1] as String);
-      final from = toFromInfo['from'];
-      final to = toFromInfo['to'];
+      final from = txAddressInfo['from'];
+      final to = txAddressInfo['to'];
       slatesToCommits[slateId] = {
         "commitId": commitId,
         "from": from,
