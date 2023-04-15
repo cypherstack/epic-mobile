@@ -69,7 +69,7 @@ class _TransactionDetailsViewState
         } else if ((_transaction.numberOfMessages ?? 0) > 1) {
           color = Theme.of(context).extension<StackColors>()!.accentColorYellow;
           label =
-              "Receiving (waiting for confirmation)"; // TODO test if the sender still has to open again after the receiver has 2 messages present, ie. sender->receiver->sender->node (yes) vs. sender->receiver->node (no)
+              "Receiving (waiting for confirmations)"; // TODO test if the sender still has to open again after the receiver has 2 messages present, ie. sender->receiver->sender->node (yes) vs. sender->receiver->node (no)
         } else {
           color = Theme.of(context).extension<StackColors>()!.accentColorYellow;
           label = "Receiving";
@@ -85,7 +85,7 @@ class _TransactionDetailsViewState
           label = "Sending (waiting for receiver)";
         } else if ((_transaction.numberOfMessages ?? 0) > 1) {
           color = Theme.of(context).extension<StackColors>()!.accentColorYellow;
-          label = "Sending (waiting for confirmation)";
+          label = "Sending (waiting for confirmations)";
         } else {
           color = Theme.of(context).extension<StackColors>()!.accentColorYellow;
           label = "Sending";
@@ -479,6 +479,11 @@ String trimTrailingZeros(Decimal amount) {
       }
       break;
     }
+  }
+
+  // remove decimal separator
+  if (amountString.endsWith(".") || amountString.endsWith(",")) {
+    amountString = amountString.substring(0, amountString.length - 1);
   }
   return amountString;
 }
