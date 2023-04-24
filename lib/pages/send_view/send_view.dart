@@ -259,7 +259,13 @@ class _SendViewState extends ConsumerState<SendView> {
                                               setState(() {
                                                 _addressToggleFlag =
                                                     sendToController
-                                                        .text.isNotEmpty;
+                                                            .text.isNotEmpty &&
+                                                        ref
+                                                            .read(
+                                                                walletProvider)!
+                                                            .validateAddress(
+                                                                sendToController
+                                                                    .text);
                                               });
                                             }
                                           },
@@ -301,7 +307,12 @@ class _SendViewState extends ConsumerState<SendView> {
                                           setState(() {
                                             _addressToggleFlag =
                                                 sendToController
-                                                    .text.isNotEmpty;
+                                                        .text.isNotEmpty &&
+                                                    ref
+                                                        .read(walletProvider)!
+                                                        .validateAddress(
+                                                            sendToController
+                                                                .text);
                                           });
 
                                           // now check for non standard encoded basic address
@@ -316,7 +327,12 @@ class _SendViewState extends ConsumerState<SendView> {
                                           setState(() {
                                             _addressToggleFlag =
                                                 sendToController
-                                                    .text.isNotEmpty;
+                                                        .text.isNotEmpty &&
+                                                    ref
+                                                        .read(walletProvider)!
+                                                        .validateAddress(
+                                                            sendToController
+                                                                .text);
                                           });
                                         }
                                       } on PlatformException catch (e, s) {
@@ -355,7 +371,11 @@ class _SendViewState extends ConsumerState<SendView> {
 
                                       setState(() {
                                         _addressToggleFlag = _address != null &&
-                                            _address!.isNotEmpty;
+                                            _address!.isNotEmpty &&
+                                            ref
+                                                .read(walletProvider)!
+                                                .validateAddress(
+                                                    _address as String);
                                       });
                                     },
                                     child: AddressBookIcon(
