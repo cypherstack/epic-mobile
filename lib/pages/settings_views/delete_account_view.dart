@@ -1,5 +1,10 @@
+import 'package:epicpay/hive/db.dart';
 import 'package:epicpay/pages/intro_view.dart';
+import 'package:epicpay/providers/global/prefs_provider.dart';
+import 'package:epicpay/providers/global/wallet_provider.dart';
+import 'package:epicpay/providers/global/wallets_service_provider.dart';
 import 'package:epicpay/utilities/delete_everything.dart';
+import 'package:epicpay/utilities/flutter_secure_storage_interface.dart';
 import 'package:epicpay/utilities/text_styles.dart';
 import 'package:epicpay/utilities/theme/stack_colors.dart';
 import 'package:epicpay/utilities/util.dart';
@@ -10,23 +15,31 @@ import 'package:epicpay/widgets/desktop/primary_button.dart';
 import 'package:epicpay/widgets/rounded_white_container.dart';
 import 'package:epicpay/widgets/stack_dialog.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-class DeleteAccountView extends StatefulWidget {
-  const DeleteAccountView({Key? key}) : super(key: key);
+class DeleteAccountView extends ConsumerStatefulWidget {
+  const DeleteAccountView({
+    Key? key,
+    this.secureStorageInterface = const SecureStorageWrapper(
+      FlutterSecureStorage(),
+    ),
+  }) : super(key: key);
 
   static const String routeName = "/deleteAccountView";
+  final FlutterSecureStorageInterface secureStorageInterface;
 
   @override
-  State<DeleteAccountView> createState() => _DeleteAccountViewState();
+  ConsumerState<DeleteAccountView> createState() => _DeleteAccountViewState();
 }
 
-class _DeleteAccountViewState extends State<DeleteAccountView> {
+class _DeleteAccountViewState extends ConsumerState<DeleteAccountView> {
   final isDesktop = Util.isDesktop;
 
   Future<void> onConfirmDeleteAccount() async {
     // TODO delete everything then pop to intro view
 
-    await showDialog(
+    await showDialog<void>(
       barrierDismissible: true,
       context: context,
       builder: (_) => StackDialog(
@@ -51,12 +64,24 @@ class _DeleteAccountViewState extends State<DeleteAccountView> {
               .extension<StackColors>()!
               .getPrimaryEnabledButtonColor(context),
           onPressed: () async {
+            await ref.read(walletProvider)!.exitCurrentWallet();
+
+            await ref
+                .read(walletsServiceChangeNotifierProvider)
+                .deleteWallet(ref.read(walletProvider)!.walletName, true);
+            await widget.secureStorageInterface.delete(key: "stack_pin");
+
             await deleteEverything();
 
-            await Navigator.of(context).pushNamedAndRemoveUntil(
-              IntroView.routeName,
-              (route) => false,
-            );
+            await DB.instance.init();
+
+            await ref.read(prefsChangeNotifierProvider).reinit();
+            if (mounted) {
+              await Navigator.of(context).pushNamedAndRemoveUntil(
+                IntroView.routeName,
+                (route) => false,
+              );
+            }
           },
           child: Text(
             "Delete",

@@ -250,11 +250,6 @@ class _CreatePinViewState extends ConsumerState<CreatePinView> {
                         if (mounted) {
                           if (!widget.popOnSuccess) {
                             if (widget.isNewWallet == true) {
-                              assert(ref
-                                      .read(prefsChangeNotifierProvider)
-                                      .hasPin ==
-                                  false);
-
                               final controller = FullScreenMessageController();
                               unawaited(
                                 showDialog<void>(

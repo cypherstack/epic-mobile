@@ -33,6 +33,23 @@ class Prefs extends ChangeNotifier {
     }
   }
 
+  Future<void> reinit() async {
+    _currency = await _getPreferredCurrency();
+    _useBiometrics = await _getUseBiometrics();
+    _hasPin = await _getHasPin();
+    _language = await _getPreferredLanguage();
+    _showFavoriteWallets = await _getShowFavoriteWallets();
+    _wifiOnly = await _getUseWifiOnly();
+    _syncType = await _getSyncType();
+    _walletIdsSyncOnStartup = await _getWalletIdsSyncOnStartup();
+    _currentNotificationId = await _getCurrentNotificationIndex();
+    _lastUnlocked = await _getLastUnlocked();
+    _lastUnlockedTimeout = await _getLastUnlockedTimeout();
+    _showTestNetCoins = await _getShowTestNetCoins();
+    _hideBlockExplorerWarning = await _getHideBlockExplorerWarning();
+    _refreshPeriod = await _getRefreshPeriod();
+  }
+
   // last timestamp user unlocked wallet
 
   int _lastUnlockedTimeout = 60;

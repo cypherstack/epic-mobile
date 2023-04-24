@@ -870,6 +870,7 @@ class EpicCashWallet extends CoinServiceAPI {
 
   @override
   Future<void> initializeNew() async {
+    await DB.instance.init();
     await _prefs.init();
     await updateNode(false);
     final mnemonic = await _getMnemonicList();
@@ -1340,6 +1341,7 @@ class EpicCashWallet extends CoinServiceAPI {
       required int height}) async {
     try {
       await _prefs.init();
+      await DB.instance.init();
       await updateNode(false);
       final String password = generatePassword();
 
