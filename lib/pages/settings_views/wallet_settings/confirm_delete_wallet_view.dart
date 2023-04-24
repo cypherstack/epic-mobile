@@ -1,11 +1,13 @@
 import 'dart:async';
 
+import 'package:epicpay/hive/db.dart';
 import 'package:epicpay/pages/add_wallet_views/create_restore_wallet_view.dart';
 import 'package:epicpay/pages/settings_views/wallet_settings/wallet_settings_view.dart';
 import 'package:epicpay/providers/global/prefs_provider.dart';
 import 'package:epicpay/providers/global/wallet_provider.dart';
 import 'package:epicpay/providers/global/wallets_service_provider.dart';
 import 'package:epicpay/utilities/assets.dart';
+import 'package:epicpay/utilities/delete_everything.dart';
 import 'package:epicpay/utilities/flutter_secure_storage_interface.dart';
 import 'package:epicpay/utilities/text_styles.dart';
 import 'package:epicpay/utilities/theme/stack_colors.dart';
@@ -75,8 +77,11 @@ class ConfirmWalletDeleteView extends ConsumerWidget {
     );
 
     await ref.read(walletProvider)!.exitCurrentWallet();
+
     // wait for widget tree to dispose of any widgets watching the manager
     await Future<void>.delayed(const Duration(seconds: 1));
+    await deleteEverything();
+    await DB.instance.init();
     ref.read(walletStateProvider.state).state = null;
   }
 

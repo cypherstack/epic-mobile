@@ -46,9 +46,7 @@ class WalletInfo {
 class WalletsService extends ChangeNotifier {
   late final FlutterSecureStorageInterface _secureStore;
 
-  Future<Map<String, WalletInfo>>? _walletNames;
-  Future<Map<String, WalletInfo>> get walletNames =>
-      _walletNames ??= _fetchWalletNames();
+  Future<Map<String, WalletInfo>> get walletNames => _fetchWalletNames();
 
   WalletsService({
     FlutterSecureStorageInterface secureStorageInterface =
@@ -137,49 +135,6 @@ class WalletsService extends ChangeNotifier {
 
     return mapped.map((name, dyn) => MapEntry(
         name, WalletInfo.fromJson(Map<String, dynamic>.from(dyn as Map))));
-  }
-
-  Future<void> addExistingepicmobile({
-    required String name,
-    required String walletId,
-    required Coin coin,
-    required bool shouldNotifyListeners,
-  }) async {
-    final _names = DB.instance
-        .get<dynamic>(boxName: DB.boxNameAllWalletsData, key: 'names') as Map?;
-
-    Map<String, dynamic> names;
-    if (_names == null) {
-      names = {};
-    } else {
-      names = Map<String, dynamic>.from(_names);
-    }
-
-    if (names.keys.contains(walletId)) {
-      throw Exception("Wallet with walletId \"$walletId\" already exists!");
-    }
-    if (names.values.where((element) => element['name'] == name).isNotEmpty) {
-      throw Exception("Wallet with name \"$name\" already exists!");
-    }
-
-    names[walletId] = {
-      "id": walletId,
-      "coin": coin.name,
-      "name": name,
-    };
-
-    await DB.instance.put<dynamic>(
-        boxName: DB.boxNameAllWalletsData, key: 'names', value: names);
-    await DB.instance.put<dynamic>(
-        boxName: DB.boxNameAllWalletsData,
-        key: "${walletId}_cryptoCurrency",
-        value: coin.name);
-    await DB.instance.put<dynamic>(
-        boxName: DB.boxNameAllWalletsData,
-        key: "${walletId}_mnemonicHasBeenVerified",
-        value: false);
-    await DB.instance.addWalletBox(walletId: walletId);
-    await refreshWallets(shouldNotifyListeners);
   }
 
   /// returns the new walletId if successful, otherwise null
@@ -381,7 +336,6 @@ class WalletsService extends ChangeNotifier {
 
     if (names.isEmpty) {
       await DB.instance.deleteAll<dynamic>(boxName: DB.boxNameAllWalletsData);
-      _walletNames = Future(() => {});
       notifyListeners();
       return 2; // error code no wallets on device
     }
@@ -393,8 +347,6 @@ class WalletsService extends ChangeNotifier {
   }
 
   Future<void> refreshWallets(bool shouldNotifyListeners) async {
-    final newNames = await _fetchWalletNames();
-    _walletNames = Future(() => newNames);
     if (shouldNotifyListeners) notifyListeners();
   }
 }

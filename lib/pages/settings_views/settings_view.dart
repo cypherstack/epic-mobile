@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:epicpay/models/send_view_auto_fill_data.dart';
 import 'package:epicpay/pages/address_book_views/address_book_view.dart';
 import 'package:epicpay/pages/pinpad_views/lock_screen_view.dart';
@@ -185,16 +187,17 @@ class SettingsView extends StatelessWidget {
                               },
                             );
                           }),
-                          const _Div(),
-                          SettingsListButton(
-                            iconAssetName: Assets.svg.alertCircle,
-                            iconSize: 18,
-                            title: "Delete Account",
-                            onPressed: () async {
-                              await Navigator.of(context)
-                                  .pushNamed(DeleteAccountView.routeName);
-                            },
-                          ),
+                          if (Platform.isIOS) const _Div(),
+                          if (Platform.isIOS)
+                            SettingsListButton(
+                              iconAssetName: Assets.svg.alertCircle,
+                              iconSize: 18,
+                              title: "Delete Account",
+                              onPressed: () async {
+                                await Navigator.of(context)
+                                    .pushNamed(DeleteAccountView.routeName);
+                              },
+                            ),
                           const _Div(),
                           SettingsListButton(
                             iconAssetName: Assets.svg.dollarSign,
