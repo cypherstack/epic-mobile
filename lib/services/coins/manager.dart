@@ -282,6 +282,16 @@ class Manager with ChangeNotifier {
     return success;
   }
 
+  Future<String> cancelPendingTransaction(String slateId) async {
+    final result = await (_currentWallet as EpicCashWallet)
+        .cancelPendingTransaction(slateId);
+    if (result.isEmpty) {
+      // success
+      notifyListeners();
+    }
+    return result;
+  }
+
   Future<bool> updateEpicBox() async {
     // Update address for receive page update
     // generateNewAddress();
