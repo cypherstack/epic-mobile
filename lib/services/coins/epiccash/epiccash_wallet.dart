@@ -461,17 +461,6 @@ class EpicCashWallet extends CoinServiceAPI {
 
   late PriceAPI _priceAPI;
 
-  Future<String> cancelPendingTransactionAndPost(String txSlateId) async {
-    String? result;
-    try {
-      result = await cancelPendingTransaction(txSlateId);
-      Logging.instance.log("result?: $result", level: LogLevel.Info);
-    } catch (e, s) {
-      Logging.instance.log("$e, $s", level: LogLevel.Error);
-    }
-    return result!;
-  }
-
   /// returns an empty String on success, error message on failure
   Future<String> cancelPendingTransaction(String tx_slate_id) async {
     final String wallet =

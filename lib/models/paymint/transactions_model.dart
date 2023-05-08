@@ -302,7 +302,7 @@ class Transaction {
   @override
   String toString() {
     String transaction =
-        "{txid: $txid, type: $txType, subType: $subType, value: $amount, fee: $fees, height: $height, confirm: $confirmedStatus, confirmations: $confirmations, address: $address, timestamp: $timestamp, worthNow: $worthNow, inputs: $inputs, slateid: $slateId, numberOfMessages: $numberOfMessages }";
+        "{txid: $txid, type: $txType, subType: $subType, value: $amount, fee: $fees, height: $height, confirm: $confirmedStatus, isCancelled: $isCancelled, confirmations: $confirmations, address: $address, timestamp: $timestamp, worthNow: $worthNow, inputs: $inputs, slateid: $slateId, numberOfMessages: $numberOfMessages }";
     return transaction;
   }
 }

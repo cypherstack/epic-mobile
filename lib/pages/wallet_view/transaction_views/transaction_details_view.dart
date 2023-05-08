@@ -407,8 +407,7 @@ class _TransactionDetailsViewState
                                 ));
 
                                 final result =
-                                    await (manager.wallet as EpicCashWallet)
-                                        .cancelPendingTransactionAndPost(id);
+                                    await manager.cancelPendingTransaction(id);
                                 if (mounted) {
                                   // pop progress dialog
                                   Navigator.of(context).pop();
