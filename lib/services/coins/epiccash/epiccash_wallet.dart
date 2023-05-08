@@ -971,6 +971,12 @@ class EpicCashWallet extends CoinServiceAPI {
     try {
       int realfee = await nativeFee(satoshiAmount);
 
+      final available = await availableBalance;
+      final availableSat = Format.decimalAmountToSatoshis(available);
+      if (availableSat == satoshiAmount) {
+        satoshiAmount = availableSat - realfee;
+      }
+
       Map<String, dynamic> txData = {
         "fee": realfee,
         "addresss": address,
@@ -1038,7 +1044,6 @@ class EpicCashWallet extends CoinServiceAPI {
           var amountSending = satoshiAmount - largestSatoshiFee;
           //Get fees for this new amount
 
-          // String? transactionFees;
           await m.protect(() async {
             ReceivePort receivePort = await getIsolate({
               "function": "getTransactionFees",
