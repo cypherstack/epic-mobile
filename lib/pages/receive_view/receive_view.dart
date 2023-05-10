@@ -60,7 +60,7 @@ class _ReceiveViewState extends ConsumerState<ReceiveView> {
       ),
     );
 
-    await ref.read(walletProvider)!.generateNewAddress();
+    await ref.read(walletProvider)!.currentReceivingAddress;
 
     shouldPop = true;
 

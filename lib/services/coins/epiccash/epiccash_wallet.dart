@@ -364,7 +364,7 @@ class EpicCashWallet extends CoinServiceAPI {
 
   Future<List<String>> _fetchAllOwnAddresses() async {
     List<String> addresses = [];
-    final ownAddress = await _getCurrentAddressForChain(0);
+    final ownAddress = await currentReceivingAddress;
     addresses.add(ownAddress);
     return addresses;
   }
@@ -616,7 +616,7 @@ class EpicCashWallet extends CoinServiceAPI {
       }
 
       Map<String, String> txAddressInfo = {};
-      txAddressInfo['from'] = await _getCurrentAddressForChain(0);
+      txAddressInfo['from'] = await currentReceivingAddress;
       txAddressInfo['to'] = txData['addresss'] as String;
       await putSendToAddresses(sendTx, txAddressInfo);
 
@@ -652,32 +652,42 @@ class EpicCashWallet extends CoinServiceAPI {
     }
   }
 
-  /// Returns the latest receiving/change (external/internal) address for the wallet depending on [chain]
-  /// and
-  /// [chain] - Use 0 for receiving (external), 1 for change (internal). Should not be any other value!
-  Future<String> _getCurrentAddressForChain(
-    int chain,
-  ) async {
+  @override
+  Future<String> get currentReceivingAddress async {
     final wallet = await _secureStore.read(key: '${_walletId}_wallet');
-
-    EpicBoxConfigModel epicboxConfig = await getEpicBoxConfig();
-
     String? walletAddress;
-    await m.protect(() async {
-      walletAddress = await compute(
-        _initGetAddressInfoWrapper,
-        Tuple3(wallet!, chain, epicboxConfig.toString()),
-      );
-    });
+    //First check if wallet address is stored in hive and return
+    if (!DB.instance.containsKey<dynamic>(
+        boxName: walletId, key: 'currentReceivingAddress')) {
+      EpicBoxConfigModel epicboxConfig = await getEpicBoxConfig();
+      await m.protect(() async {
+        walletAddress = await compute(
+          _initGetAddressInfoWrapper,
+          Tuple3(wallet!, 0, epicboxConfig.toString()),
+        );
+      });
+
+      await DB.instance.put<dynamic>(
+          boxName: walletId,
+          key: "currentReceivingAddress",
+          value: walletAddress);
+
+      Logging.instance.log("WALLET ADDRESS FROM RUST IS $walletAddress",
+          level: LogLevel.Info);
+    } else {
+      walletAddress = DB.instance.get<dynamic>(
+          boxName: walletId, key: "currentReceivingAddress") as String;
+
+      Logging.instance.log("WALLET ADDRESS FROM HIVE IS $walletAddress",
+          level: LogLevel.Info);
+    }
+
     Logging.instance
         .log("WALLET_ADDRESS_IS $walletAddress", level: LogLevel.Info);
     return walletAddress!;
   }
-
-  @override
-  Future<String> get currentReceivingAddress =>
-      _currentReceivingAddress ??= _getCurrentAddressForChain(0);
-  Future<String>? _currentReceivingAddress;
+  //     _currentReceivingAddress ??= _getCurrentAddressForChain(0);
+  // Future<String>? _currentReceivingAddress;
 
   @override
   Future<void> exit() async {
@@ -811,29 +821,6 @@ class EpicCashWallet extends CoinServiceAPI {
   @override
   int get txCount => _txCount;
 
-  Future<void> storeEpicboxInfo() async {
-    final wallet = await _secureStore.read(key: '${_walletId}_wallet');
-    int index = 0;
-
-    Logging.instance.log("This index is $index", level: LogLevel.Info);
-    EpicBoxConfigModel epicboxConfig = await getEpicBoxConfig();
-
-    String? walletAddress;
-    await m.protect(() async {
-      walletAddress = await compute(
-        _initGetAddressInfoWrapper,
-        Tuple3(wallet!, index, epicboxConfig.toString()),
-      );
-    });
-    Logging.instance
-        .log("WALLET_ADDRESS_IS $walletAddress", level: LogLevel.Info);
-    Logging.instance
-        .log("Wallet address is $walletAddress", level: LogLevel.Info);
-    String addressInfo = walletAddress!;
-    await _secureStore.write(
-        key: '${_walletId}_address_info', value: addressInfo);
-  }
-
   // TODO: make more robust estimate of date maybe using https://explorer.epic.tech/api-index
   int calculateRestoreHeightFrom({required DateTime date}) {
     int secondsSinceEpoch = date.millisecondsSinceEpoch ~/ 1000;
@@ -890,7 +877,7 @@ class EpicCashWallet extends CoinServiceAPI {
     await _secureStore.write(key: '${_walletId}_wallet', value: walletOpen);
 
     //Store Epic box address info
-    await storeEpicboxInfo();
+    await currentReceivingAddress;
 
     // subtract a couple days to ensure we have a buffer for SWB
     final bufferedCreateHeight = calculateRestoreHeightFrom(
@@ -919,6 +906,8 @@ class EpicCashWallet extends CoinServiceAPI {
         value: <String, String>{});
     await DB.instance
         .put<dynamic>(boxName: walletId, key: "isFavorite", value: false);
+    //Store wallet address in hive
+    await currentReceivingAddress;
   }
 
   bool refreshMutex = false;
@@ -1186,22 +1175,17 @@ class EpicCashWallet extends CoinServiceAPI {
       }
     }
 
-    bool isEpicboxConnected = await testEpicboxServer(
-        _epicBoxConfig.host, _epicBoxConfig.port ?? 443);
+    try {
+      bool isEpicboxConnected = await testEpicboxServer(
+          _epicBoxConfig.host, _epicBoxConfig.port ?? 443);
 
-    if (!isEpicboxConnected) {
-      //   // failover to another random server from the default list
-      //   List<EpicBoxServerModel> alternativeServers = DefaultEpicBoxes.all;
-      //   alternativeServers.removeWhere((opt) => opt.name == DefaultEpicBoxes.defaultEpicBoxServer.name);
-      //   alternativeServers.shuffle(); // randomize which server is used
-      //   _epicBoxConfig = EpicBoxConfigModel.fromServer(alternativeServers.first);
-      //   // TODO test this connection before returning it
-
-      Logging.instance.log(
-          "Error in getEpicBoxConfig (not connected to epicbox server)",
-          level: LogLevel.Error);
-      throw Exception(
-          "Error in getEpicBoxConfig (not connected to epicbox server)");
+      if (!isEpicboxConnected) {
+        Logging.instance.log(
+            "Error in getEpicBoxConfig (not connected to epicbox server)",
+            level: LogLevel.Error);
+      }
+    } catch (e, s) {
+      rethrow;
     }
 
     return _epicBoxConfig;
@@ -1212,12 +1196,11 @@ class EpicCashWallet extends CoinServiceAPI {
   // address based on the epicbox host/domain/URL we must force an update here
   Future<bool> updateEpicBox() async {
     try {
-      _currentReceivingAddress = _getCurrentAddressForChain(0);
+      await currentReceivingAddress;
       return true;
     } catch (e, s) {
       Logging.instance.log("$e, $s", level: LogLevel.Error);
       throw Exception("Error in updateEpicBox (_getCurrentAddressForChain)");
-      return false;
     }
   }
 
@@ -1394,7 +1377,7 @@ class EpicCashWallet extends CoinServiceAPI {
       await _secureStore.write(key: '${_walletId}_wallet', value: walletOpen);
 
       //Store Epic box address info
-      await storeEpicboxInfo();
+      await currentReceivingAddress;
     } catch (e, s) {
       Logging.instance
           .log("Error recovering wallet $e\n$s", level: LogLevel.Error);
@@ -1409,9 +1392,6 @@ class EpicCashWallet extends CoinServiceAPI {
 
     ListenerManager.pointer =
         epicboxListenerStart(wallet!, epicboxConfig.toString());
-
-    // await _secureStore.write(
-    //     key: '${_walletId}_epicboxHandler', value: handler.toString());
   }
 
   Future<int> getRestoreHeight() async {
@@ -1610,9 +1590,6 @@ class EpicCashWallet extends CoinServiceAPI {
         await DB.instance.put<dynamic>(
             boxName: walletId, key: "creationHeight", value: await chainHeight);
       }
-
-      final int curAdd = await setCurrentIndex();
-      _currentReceivingAddress = _getCurrentAddressForChain(curAdd);
 
       if (!await startScans()) {
         refreshMutex = false;
@@ -2074,30 +2051,5 @@ class EpicCashWallet extends CoinServiceAPI {
     int currentFee = await nativeFee(satoshiAmount, ifErrorEstimateFee: true);
     // TODO: implement this
     return currentFee;
-  }
-
-  // not used in epic currently
-  @override
-  Future<bool> generateNewAddress() async {
-    try {
-      // await incrementAddressIndexForChain(
-      //     0); // First increment the receiving index
-      // final newReceivingIndex =
-      // DB.instance.get<dynamic>(boxName: walletId, key: 'receivingIndex')
-      // as int; // Check the new receiving index
-      // final newReceivingAddress = await _generateAddressForChain(0,
-      //     newReceivingIndex); // Use new index to derive a new receiving address
-      // await addToAddressesArrayForChain(newReceivingAddress,
-      //     0); // Add that new receiving address to the array of receiving addresses
-      // _currentReceivingAddress = Future(() =>
-      // newReceivingAddress); // Set the new receiving address that the service
-
-      return true;
-    } catch (e, s) {
-      Logging.instance.log(
-          "Exception rethrown from generateNewAddress(): $e\n$s",
-          level: LogLevel.Error);
-      return false;
-    }
   }
 }

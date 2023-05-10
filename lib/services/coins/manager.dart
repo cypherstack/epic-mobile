@@ -171,18 +171,6 @@ class Manager with ChangeNotifier {
   Decimal _cachedTotalBalance = Decimal.zero;
   Decimal get cachedTotalBalance => _cachedTotalBalance;
 
-  // Future<Decimal> get fiatBalance async {
-  //   final balance = await _currentWallet.availableBalance;
-  //   final price = await _currentWallet.basePrice;
-  //   return balance * price;
-  // }
-  //
-  // Future<Decimal> get fiatTotalBalance async {
-  //   final balance = await _currentWallet.totalBalance;
-  //   final price = await _currentWallet.basePrice;
-  //   return balance * price;
-  // }
-
   Future<List<String>> get allOwnAddresses => _currentWallet.allOwnAddresses;
 
   Future<TransactionData> get transactionData => _currentWallet.transactionData;
@@ -272,14 +260,6 @@ class Manager with ChangeNotifier {
 
   Future<int> estimateFeeFor(int satoshiAmount, int feeRate) async {
     return _currentWallet.estimateFeeFor(satoshiAmount, feeRate);
-  }
-
-  Future<bool> generateNewAddress() async {
-    final success = await _currentWallet.generateNewAddress();
-    if (success) {
-      notifyListeners();
-    }
-    return success;
   }
 
   Future<String> cancelPendingTransaction(String slateId) async {
