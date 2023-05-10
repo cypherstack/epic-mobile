@@ -116,8 +116,6 @@ abstract class CoinServiceAPI {
 
   Future<int> estimateFeeFor(int satoshiAmount, int feeRate);
 
-  Future<bool> generateNewAddress();
-
   // used for electrumx coins
   Future<void> updateSentCachedTxData(Map<String, dynamic> txData);
 }
