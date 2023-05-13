@@ -41,6 +41,10 @@ class TransactionDetailsView extends ConsumerStatefulWidget {
 
 class _TransactionDetailsViewState
     extends ConsumerState<TransactionDetailsView> {
+  static const double maxDivHeight = 51;
+  static const double minDivHeight = 5;
+  final _key = GlobalKey();
+
   late final TextEditingController noteController;
   late Transaction _transaction;
   late final String walletId;
@@ -50,6 +54,42 @@ class _TransactionDetailsViewState
   late final Decimal fee;
 
   bool showFeePending = false;
+
+  late final bool isSent;
+  late final int divCount;
+  double divHeight = maxDivHeight;
+  double? layoutBuilderHeight;
+  Size? size;
+
+  double _getInRange(double value) {
+    if (value < minDivHeight) {
+      return minDivHeight;
+    } else if (value > maxDivHeight) {
+      return maxDivHeight;
+    } else {
+      return value;
+    }
+  }
+
+  void _setSize() {
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+      size = _key.currentContext?.size;
+
+      if (layoutBuilderHeight != null && size != null) {
+        if (layoutBuilderHeight! < size!.height) {
+          final diff = size!.height - layoutBuilderHeight!;
+          final dDiff = diff / divCount;
+          divHeight = _getInRange(divHeight - dDiff);
+        } else {
+          final diff = layoutBuilderHeight! - size!.height;
+          final dDiff = diff / divCount;
+          divHeight = _getInRange(divHeight + dDiff);
+        }
+      }
+
+      setState(() {});
+    });
+  }
 
   Widget whatIsIt(String type) {
     Color color;
@@ -183,6 +223,63 @@ class _TransactionDetailsViewState
     return shouldContinue ?? false;
   }
 
+  Future<void> _onCancelPressed() async {
+    final Manager manager = ref.read(walletProvider)!;
+
+    if (manager.wallet is EpicCashWallet) {
+      final String? id = _transaction.slateId;
+      if (id == null) {
+        // unawaited(showFloatingFlushBar(
+        //   type: FlushBarType.warning,
+        //   message: "Could not find Epic transaction ID",
+        //   context: context,
+        // ));
+        return;
+      }
+
+      unawaited(showDialog<dynamic>(
+        barrierDismissible: false,
+        context: context,
+        builder: (_) => const CancellingTransactionProgressDialog(),
+      ));
+
+      final result = await manager.cancelPendingTransaction(id);
+      if (mounted) {
+        // pop progress dialog
+        Navigator.of(context).pop();
+
+        if (result.isEmpty) {
+          await showDialog<dynamic>(
+            context: context,
+            builder: (_) => OkDialog(
+              title: "Transaction cancelled",
+              onOkPressed: (_) {
+                manager.refresh();
+                Navigator.of(context)
+                    .popUntil(ModalRoute.withName(HomeView.routeName));
+              },
+            ),
+          );
+        } else {
+          await showDialog<dynamic>(
+            context: context,
+            builder: (_) => OkDialog(
+              title: "Failed to cancel transaction",
+              message: result,
+            ),
+          );
+        }
+      }
+    } else {
+      // unawaited(showFloatingFlushBar(
+      //   type: FlushBarType.warning,
+      //   message: "ERROR: Wallet type is not Epic Cash",
+      //   context: context,
+      // ));
+      return;
+    }
+  }
+
   @override
   void initState() {
     noteController = TextEditingController();
@@ -198,7 +295,9 @@ class _TransactionDetailsViewState
           .read(notesServiceChangeNotifierProvider(walletId))
           .getNoteFor(txid: _transaction.txid);
     });
-
+    isSent = _transaction.txType.toLowerCase() == "sent";
+    divCount = isSent ? 8 : 6;
+    _setSize();
     super.initState();
   }
 
@@ -210,6 +309,8 @@ class _TransactionDetailsViewState
 
   @override
   Widget build(BuildContext context) {
+    final scaleFactor = (MediaQuery.of(context).textScaleFactor ?? 1.0) * 0.85;
+
     return Background(
       child: Scaffold(
         backgroundColor: Theme.of(context).extension<StackColors>()!.background,
@@ -228,236 +329,214 @@ class _TransactionDetailsViewState
           ),
         ),
         body: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(
-              24,
+          child: MediaQuery(
+            data: MediaQuery.of(context).copyWith(
+              textScaleFactor: scaleFactor,
             ),
-            child: Column(
-              children: [
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        TXDetailsItemBase(
-                          title: Text(
-                            "STATUS",
-                            style: STextStyles.overLineBold(context),
-                          ),
-                          body: whatIsIt(_transaction.txType),
-                        ),
-                        const _Divider(),
-                        TXDetailsItemBase(
-                          title: Text(
-                            "NOTE",
-                            style: STextStyles.overLineBold(context),
-                          ),
-                          body: TextField(
-                            autocorrect: false,
-                            enableSuggestions: false,
-                            controller: noteController,
-                            onChanged: (value) {
-                              ref
-                                  .read(notesServiceChangeNotifierProvider(
-                                      walletId))
-                                  .editOrAddNote(
-                                    txid: _transaction.txid,
-                                    note: value,
-                                  );
-                            },
-                            style: STextStyles.body(context),
-                            textAlignVertical: TextAlignVertical.center,
-                            decoration: InputDecoration(
-                              focusColor: Colors.transparent,
-                              fillColor: Colors.transparent,
-                              filled: true,
-                              contentPadding: const EdgeInsets.symmetric(
-                                vertical: 0,
-                                horizontal: 0,
-                              ),
-                              enabledBorder: InputBorder.none,
-                              focusedBorder: InputBorder.none,
-                              errorBorder: InputBorder.none,
-                              disabledBorder: InputBorder.none,
-                              focusedErrorBorder: InputBorder.none,
-                              // border: InputBorder.none,
-                              isCollapsed: true,
-                              hintText: "Type something...",
-                              hintStyle: STextStyles.body(context).copyWith(
-                                color: Theme.of(context)
-                                    .extension<StackColors>()!
-                                    .textDark,
-                              ),
-                            ),
-                          ),
-                        ),
-                        if (_transaction.txType.toLowerCase() == "sent")
-                          const _Divider(),
-                        if (_transaction.txType.toLowerCase() == "sent")
-                          TXDetailsItem(
-                            title: "RECIPIENT",
-                            info: _transaction.address,
-                          ),
-                        const _Divider(),
-                        TXDetailsItem(
-                          title: "AMOUNT",
-                          info: trimTrailingZeros(amount),
-                        ),
-                        if (_transaction.txType.toLowerCase() == "sent")
-                          const _Divider(),
-                        if (_transaction.txType.toLowerCase() == "sent")
-                          TXDetailsItem(
-                            title: "FEE",
-                            info: showFeePending
-                                ? _transaction.confirmedStatus
-                                    ? trimTrailingZeros(fee)
-                                    : "Pending"
-                                : trimTrailingZeros(fee),
-                          ),
-                        const _Divider(),
-                        TXDetailsItem(
-                          title: "DATE",
-                          info: Format.extractDateFrom(
-                            _transaction.timestamp,
-                          ),
-                        ),
-                        const _Divider(),
-                        TXDetailsItemBase(
-                          title: Text(
-                            "TRANSACTION ID",
-                            style: STextStyles.overLineBold(context),
-                          ),
-                          body: GestureDetector(
-                            onTap: () async {
-                              final uri = Uri.parse(
-                                  "https://explorer3.epic.tech/blockdetail/${_transaction.txid}");
-                              try {
-                                await launchUrl(
-                                  uri,
-                                  mode: LaunchMode.externalApplication,
-                                );
-                              } catch (_) {
-                                unawaited(
-                                  showDialog<void>(
-                                    context: context,
-                                    builder: (_) => OkDialog(
-                                      title: "Could not open in block explorer",
-                                      message:
-                                          "Failed to open \"${uri.toString()}\"",
+            child: Padding(
+              padding: const EdgeInsets.only(
+                top: 16,
+                left: 24,
+                right: 24,
+              ),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  layoutBuilderHeight = constraints.maxHeight;
+                  return Column(
+                    children: [
+                      Expanded(
+                        child: SingleChildScrollView(
+                          child: IntrinsicHeight(
+                            key: _key,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                TXDetailsItemBase(
+                                  title: Text(
+                                    "STATUS",
+                                    style: STextStyles.overLineBold(context),
+                                  ),
+                                  body: whatIsIt(_transaction.txType),
+                                ),
+                                _Divider(
+                                  height: divHeight,
+                                ),
+                                TXDetailsItemBase(
+                                  title: Text(
+                                    "NOTE",
+                                    style: STextStyles.overLineBold(context),
+                                  ),
+                                  body: TextField(
+                                    autocorrect: false,
+                                    enableSuggestions: false,
+                                    controller: noteController,
+                                    onChanged: (value) {
+                                      ref
+                                          .read(
+                                              notesServiceChangeNotifierProvider(
+                                                  walletId))
+                                          .editOrAddNote(
+                                            txid: _transaction.txid,
+                                            note: value,
+                                          );
+                                    },
+                                    style: STextStyles.body(context),
+                                    textAlignVertical: TextAlignVertical.center,
+                                    decoration: InputDecoration(
+                                      focusColor: Colors.transparent,
+                                      fillColor: Colors.transparent,
+                                      filled: true,
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                        vertical: 0,
+                                        horizontal: 0,
+                                      ),
+                                      enabledBorder: InputBorder.none,
+                                      focusedBorder: InputBorder.none,
+                                      errorBorder: InputBorder.none,
+                                      disabledBorder: InputBorder.none,
+                                      focusedErrorBorder: InputBorder.none,
+                                      // border: InputBorder.none,
+                                      isCollapsed: true,
+                                      hintText: "Type something...",
+                                      hintStyle:
+                                          STextStyles.body(context).copyWith(
+                                        color: Theme.of(context)
+                                            .extension<StackColors>()!
+                                            .textDark,
+                                      ),
                                     ),
                                   ),
-                                );
-                              }
-                            },
-                            child: Container(
-                              color: Colors.transparent,
-                              child: Text(
-                                _transaction.txid,
-                                style: STextStyles.body(context),
-                              ),
+                                ),
+                                if (isSent)
+                                  _Divider(
+                                    height: divHeight,
+                                  ),
+                                if (isSent)
+                                  TXDetailsItem(
+                                    title: "RECIPIENT",
+                                    info: _transaction.address,
+                                  ),
+                                _Divider(
+                                  height: divHeight,
+                                ),
+                                TXDetailsItem(
+                                  title: "AMOUNT",
+                                  info: trimTrailingZeros(amount),
+                                ),
+                                if (isSent)
+                                  _Divider(
+                                    height: divHeight,
+                                  ),
+                                if (isSent)
+                                  TXDetailsItem(
+                                    title: "FEE",
+                                    info: showFeePending
+                                        ? _transaction.confirmedStatus
+                                            ? trimTrailingZeros(fee)
+                                            : "Pending"
+                                        : trimTrailingZeros(fee),
+                                  ),
+                                _Divider(
+                                  height: divHeight,
+                                ),
+                                TXDetailsItem(
+                                  title: "DATE",
+                                  info: Format.extractDateFrom(
+                                    _transaction.timestamp,
+                                  ),
+                                ),
+                                _Divider(
+                                  height: divHeight,
+                                ),
+                                TXDetailsItemBase(
+                                  title: Text(
+                                    "TRANSACTION ID",
+                                    style: STextStyles.overLineBold(context),
+                                  ),
+                                  body: GestureDetector(
+                                    onTap: () async {
+                                      final uri = Uri.parse(
+                                          "https://explorer3.epic.tech/blockdetail/${_transaction.txid}");
+                                      try {
+                                        await launchUrl(
+                                          uri,
+                                          mode: LaunchMode.externalApplication,
+                                        );
+                                      } catch (_) {
+                                        unawaited(
+                                          showDialog<void>(
+                                            context: context,
+                                            builder: (_) => OkDialog(
+                                              title:
+                                                  "Could not open in block explorer",
+                                              message:
+                                                  "Failed to open \"${uri.toString()}\"",
+                                            ),
+                                          ),
+                                        );
+                                      }
+                                    },
+                                    child: Container(
+                                      color: Colors.transparent,
+                                      child: Text(
+                                        _transaction.txid,
+                                        style: STextStyles.body(context),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                _Divider(
+                                  height: divHeight,
+                                ),
+                                TXDetailsItem(
+                                  title: "SLATE ID",
+                                  info: _transaction.slateId ?? "Unknown",
+                                ),
+                                _Divider(
+                                  height: divHeight,
+                                ),
+                                TXDetailsItem(
+                                  title: "BLOCK HEIGHT",
+                                  info: _transaction.confirmations > 0
+                                      ? "${_transaction.height}"
+                                      : "Pending",
+                                ),
+                                const SizedBox(
+                                  height: 16,
+                                ),
+                                if (isSent &&
+                                    _transaction.confirmedStatus == false &&
+                                    _transaction.isCancelled == false)
+                                  TextButton(
+                                    style: ButtonStyle(
+                                      backgroundColor:
+                                          MaterialStateProperty.all<Color>(
+                                        Theme.of(context)
+                                            .extension<StackColors>()!
+                                            .accentColorRed,
+                                      ),
+                                    ),
+                                    onPressed: _onCancelPressed,
+                                    child: Text(
+                                      "CANCEL TRANSACTION",
+                                      style: STextStyles.buttonText(context)
+                                          .copyWith(
+                                        color: Theme.of(context)
+                                            .extension<StackColors>()!
+                                            .popupBG,
+                                      ),
+                                    ),
+                                  ),
+                              ],
                             ),
                           ),
                         ),
-                        const _Divider(),
-                        TXDetailsItem(
-                          title: "SLATE ID",
-                          info: _transaction.slateId ?? "Unknown",
-                        ),
-                        const _Divider(),
-                        TXDetailsItem(
-                          title: "BLOCK HEIGHT",
-                          info: _transaction.confirmations > 0
-                              ? "${_transaction.height}"
-                              : "Pending",
-                        ),
-                        const SizedBox(
-                          height: 24,
-                        ),
-                        if (coin == Coin.epicCash &&
-                            _transaction.confirmedStatus == false &&
-                            _transaction.isCancelled == false &&
-                            _transaction.txType == "Sent")
-                          TextButton(
-                            style: ButtonStyle(
-                              backgroundColor: MaterialStateProperty.all<Color>(
-                                Theme.of(context)
-                                    .extension<StackColors>()!
-                                    .accentColorRed,
-                              ),
-                            ),
-                            onPressed: () async {
-                              final Manager manager = ref.read(walletProvider)!;
-
-                              if (manager.wallet is EpicCashWallet) {
-                                final String? id = _transaction.slateId;
-                                if (id == null) {
-                                  // unawaited(showFloatingFlushBar(
-                                  //   type: FlushBarType.warning,
-                                  //   message: "Could not find Epic transaction ID",
-                                  //   context: context,
-                                  // ));
-                                  return;
-                                }
-
-                                unawaited(showDialog<dynamic>(
-                                  barrierDismissible: false,
-                                  context: context,
-                                  builder: (_) =>
-                                      const CancellingTransactionProgressDialog(),
-                                ));
-
-                                final result =
-                                    await manager.cancelPendingTransaction(id);
-                                if (mounted) {
-                                  // pop progress dialog
-                                  Navigator.of(context).pop();
-
-                                  if (result.isEmpty) {
-                                    await showDialog<dynamic>(
-                                      context: context,
-                                      builder: (_) => OkDialog(
-                                        title: "Transaction cancelled",
-                                        onOkPressed: (_) {
-                                          manager.refresh();
-                                          Navigator.of(context).popUntil(
-                                              ModalRoute.withName(
-                                                  HomeView.routeName));
-                                        },
-                                      ),
-                                    );
-                                  } else {
-                                    await showDialog<dynamic>(
-                                      context: context,
-                                      builder: (_) => OkDialog(
-                                        title: "Failed to cancel transaction",
-                                        message: result,
-                                      ),
-                                    );
-                                  }
-                                }
-                              } else {
-                                // unawaited(showFloatingFlushBar(
-                                //   type: FlushBarType.warning,
-                                //   message: "ERROR: Wallet type is not Epic Cash",
-                                //   context: context,
-                                // ));
-                                return;
-                              }
-                            },
-                            child: Text(
-                              "CANCEL TRANSACTION",
-                              style: STextStyles.buttonText(context).copyWith(
-                                color: Theme.of(context)
-                                    .extension<StackColors>()!
-                                    .popupBG,
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
+                      ),
+                    ],
+                  );
+                },
+              ),
             ),
           ),
         ),
@@ -488,12 +567,17 @@ String trimTrailingZeros(Decimal amount) {
 }
 
 class _Divider extends StatelessWidget {
-  const _Divider({Key? key}) : super(key: key);
+  const _Divider({
+    Key? key,
+    required this.height,
+  }) : super(key: key);
+
+  final double height;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 15),
+      padding: EdgeInsets.symmetric(vertical: (height - 1) / 2),
       child: Container(
         height: 1,
         color: Theme.of(context)
@@ -530,7 +614,7 @@ class TXDetailsItemBase extends StatelessWidget {
     Key? key,
     required this.title,
     required this.body,
-    this.spacing = 8.0,
+    this.spacing = 5,
   }) : super(key: key);
 
   final Widget title;
