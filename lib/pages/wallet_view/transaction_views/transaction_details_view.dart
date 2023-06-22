@@ -8,6 +8,7 @@ import 'package:epicpay/providers/global/address_book_service_provider.dart';
 import 'package:epicpay/providers/providers.dart';
 import 'package:epicpay/services/coins/epiccash/epiccash_wallet.dart';
 import 'package:epicpay/services/coins/manager.dart';
+import 'package:epicpay/utilities/clipboard_interface.dart';
 import 'package:epicpay/utilities/enums/coin_enum.dart';
 import 'package:epicpay/utilities/format.dart';
 import 'package:epicpay/utilities/logger.dart';
@@ -26,6 +27,7 @@ class TransactionDetailsView extends ConsumerStatefulWidget {
     required this.transaction,
     required this.walletId,
     required this.coin,
+    this.clipboard = const ClipboardWrapper(),
   }) : super(key: key);
 
   static const String routeName = "/transactionDetails";
@@ -33,6 +35,7 @@ class TransactionDetailsView extends ConsumerStatefulWidget {
   final Transaction transaction;
   final String walletId;
   final Coin coin;
+  final ClipboardInterface clipboard;
 
   @override
   ConsumerState<TransactionDetailsView> createState() =>
@@ -481,7 +484,12 @@ class _TransactionDetailsViewState
                                       color: Colors.transparent,
                                       child: Text(
                                         _transaction.txid,
-                                        style: STextStyles.body(context),
+                                        style:
+                                            STextStyles.body(context).copyWith(
+                                          color: Theme.of(context)
+                                              .extension<StackColors>()!
+                                              .textGold,
+                                        ),
                                       ),
                                     ),
                                   ),
