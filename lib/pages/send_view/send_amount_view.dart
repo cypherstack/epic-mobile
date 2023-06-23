@@ -48,8 +48,8 @@ class SendAmountView extends ConsumerStatefulWidget {
 enum SendingState { waiting, generating, sending, sent }
 
 class _SendAmountViewState extends ConsumerState<SendAmountView> {
-  static const double maxDivHeight = 35;
-  static const double minDivHeight = 5;
+  static const double maxDivHeight = 50;
+  static const double minDivHeight = 3;
   final _key = GlobalKey();
 
   late final String walletId;
@@ -95,18 +95,12 @@ class _SendAmountViewState extends ConsumerState<SendAmountView> {
   void _setSize() {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
       size = _key.currentContext?.size;
-      debugPrint("SIZE: $size");
-      debugPrint("LAYOUT: $layoutBuilderHeight");
 
       if (layoutBuilderHeight != null && size != null) {
         if (layoutBuilderHeight! < size!.height) {
           final diff = size!.height - layoutBuilderHeight!;
           final dDiff = diff / divCount;
           divHeight = _getInRange(divHeight - dDiff);
-
-          debugPrint("DIFF: $diff");
-          debugPrint("LAYOUT: $layoutBuilderHeight");
-          debugPrint("SIZE: $size");
         } else {
           final diff = layoutBuilderHeight! - size!.height;
           final dDiff = diff / divCount;
@@ -486,7 +480,7 @@ class _SendAmountViewState extends ConsumerState<SendAmountView> {
       }
     });
 
-    divCount = 7;
+    divCount = 6;
     _setSize();
     super.initState();
   }
@@ -514,7 +508,7 @@ class _SendAmountViewState extends ConsumerState<SendAmountView> {
     debugPrint("BUILD: $runtimeType");
 
     debugPrint("DIVHEIGHT: $divHeight");
-    debugPrint("layout size: $layoutBuilderHeight");
+    debugPrint("Layout: $layoutBuilderHeight");
     return Background(
       child: Scaffold(
         appBar: AppBar(
@@ -537,179 +531,88 @@ class _SendAmountViewState extends ConsumerState<SendAmountView> {
               textScaleFactor: scaleFactor,
             ),
             child: Padding(
-              padding: const EdgeInsets.only(
-                top: 16,
-                left: 24,
-                right: 24,
+              padding: EdgeInsets.symmetric(
+                vertical: (divHeight == minDivHeight) ? 5 : 16,
+                horizontal: 24,
               ),
               child: LayoutBuilder(
                 builder: (builderContext, constraints) {
                   layoutBuilderHeight = constraints.maxHeight;
                   return SingleChildScrollView(
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(
-                        minHeight: constraints.maxHeight,
-                      ),
-                      child: IntrinsicHeight(
-                        key: _key,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            SendAmountItem(
-                              title: "SEND TO",
-                              info: address,
+                    child: IntrinsicHeight(
+                      key: _key,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          SendAmountItem(
+                            title: "SEND TO",
+                            info: address,
+                          ),
+                          _Divider(height: divHeight),
+                          SendAmountItemBase(
+                            title: Text(
+                              "NOTE (OPTIONAL)",
+                              style: STextStyles.overLineBold(context),
                             ),
-                            // _Divider(
-                            //   height: (layoutBuilderHeight! < 700) ? 10 : 40,
-                            // ),
-                            _Divider(height: divHeight),
-                            SendAmountItemBase(
-                              title: Text(
-                                "NOTE (OPTIONAL)",
-                                style: STextStyles.overLineBold(context),
-                              ),
-                              body: Row(
-                                children: [
-                                  Expanded(
-                                    child: TextField(
-                                      autocorrect: true,
-                                      enableSuggestions: true,
-                                      controller: noteController,
-                                      focusNode: _noteFocusNode,
-                                      style: STextStyles.body(context),
-                                      onChanged: (_) => setState(() {}),
-                                      decoration: InputDecoration(
-                                        contentPadding: const EdgeInsets.all(0),
-                                        hintText: "Type something...",
-                                        hintStyle:
-                                            STextStyles.body(context).copyWith(
-                                          color: Theme.of(context)
-                                              .extension<StackColors>()!
-                                              .textDark,
-                                        ),
-                                        fillColor: Theme.of(context)
-                                            .extension<StackColors>()!
-                                            .background,
-                                        enabledBorder: InputBorder.none,
-                                        focusedBorder: InputBorder.none,
-                                        isCollapsed: true,
-                                      ),
-                                    ),
-                                  ),
-                                  if (noteController.text.isNotEmpty)
-                                    TextFieldIconButton(
-                                      height: 20,
-                                      width: 20,
-                                      child: const XIcon(
-                                        width: 16,
-                                        height: 16,
-                                      ),
-                                      onTap: () async {
-                                        setState(() {
-                                          noteController.text = "";
-                                        });
-                                      },
-                                    ),
-                                ],
-                              ),
-                            ),
-                            // _Divider(
-                            //   height: (layoutBuilderHeight! < 700) ? 10 : 40,
-                            // ),
-                            _Divider(height: divHeight),
-                            SendAmountItemBase(
-                              title: Text(
-                                "ENTER AMOUNT TO SEND",
-                                style: STextStyles.overLineBold(context),
-                              ),
-                              body: TextField(
-                                autocorrect: true,
-                                enableSuggestions: true,
-                                style: STextStyles.body(context),
-                                key: const Key(
-                                    "amountInputFieldCryptoTextFieldKey"),
-                                controller: cryptoAmountController,
-                                focusNode: _cryptoFocus,
-                                keyboardType:
-                                    const TextInputType.numberWithOptions(
-                                  signed: false,
-                                  decimal: true,
-                                ),
-                                textAlign: TextAlign.left,
-                                inputFormatters: [
-                                  // regex to validate a crypto amount with 8 decimal places
-                                  TextInputFormatter.withFunction((oldValue,
-                                          newValue) =>
-                                      RegExp(r'^([0-9]*[,.]?[0-9]{0,8}|[,.][0-9]{0,8})$')
-                                              .hasMatch(newValue.text)
-                                          ? newValue
-                                          : oldValue),
-                                ],
-                                decoration: InputDecoration(
-                                  filled: true,
-                                  fillColor: Theme.of(context)
-                                      .extension<StackColors>()!
-                                      .coal,
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 14,
-                                    vertical: 12,
-                                  ),
-                                  hintText: "0.00",
-                                  hintStyle: STextStyles.body(context).copyWith(
-                                    color: Theme.of(context)
-                                        .extension<StackColors>()!
-                                        .textMedium,
-                                  ),
-                                  isCollapsed: true,
-                                  suffixIcon: SizedBox(
-                                    width: 79,
-                                    child: DecoratedBox(
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.only(
-                                          topRight: Radius.circular(
-                                            Constants.size.circularBorderRadius,
-                                          ),
-                                          bottomRight: Radius.circular(
-                                            Constants.size.circularBorderRadius,
-                                          ),
-                                        ),
+                            body: Row(
+                              children: [
+                                Expanded(
+                                  child: TextField(
+                                    autocorrect: true,
+                                    enableSuggestions: true,
+                                    controller: noteController,
+                                    focusNode: _noteFocusNode,
+                                    style: STextStyles.body(context),
+                                    onChanged: (_) => setState(() {}),
+                                    decoration: InputDecoration(
+                                      contentPadding: const EdgeInsets.all(0),
+                                      hintText: "Type something...",
+                                      hintStyle:
+                                          STextStyles.body(context).copyWith(
                                         color: Theme.of(context)
                                             .extension<StackColors>()!
-                                            .buttonBackPrimaryDisabled
-                                            .withOpacity(0.7),
+                                            .textDark,
                                       ),
-                                      child: Padding(
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 14,
-                                          vertical: 12,
-                                        ),
-                                        child: Text(
-                                          coin.ticker,
-                                          textAlign: TextAlign.center,
-                                          style: STextStyles.body(context)
-                                              .copyWith(
-                                            color: Theme.of(context)
-                                                .extension<StackColors>()!
-                                                .textMedium,
-                                          ),
-                                        ),
-                                      ),
+                                      fillColor: Theme.of(context)
+                                          .extension<StackColors>()!
+                                          .background,
+                                      enabledBorder: InputBorder.none,
+                                      focusedBorder: InputBorder.none,
+                                      isCollapsed: true,
                                     ),
                                   ),
                                 ),
-                              ),
+                                if (noteController.text.isNotEmpty)
+                                  TextFieldIconButton(
+                                    height: 20,
+                                    width: 20,
+                                    child: const XIcon(
+                                      width: 16,
+                                      height: 16,
+                                    ),
+                                    onTap: () async {
+                                      setState(() {
+                                        noteController.text = "";
+                                      });
+                                    },
+                                  ),
+                              ],
                             ),
-                            const SizedBox(
-                              height: 10,
+                          ),
+                          _Divider(height: divHeight),
+                          SendAmountItemBase(
+                            title: Text(
+                              "ENTER AMOUNT TO SEND",
+                              style: STextStyles.overLineBold(context),
                             ),
-                            TextField(
+                            body: TextField(
                               autocorrect: true,
                               enableSuggestions: true,
                               style: STextStyles.body(context),
-                              key:
-                                  const Key("amountInputFieldFiatTextFieldKey"),
-                              controller: baseAmountController,
-                              focusNode: _baseFocus,
+                              key: const Key(
+                                  "amountInputFieldCryptoTextFieldKey"),
+                              controller: cryptoAmountController,
+                              focusNode: _cryptoFocus,
                               keyboardType:
                                   const TextInputType.numberWithOptions(
                                 signed: false,
@@ -717,74 +620,14 @@ class _SendAmountViewState extends ConsumerState<SendAmountView> {
                               ),
                               textAlign: TextAlign.left,
                               inputFormatters: [
-                                // regex to validate a fiat amount with 2 decimal places
+                                // regex to validate a crypto amount with 8 decimal places
                                 TextInputFormatter.withFunction((oldValue,
                                         newValue) =>
-                                    RegExp(r'^([0-9]*[,.]?[0-9]{0,2}|[,.][0-9]{0,2})$')
+                                    RegExp(r'^([0-9]*[,.]?[0-9]{0,8}|[,.][0-9]{0,8})$')
                                             .hasMatch(newValue.text)
                                         ? newValue
                                         : oldValue),
                               ],
-                              onChanged: (baseAmountString) {
-                                if (baseAmountString.isNotEmpty &&
-                                    baseAmountString != "." &&
-                                    baseAmountString != ",") {
-                                  final baseAmount =
-                                      baseAmountString.contains(",")
-                                          ? Decimal.parse(baseAmountString
-                                              .replaceFirst(",", "."))
-                                          : Decimal.parse(baseAmountString);
-
-                                  var _price = ref
-                                      .read(priceAnd24hChangeNotifierProvider)
-                                      .getPrice(coin)
-                                      .item1;
-
-                                  if (_price == Decimal.zero) {
-                                    _amountToSend = Decimal.zero;
-                                  } else {
-                                    _amountToSend = baseAmount <= Decimal.zero
-                                        ? Decimal.zero
-                                        : (baseAmount / _price).toDecimal(
-                                            scaleOnInfinitePrecision:
-                                                Constants.decimalPlaces);
-                                  }
-                                  if (_cachedAmountToSend != null &&
-                                      _cachedAmountToSend == _amountToSend) {
-                                    return;
-                                  }
-                                  _cachedAmountToSend = _amountToSend;
-                                  Logging.instance.log(
-                                      "it changed $_amountToSend $_cachedAmountToSend",
-                                      level: LogLevel.Info);
-
-                                  final amountString =
-                                      Format.localizedStringAsFixed(
-                                    value: _amountToSend!,
-                                    locale: ref
-                                        .read(
-                                            localeServiceChangeNotifierProvider)
-                                        .locale,
-                                    decimalPlaces: Constants.decimalPlaces,
-                                  );
-
-                                  _cryptoAmountChangeLock = true;
-                                  cryptoAmountController.text = amountString;
-                                  _cryptoAmountChangeLock = false;
-                                } else {
-                                  _amountToSend = Decimal.zero;
-                                  _cryptoAmountChangeLock = true;
-                                  cryptoAmountController.text = "";
-                                  _cryptoAmountChangeLock = false;
-                                }
-                                // setState(() {
-                                //   _calculateFeesFuture = calculateFees(
-                                //       Format.decimalAmountToSatoshis(
-                                //           _amountToSend!));
-                                // });
-                                _updatePreviewButtonState(
-                                    address, _amountToSend, feeErr);
-                              },
                               decoration: InputDecoration(
                                 filled: true,
                                 fillColor: Theme.of(context)
@@ -824,8 +667,7 @@ class _SendAmountViewState extends ConsumerState<SendAmountView> {
                                         vertical: 12,
                                       ),
                                       child: Text(
-                                        ref.watch(prefsChangeNotifierProvider
-                                            .select((value) => value.currency)),
+                                        coin.ticker,
                                         textAlign: TextAlign.center,
                                         style:
                                             STextStyles.body(context).copyWith(
@@ -839,239 +681,363 @@ class _SendAmountViewState extends ConsumerState<SendAmountView> {
                                 ),
                               ),
                             ),
-                            const SizedBox(
-                              height: 16,
+                          ),
+                          const SizedBox(
+                            height: 10,
+                          ),
+                          TextField(
+                            autocorrect: true,
+                            enableSuggestions: true,
+                            style: STextStyles.body(context),
+                            key: const Key("amountInputFieldFiatTextFieldKey"),
+                            controller: baseAmountController,
+                            focusNode: _baseFocus,
+                            keyboardType: const TextInputType.numberWithOptions(
+                              signed: false,
+                              decimal: true,
                             ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                TextButton(
-                                  onPressed: availableBalance,
-                                  style: Theme.of(context)
-                                      .extension<StackColors>()!
-                                      .getPrimaryDisabledButtonColor(context),
+                            textAlign: TextAlign.left,
+                            inputFormatters: [
+                              // regex to validate a fiat amount with 2 decimal places
+                              TextInputFormatter.withFunction((oldValue,
+                                      newValue) =>
+                                  RegExp(r'^([0-9]*[,.]?[0-9]{0,2}|[,.][0-9]{0,2})$')
+                                          .hasMatch(newValue.text)
+                                      ? newValue
+                                      : oldValue),
+                            ],
+                            onChanged: (baseAmountString) {
+                              if (baseAmountString.isNotEmpty &&
+                                  baseAmountString != "." &&
+                                  baseAmountString != ",") {
+                                final baseAmount = baseAmountString
+                                        .contains(",")
+                                    ? Decimal.parse(
+                                        baseAmountString.replaceFirst(",", "."))
+                                    : Decimal.parse(baseAmountString);
+
+                                var _price = ref
+                                    .read(priceAnd24hChangeNotifierProvider)
+                                    .getPrice(coin)
+                                    .item1;
+
+                                if (_price == Decimal.zero) {
+                                  _amountToSend = Decimal.zero;
+                                } else {
+                                  _amountToSend = baseAmount <= Decimal.zero
+                                      ? Decimal.zero
+                                      : (baseAmount / _price).toDecimal(
+                                          scaleOnInfinitePrecision:
+                                              Constants.decimalPlaces);
+                                }
+                                if (_cachedAmountToSend != null &&
+                                    _cachedAmountToSend == _amountToSend) {
+                                  return;
+                                }
+                                _cachedAmountToSend = _amountToSend;
+                                Logging.instance.log(
+                                    "it changed $_amountToSend $_cachedAmountToSend",
+                                    level: LogLevel.Info);
+
+                                final amountString =
+                                    Format.localizedStringAsFixed(
+                                  value: _amountToSend!,
+                                  locale: ref
+                                      .read(localeServiceChangeNotifierProvider)
+                                      .locale,
+                                  decimalPlaces: Constants.decimalPlaces,
+                                );
+
+                                _cryptoAmountChangeLock = true;
+                                cryptoAmountController.text = amountString;
+                                _cryptoAmountChangeLock = false;
+                              } else {
+                                _amountToSend = Decimal.zero;
+                                _cryptoAmountChangeLock = true;
+                                cryptoAmountController.text = "";
+                                _cryptoAmountChangeLock = false;
+                              }
+                              // setState(() {
+                              //   _calculateFeesFuture = calculateFees(
+                              //       Format.decimalAmountToSatoshis(
+                              //           _amountToSend!));
+                              // });
+                              _updatePreviewButtonState(
+                                  address, _amountToSend, feeErr);
+                            },
+                            decoration: InputDecoration(
+                              filled: true,
+                              fillColor: Theme.of(context)
+                                  .extension<StackColors>()!
+                                  .coal,
+                              contentPadding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                                vertical: 12,
+                              ),
+                              hintText: "0.00",
+                              hintStyle: STextStyles.body(context).copyWith(
+                                color: Theme.of(context)
+                                    .extension<StackColors>()!
+                                    .textMedium,
+                              ),
+                              isCollapsed: true,
+                              suffixIcon: SizedBox(
+                                width: 79,
+                                child: DecoratedBox(
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.only(
+                                      topRight: Radius.circular(
+                                        Constants.size.circularBorderRadius,
+                                      ),
+                                      bottomRight: Radius.circular(
+                                        Constants.size.circularBorderRadius,
+                                      ),
+                                    ),
+                                    color: Theme.of(context)
+                                        .extension<StackColors>()!
+                                        .buttonBackPrimaryDisabled
+                                        .withOpacity(0.7),
+                                  ),
                                   child: Padding(
                                     padding: const EdgeInsets.symmetric(
-                                        horizontal: 16),
+                                      horizontal: 14,
+                                      vertical: 12,
+                                    ),
                                     child: Text(
-                                      "VIEW AVAILABLE BALANCE",
+                                      ref.watch(prefsChangeNotifierProvider
+                                          .select((value) => value.currency)),
                                       textAlign: TextAlign.center,
-                                      style: STextStyles.overLineBold(context)
-                                          .copyWith(
+                                      style: STextStyles.body(context).copyWith(
                                         color: Theme.of(context)
                                             .extension<StackColors>()!
-                                            .buttonBackPrimary,
+                                            .textMedium,
                                       ),
                                     ),
                                   ),
                                 ),
-                              ],
+                              ),
                             ),
-                            // SizedBox(
-                            //   height: (layoutBuilderHeight! < 700) ? 10 : 40,
-                            // ),
-                            SizedBox(
-                              height: divHeight,
-                            ),
-                            Center(
-                              child: SendAmountItemBase(
-                                title: Center(
+                          ),
+                          const SizedBox(
+                            height: 16,
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              TextButton(
+                                onPressed: availableBalance,
+                                style: Theme.of(context)
+                                    .extension<StackColors>()!
+                                    .getPrimaryDisabledButtonColor(context),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 16),
                                   child: Text(
-                                    "NETWORK FEE",
-                                    style: STextStyles.overLineBold(context),
+                                    "VIEW AVAILABLE BALANCE",
                                     textAlign: TextAlign.center,
+                                    style: STextStyles.overLineBold(context)
+                                        .copyWith(
+                                      color: Theme.of(context)
+                                          .extension<StackColors>()!
+                                          .buttonBackPrimary,
+                                    ),
                                   ),
                                 ),
-                                body: FutureBuilder(
-                                  future: _calculateFeesFuture,
-                                  builder: (context,
-                                      AsyncSnapshot<Decimal> snapshot) {
-                                    if (snapshot.connectionState ==
-                                            ConnectionState.done &&
-                                        snapshot.hasData) {
-                                      final feeAmount = snapshot.data!;
+                              ),
+                            ],
+                          ),
+                          SizedBox(
+                            height: divHeight,
+                          ),
+                          Center(
+                            child: SendAmountItemBase(
+                              title: Center(
+                                child: Text(
+                                  "NETWORK FEE",
+                                  style: STextStyles.overLineBold(context),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                              body: FutureBuilder(
+                                future: _calculateFeesFuture,
+                                builder:
+                                    (context, AsyncSnapshot<Decimal> snapshot) {
+                                  if (snapshot.connectionState ==
+                                          ConnectionState.done &&
+                                      snapshot.hasData) {
+                                    final feeAmount = snapshot.data!;
 
-                                      if (_amountToSend ==
-                                          ref
+                                    if (_amountToSend ==
+                                        ref
+                                            .read(walletProvider)!
+                                            .cachedAvailableBalance) {
+                                      _amountToSend = ref
                                               .read(walletProvider)!
-                                              .cachedAvailableBalance) {
-                                        _amountToSend = ref
-                                                .read(walletProvider)!
-                                                .cachedAvailableBalance -
-                                            feeAmount;
-                                      }
+                                              .cachedAvailableBalance -
+                                          feeAmount;
+                                    }
 
-                                      final total = feeAmount +
-                                          (_amountToSend ?? Decimal.zero);
+                                    final total = feeAmount +
+                                        (_amountToSend ?? Decimal.zero);
 
-                                      if (total >
-                                          ref
-                                              .read(walletProvider)!
-                                              .cachedAvailableBalance) {
-                                        feeErr = "Not enough balance";
-                                        WidgetsBinding.instance
-                                            .addPostFrameCallback((_) {
-                                          _updatePreviewButtonState(
-                                              address, _amountToSend, feeErr);
-                                        });
-                                      } else {
-                                        feeErr = null;
-                                        WidgetsBinding.instance
-                                            .addPostFrameCallback((_) {
-                                          _updatePreviewButtonState(
-                                              address, _amountToSend, feeErr);
-                                        });
-                                      }
+                                    if (total >
+                                        ref
+                                            .read(walletProvider)!
+                                            .cachedAvailableBalance) {
+                                      feeErr = "Not enough balance";
+                                      WidgetsBinding.instance
+                                          .addPostFrameCallback((_) {
+                                        _updatePreviewButtonState(
+                                            address, _amountToSend, feeErr);
+                                      });
+                                    } else {
+                                      feeErr = null;
+                                      WidgetsBinding.instance
+                                          .addPostFrameCallback((_) {
+                                        _updatePreviewButtonState(
+                                            address, _amountToSend, feeErr);
+                                      });
+                                    }
 
-                                      return Column(
-                                        children: [
-                                          Text(
-                                            feeErr ??
-                                                "~$feeAmount ${coin.ticker}",
-                                            textAlign: TextAlign.center,
-                                            style: STextStyles.body(context),
-                                          ),
-                                          // SizedBox(
-                                          //     height:
-                                          //         (layoutBuilderHeight! < 700)
-                                          //             ? 10
-                                          //             : 36),
-                                          SizedBox(
-                                            height: divHeight,
-                                          ),
-                                          Center(
-                                            child: Text(
-                                              "TOTAL AMOUNT TO SEND (INCLUDING FEE)",
-                                              style: STextStyles.overLineBold(
-                                                      context)
-                                                  .copyWith(
-                                                color: Theme.of(context)
-                                                    .extension<StackColors>()!
-                                                    .textMedium,
-                                              ),
+                                    return Column(
+                                      children: [
+                                        Text(
+                                          feeErr ??
+                                              "~$feeAmount ${coin.ticker}",
+                                          textAlign: TextAlign.center,
+                                          style: STextStyles.body(context),
+                                        ),
+                                        // SizedBox(
+                                        //     height:
+                                        //         (layoutBuilderHeight! < 700)
+                                        //             ? 10
+                                        //             : 36),
+                                        SizedBox(
+                                          height: divHeight,
+                                        ),
+                                        Center(
+                                          child: Text(
+                                            "TOTAL AMOUNT TO SEND (INCLUDING FEE)",
+                                            style: STextStyles.overLineBold(
+                                                    context)
+                                                .copyWith(
+                                              color: Theme.of(context)
+                                                  .extension<StackColors>()!
+                                                  .textMedium,
                                             ),
                                           ),
-                                          const SizedBox(
-                                            height: 6,
+                                        ),
+                                        const SizedBox(
+                                          height: 6,
+                                        ),
+                                        Text(
+                                          feeErr ?? "~$total ${coin.ticker}",
+                                          textAlign: TextAlign.center,
+                                          style: STextStyles.titleH2(context)
+                                              .copyWith(
+                                            color: Theme.of(context)
+                                                .extension<StackColors>()!
+                                                .buttonBackPrimary,
                                           ),
-                                          Text(
-                                            feeErr ?? "~$total ${coin.ticker}",
-                                            textAlign: TextAlign.center,
+                                        )
+                                      ],
+                                    );
+                                  } else {
+                                    return Column(
+                                      children: [
+                                        Center(
+                                          child: AnimatedText(
+                                            stringsToLoopThrough: const [
+                                              "Calculating",
+                                              "Calculating.",
+                                              "Calculating..",
+                                              "Calculating...",
+                                            ],
+                                            style: STextStyles.body(context),
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          height: (layoutBuilderHeight! < 700)
+                                              ? 10
+                                              : 36,
+                                        ),
+                                        Center(
+                                          child: Text(
+                                            "TOTAL AMOUNT TO SEND (INCLUDING FEE)",
+                                            style: STextStyles.overLineBold(
+                                                    context)
+                                                .copyWith(
+                                              color: Theme.of(context)
+                                                  .extension<StackColors>()!
+                                                  .textMedium,
+                                            ),
+                                          ),
+                                        ),
+                                        const SizedBox(
+                                          height: 6,
+                                        ),
+                                        Center(
+                                          child: AnimatedText(
+                                            stringsToLoopThrough: const [
+                                              "Calculating",
+                                              "Calculating.",
+                                              "Calculating..",
+                                              "Calculating...",
+                                            ],
                                             style: STextStyles.titleH2(context)
                                                 .copyWith(
                                               color: Theme.of(context)
                                                   .extension<StackColors>()!
                                                   .buttonBackPrimary,
                                             ),
-                                          )
-                                        ],
-                                      );
-                                    } else {
-                                      return Column(
-                                        children: [
-                                          Center(
-                                            child: AnimatedText(
-                                              stringsToLoopThrough: const [
-                                                "Calculating",
-                                                "Calculating.",
-                                                "Calculating..",
-                                                "Calculating...",
-                                              ],
-                                              style: STextStyles.body(context),
-                                            ),
                                           ),
-                                          SizedBox(
-                                            height: (layoutBuilderHeight! < 700)
-                                                ? 10
-                                                : 36,
-                                          ),
-                                          Center(
-                                            child: Text(
-                                              "TOTAL AMOUNT TO SEND (INCLUDING FEE)",
-                                              style: STextStyles.overLineBold(
-                                                      context)
-                                                  .copyWith(
-                                                color: Theme.of(context)
-                                                    .extension<StackColors>()!
-                                                    .textMedium,
-                                              ),
-                                            ),
-                                          ),
-                                          const SizedBox(
-                                            height: 6,
-                                          ),
-                                          Center(
-                                            child: AnimatedText(
-                                              stringsToLoopThrough: const [
-                                                "Calculating",
-                                                "Calculating.",
-                                                "Calculating..",
-                                                "Calculating...",
-                                              ],
-                                              style:
-                                                  STextStyles.titleH2(context)
-                                                      .copyWith(
-                                                color: Theme.of(context)
-                                                    .extension<StackColors>()!
-                                                    .buttonBackPrimary,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      );
-                                    }
-                                  },
-                                ),
+                                        ),
+                                      ],
+                                    );
+                                  }
+                                },
                               ),
                             ),
-                            SizedBox(
-                              height: divHeight,
-                            ),
-                            // SizedBox(
-                            //   height: (layoutBuilderHeight! < 700) ? 10 : 50,
-                            // ),
-                            SizedBox(
-                              height: divHeight,
-                            ),
-                            CustomTextButtonBase(
-                              height: 56,
-                              textButton: TextButton(
-                                onPressed: ref
+                          ),
+                          if (divHeight == maxDivHeight) const Spacer(),
+                          SizedBox(
+                            height: (divHeight == maxDivHeight)
+                                ? divHeight + 70
+                                : divHeight,
+                          ),
+                          CustomTextButtonBase(
+                            height: 56,
+                            textButton: TextButton(
+                              onPressed: ref
+                                      .watch(previewTxButtonStateProvider.state)
+                                      .state
+                                  ? send
+                                  : null,
+                              style: ref
+                                      .watch(previewTxButtonStateProvider.state)
+                                      .state
+                                  ? Theme.of(context)
+                                      .extension<StackColors>()!
+                                      .getPrimaryEnabledButtonColor(context)
+                                  : Theme.of(context)
+                                      .extension<StackColors>()!
+                                      .getPrimaryDisabledButtonColor(context),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  getButtonChild(
+                                    context,
+                                    ref
                                         .watch(
                                             previewTxButtonStateProvider.state)
-                                        .state
-                                    ? send
-                                    : null,
-                                style: ref
-                                        .watch(
-                                            previewTxButtonStateProvider.state)
-                                        .state
-                                    ? Theme.of(context)
-                                        .extension<StackColors>()!
-                                        .getPrimaryEnabledButtonColor(context)
-                                    : Theme.of(context)
-                                        .extension<StackColors>()!
-                                        .getPrimaryDisabledButtonColor(context),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    getButtonChild(
-                                      context,
-                                      ref
-                                          .watch(previewTxButtonStateProvider
-                                              .state)
-                                          .state,
-                                      sendingState,
-                                    ),
-                                  ],
-                                ),
+                                        .state,
+                                    sendingState,
+                                  ),
+                                ],
                               ),
                             ),
-                            SizedBox(
-                              height: divHeight,
-                            ),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
                     ),
                   );
