@@ -95,12 +95,18 @@ class _SendAmountViewState extends ConsumerState<SendAmountView> {
   void _setSize() {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
       size = _key.currentContext?.size;
+      debugPrint("SIZE: $size");
+      debugPrint("LAYOUT: $layoutBuilderHeight");
 
       if (layoutBuilderHeight != null && size != null) {
         if (layoutBuilderHeight! < size!.height) {
           final diff = size!.height - layoutBuilderHeight!;
           final dDiff = diff / divCount;
           divHeight = _getInRange(divHeight - dDiff);
+
+          debugPrint("DIFF: $diff");
+          debugPrint("LAYOUT: $layoutBuilderHeight");
+          debugPrint("SIZE: $size");
         } else {
           final diff = layoutBuilderHeight! - size!.height;
           final dDiff = diff / divCount;
@@ -480,7 +486,7 @@ class _SendAmountViewState extends ConsumerState<SendAmountView> {
       }
     });
 
-    divCount = 6;
+    divCount = 7;
     _setSize();
     super.initState();
   }
@@ -553,9 +559,10 @@ class _SendAmountViewState extends ConsumerState<SendAmountView> {
                               title: "SEND TO",
                               info: address,
                             ),
-                            _Divider(
-                              height: (layoutBuilderHeight! < 700) ? 10 : 40,
-                            ),
+                            // _Divider(
+                            //   height: (layoutBuilderHeight! < 700) ? 10 : 40,
+                            // ),
+                            _Divider(height: divHeight),
                             SendAmountItemBase(
                               title: Text(
                                 "NOTE (OPTIONAL)",
@@ -606,9 +613,10 @@ class _SendAmountViewState extends ConsumerState<SendAmountView> {
                                 ],
                               ),
                             ),
-                            _Divider(
-                              height: (layoutBuilderHeight! < 700) ? 10 : 40,
-                            ),
+                            // _Divider(
+                            //   height: (layoutBuilderHeight! < 700) ? 10 : 40,
+                            // ),
+                            _Divider(height: divHeight),
                             SendAmountItemBase(
                               title: Text(
                                 "ENTER AMOUNT TO SEND",
@@ -859,8 +867,11 @@ class _SendAmountViewState extends ConsumerState<SendAmountView> {
                                 ),
                               ],
                             ),
+                            // SizedBox(
+                            //   height: (layoutBuilderHeight! < 700) ? 10 : 40,
+                            // ),
                             SizedBox(
-                              height: (layoutBuilderHeight! < 700) ? 10 : 40,
+                              height: divHeight,
                             ),
                             Center(
                               child: SendAmountItemBase(
@@ -920,11 +931,14 @@ class _SendAmountViewState extends ConsumerState<SendAmountView> {
                                             textAlign: TextAlign.center,
                                             style: STextStyles.body(context),
                                           ),
+                                          // SizedBox(
+                                          //     height:
+                                          //         (layoutBuilderHeight! < 700)
+                                          //             ? 10
+                                          //             : 36),
                                           SizedBox(
-                                              height:
-                                                  (layoutBuilderHeight! < 700)
-                                                      ? 10
-                                                      : 36),
+                                            height: divHeight,
+                                          ),
                                           Center(
                                             child: Text(
                                               "TOTAL AMOUNT TO SEND (INCLUDING FEE)",
@@ -1010,11 +1024,14 @@ class _SendAmountViewState extends ConsumerState<SendAmountView> {
                                 ),
                               ),
                             ),
-                            Spacer(
-                              flex: (layoutBuilderHeight! < 700) ? 1 : 2,
-                            ),
                             SizedBox(
-                              height: (layoutBuilderHeight! < 700) ? 10 : 50,
+                              height: divHeight,
+                            ),
+                            // SizedBox(
+                            //   height: (layoutBuilderHeight! < 700) ? 10 : 50,
+                            // ),
+                            SizedBox(
+                              height: divHeight,
                             ),
                             CustomTextButtonBase(
                               height: 56,
@@ -1050,7 +1067,9 @@ class _SendAmountViewState extends ConsumerState<SendAmountView> {
                                 ),
                               ),
                             ),
-                            const Spacer(),
+                            SizedBox(
+                              height: divHeight,
+                            ),
                           ],
                         ),
                       ),
