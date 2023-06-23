@@ -80,6 +80,7 @@ class _SendAmountViewState extends ConsumerState<SendAmountView> {
   late final int divCount;
   double divHeight = minDivHeight;
   double? layoutBuilderHeight;
+  double? screenDiff;
   Size? size;
 
   double _getInRange(double value) {
@@ -101,10 +102,12 @@ class _SendAmountViewState extends ConsumerState<SendAmountView> {
           final diff = size!.height - layoutBuilderHeight!;
           final dDiff = diff / divCount;
           divHeight = _getInRange(divHeight - dDiff);
+          screenDiff = divHeight + dDiff - _getInRange(divHeight - dDiff);
         } else {
           final diff = layoutBuilderHeight! - size!.height;
           final dDiff = diff / divCount;
           divHeight = _getInRange(divHeight + dDiff);
+          screenDiff = divHeight + dDiff - _getInRange(divHeight - dDiff);
         }
       }
 
@@ -506,9 +509,6 @@ class _SendAmountViewState extends ConsumerState<SendAmountView> {
   Widget build(BuildContext context) {
     final scaleFactor = (MediaQuery.of(context).textScaleFactor ?? 1.0) * 0.85;
     debugPrint("BUILD: $runtimeType");
-
-    debugPrint("DIVHEIGHT: $divHeight");
-    debugPrint("Layout: $layoutBuilderHeight");
     return Background(
       child: Scaffold(
         appBar: AppBar(
@@ -1000,11 +1000,13 @@ class _SendAmountViewState extends ConsumerState<SendAmountView> {
                             ),
                           ),
                           if (divHeight == maxDivHeight) const Spacer(),
-                          SizedBox(
-                            height: (divHeight == maxDivHeight)
-                                ? divHeight + 70
-                                : divHeight,
-                          ),
+                          (divHeight == maxDivHeight)
+                              ? SizedBox(
+                                  height: screenDiff,
+                                )
+                              : SizedBox(
+                                  height: divHeight,
+                                ),
                           CustomTextButtonBase(
                             height: 56,
                             textButton: TextButton(
