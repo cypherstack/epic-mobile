@@ -253,6 +253,7 @@ flutter:
     - assets/svg/edit.svg
     - assets/svg/refresh.svg
     - assets/svg/clipboard.svg
+    - assets/svg/swap-arrows.svg
     # coin icons
     - assets/svg/coin_icons/EpicCash.svg
     # socials
