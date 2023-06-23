@@ -228,6 +228,8 @@ flutter:
     - assets/svg/dark/tx-icon-receive.svg
     - assets/svg/dark/tx-icon-receive-pending.svg
     - assets/svg/dark/tx-icon-receive-failed.svg
+    - assets/svg/dark/arrow-down-circle-pending.svg
+    - assets/svg/dark/arrow-up-circle-pending.svg
     - assets/svg/add-backup.svg
     - assets/svg/auto-backup.svg
     - assets/svg/message-question.svg

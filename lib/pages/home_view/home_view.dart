@@ -111,12 +111,12 @@ class _HomeViewState extends ConsumerState<HomeView> {
   void initState() {
     _pageController = PageController(initialPage: 1);
     _children = [
+      WalletView(
+        walletId: ref.read(walletProvider)!.walletId,
+      ),
       SendView(
         walletId: ref.read(walletProvider)!.walletId,
         coin: ref.read(walletProvider)!.coin,
-      ),
-      WalletView(
-        walletId: ref.read(walletProvider)!.walletId,
       ),
       ReceiveView(
         walletId: ref.read(walletProvider)!.walletId,

@@ -40,14 +40,14 @@ class _SVG {
   String receive(BuildContext context) =>
       "assets/svg/${Theme.of(context).extension<StackColors>()!.themeType.name}/tx-icon-receive.svg";
   String receivePending(BuildContext context) =>
-      "assets/svg/${Theme.of(context).extension<StackColors>()!.themeType.name}/tx-icon-receive-pending.svg";
+      "assets/svg/${Theme.of(context).extension<StackColors>()!.themeType.name}/arrow-down-circle-pending.svg";
   String receiveCancelled(BuildContext context) =>
       "assets/svg/${Theme.of(context).extension<StackColors>()!.themeType.name}/tx-icon-receive-failed.svg";
 
   String send(BuildContext context) =>
       "assets/svg/${Theme.of(context).extension<StackColors>()!.themeType.name}/tx-icon-send.svg";
   String sendPending(BuildContext context) =>
-      "assets/svg/${Theme.of(context).extension<StackColors>()!.themeType.name}/tx-icon-send-pending.svg";
+      "assets/svg/${Theme.of(context).extension<StackColors>()!.themeType.name}/arrow-up-circle-pending.svg";
   String sendCancelled(BuildContext context) =>
       "assets/svg/${Theme.of(context).extension<StackColors>()!.themeType.name}/tx-icon-send-failed.svg";
 
