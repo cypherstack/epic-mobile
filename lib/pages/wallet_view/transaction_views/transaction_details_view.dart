@@ -18,6 +18,7 @@ import 'package:epicpay/widgets/background.dart';
 import 'package:epicpay/widgets/custom_buttons/app_bar_icon_button.dart';
 import 'package:epicpay/widgets/stack_dialog.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -51,6 +52,8 @@ class _TransactionDetailsViewState
   late final TextEditingController noteController;
   late Transaction _transaction;
   late final String walletId;
+
+  late final ClipboardInterface clipboard;
 
   late final Coin coin;
   late final Decimal amount;
@@ -288,6 +291,7 @@ class _TransactionDetailsViewState
     noteController = TextEditingController();
     _transaction = widget.transaction;
     walletId = widget.walletId;
+    clipboard = widget.clipboard;
 
     coin = widget.coin;
     amount = Format.satoshisToAmount(_transaction.amount, coin: coin);
@@ -596,11 +600,34 @@ class _Divider extends StatelessWidget {
   }
 }
 
-class TXDetailsItem extends StatelessWidget {
-  const TXDetailsItem({Key? key, required this.title, required this.info})
-      : super(key: key);
+class TXDetailsItem extends ConsumerStatefulWidget {
+  const TXDetailsItem({
+    Key? key,
+    required this.title,
+    required this.info,
+    this.clipboard = const ClipboardWrapper(),
+  }) : super(key: key);
+
   final String title;
   final String info;
+  final ClipboardInterface clipboard;
+
+  @override
+  ConsumerState<TXDetailsItem> createState() => _TXDetailsItemState();
+}
+
+class _TXDetailsItemState extends ConsumerState<TXDetailsItem> {
+  late final String title;
+  late final String info;
+  late final ClipboardInterface clipboard;
+
+  @override
+  void initState() {
+    title = widget.title;
+    info = widget.info;
+    clipboard = widget.clipboard;
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -609,9 +636,18 @@ class TXDetailsItem extends StatelessWidget {
         title,
         style: STextStyles.overLineBold(context),
       ),
-      body: SelectableText(
-        info,
-        style: STextStyles.body(context),
+      body: GestureDetector(
+        onTap: () {
+          clipboard.setData(
+            ClipboardData(
+              text: info,
+            ),
+          );
+        },
+        child: Text(
+          info,
+          style: STextStyles.body(context),
+        ),
       ),
     );
   }
