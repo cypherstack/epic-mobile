@@ -102,12 +102,14 @@ class _SendAmountViewState extends ConsumerState<SendAmountView> {
           final diff = size!.height - layoutBuilderHeight!;
           final dDiff = diff / divCount;
           divHeight = _getInRange(divHeight - dDiff);
-          screenDiff = divHeight + dDiff - _getInRange(divHeight - dDiff);
         } else {
           final diff = layoutBuilderHeight! - size!.height;
           final dDiff = diff / divCount;
-          divHeight = _getInRange(divHeight + dDiff);
-          screenDiff = divHeight + dDiff - _getInRange(divHeight - dDiff);
+          final clampInput = divHeight + dDiff;
+          divHeight = _getInRange(clampInput);
+          screenDiff = clampInput - divHeight;
+          screenDiff = screenDiff! * divCount;
+          screenDiff = screenDiff! - ((divHeight == minDivHeight) ? 5 : 16);
         }
       }
 
@@ -483,7 +485,7 @@ class _SendAmountViewState extends ConsumerState<SendAmountView> {
       }
     });
 
-    divCount = 6;
+    divCount = 5;
     _setSize();
     super.initState();
   }
@@ -531,9 +533,10 @@ class _SendAmountViewState extends ConsumerState<SendAmountView> {
               textScaleFactor: scaleFactor,
             ),
             child: Padding(
-              padding: EdgeInsets.symmetric(
-                vertical: (divHeight == minDivHeight) ? 5 : 16,
-                horizontal: 24,
+              padding: EdgeInsets.only(
+                top: (divHeight == minDivHeight) ? 5 : 16,
+                left: 24,
+                right: 24,
               ),
               child: LayoutBuilder(
                 builder: (builderContext, constraints) {
@@ -957,9 +960,7 @@ class _SendAmountViewState extends ConsumerState<SendAmountView> {
                                           ),
                                         ),
                                         SizedBox(
-                                          height: (layoutBuilderHeight! < 700)
-                                              ? 10
-                                              : 36,
+                                          height: divHeight,
                                         ),
                                         Center(
                                           child: Text(
@@ -999,14 +1000,11 @@ class _SendAmountViewState extends ConsumerState<SendAmountView> {
                               ),
                             ),
                           ),
-                          if (divHeight == maxDivHeight) const Spacer(),
-                          (divHeight == maxDivHeight)
-                              ? SizedBox(
-                                  height: screenDiff,
-                                )
-                              : SizedBox(
-                                  height: divHeight,
-                                ),
+                          SizedBox(
+                            height: screenDiff != null && screenDiff! > 0
+                                ? screenDiff! + divHeight
+                                : divHeight,
+                          ),
                           CustomTextButtonBase(
                             height: 56,
                             textButton: TextButton(
