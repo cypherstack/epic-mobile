@@ -1,4 +1,5 @@
 import 'package:epicpay/models/isar/models/exchange/currency.dart';
+import 'package:epicpay/models/isar/models/exchange/pair.dart';
 import 'package:tuple/tuple.dart';
 
 class AggregateCurrency {
@@ -18,14 +19,14 @@ class AggregateCurrency {
     return _map[exchangeName];
   }
 
-  // String get ticker => _map.values.first!.ticker;
-  //
-  // String get name => _map.values.first!.name;
-  //
-  // String get image => _map.values.first!.image;
-  //
-  // SupportedRateType get rateType => _map.values.first!.rateType;
-  //
+  String get ticker => _map.values.first!.ticker;
+
+  String get name => _map.values.first!.name;
+
+  String get image => _map.values.first!.image;
+
+  SupportedRateType get rateType => _map.values.first!.rateType;
+
   // bool get isStackCoin => _map.values.first!.isStackCoin;
 
   @override
