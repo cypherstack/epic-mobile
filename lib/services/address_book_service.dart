@@ -1,4 +1,4 @@
-import 'package:epicpay/hive/db.dart';
+import 'package:epicpay/db/hive/db.dart';
 import 'package:epicpay/models/contact.dart';
 import 'package:epicpay/utilities/logger.dart';
 import 'package:flutter/cupertino.dart';

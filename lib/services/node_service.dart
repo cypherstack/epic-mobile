@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:epicpay/hive/db.dart';
+import 'package:epicpay/db/hive/db.dart';
 import 'package:epicpay/models/epicbox_server_model.dart';
 import 'package:epicpay/models/node_model.dart';
 import 'package:epicpay/utilities/default_epicboxes.dart';

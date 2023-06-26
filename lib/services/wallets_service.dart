@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:epicpay/hive/db.dart';
+import 'package:epicpay/db/hive/db.dart';
 import 'package:epicpay/services/coins/epiccash/epiccash_wallet.dart';
 import 'package:epicpay/utilities/enums/coin_enum.dart';
 import 'package:epicpay/utilities/flutter_secure_storage_interface.dart';

@@ -1,4 +1,4 @@
-import 'package:epicpay/hive/db.dart';
+import 'package:epicpay/db/hive/db.dart';
 import 'package:epicpay/utilities/constants.dart';
 import 'package:epicpay/utilities/enums/languages_enum.dart';
 import 'package:epicpay/utilities/enums/sync_type_enum.dart';

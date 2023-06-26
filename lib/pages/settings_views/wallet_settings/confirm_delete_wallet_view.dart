@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:epicpay/hive/db.dart';
+import 'package:epicpay/db/hive/db.dart';
 import 'package:epicpay/pages/add_wallet_views/create_restore_wallet_view.dart';
 import 'package:epicpay/pages/settings_views/wallet_settings/wallet_settings_view.dart';
 import 'package:epicpay/providers/global/prefs_provider.dart';

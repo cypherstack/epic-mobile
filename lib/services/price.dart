@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:decimal/decimal.dart';
-import 'package:epicpay/hive/db.dart';
+import 'package:epicpay/db/hive/db.dart';
 import 'package:epicpay/utilities/enums/coin_enum.dart';
 import 'package:epicpay/utilities/logger.dart';
 import 'package:flutter/foundation.dart';

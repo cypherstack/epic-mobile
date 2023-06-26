@@ -1,9 +1,13 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:epicpay/hive/db.dart';
+import 'package:epicpay/db/isar/isar_db.dart';
+import 'package:epicpay/db/hive/db.dart';
 import 'package:epicpay/models/epicbox_config_model.dart';
 import 'package:epicpay/models/epicbox_server_model.dart';
+import 'package:epicpay/models/isar/models/exchange/currency.dart';
+import 'package:epicpay/models/isar/models/exchange/pair.dart';
+import 'package:epicpay/models/isar/models/exchange/trade.dart';
 import 'package:epicpay/models/isar/models/log.dart';
 import 'package:epicpay/models/models.dart';
 import 'package:epicpay/models/node_model.dart';
@@ -60,12 +64,18 @@ void main() async {
   // FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   if (!(Logging.isArmLinux || Logging.isTestEnv)) {
     final isar = await Isar.open(
-      [LogSchema],
+      [
+        LogSchema,
+        TradeSchema,
+        PairSchema,
+        CurrencySchema,
+      ],
       directory: appDirectory.path,
       inspector: false,
     );
     await Logging.instance.init(isar);
     await DebugService.instance.init(isar);
+    IsarDB.instance.init(isar);
 
     // clear out all info logs on startup. No need to await and block
     unawaited(DebugService.instance.deleteLogsOlderThan());
