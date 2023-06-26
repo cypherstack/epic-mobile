@@ -63,7 +63,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
   // late StreamSubscription<dynamic> _nodeStatusSubscription;
   late StreamSubscription<dynamic> _refreshSubscription;
 
-  int currentIndex = 1;
+  int currentIndex = 0;
 
   void _onTappedBar(int value) {
     setState(() {
@@ -74,8 +74,8 @@ class _HomeViewState extends ConsumerState<HomeView> {
 
   Future<bool> _onWillPop() async {
     // go to home view when tapping back on the main exchange view
-    if (ref.read(homeViewPageIndexStateProvider.state).state != 1) {
-      ref.read(homeViewPageIndexStateProvider.state).state = 1;
+    if (ref.read(homeViewPageIndexStateProvider.state).state != 0) {
+      ref.read(homeViewPageIndexStateProvider.state).state = 0;
       return false;
     }
 
