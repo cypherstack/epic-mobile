@@ -5,7 +5,7 @@ import 'package:epicpay/models/exchange/estimate.dart';
 import 'package:epicpay/models/exchange/range.dart';
 import 'package:epicpay/models/isar/models/exchange/currency.dart';
 import 'package:epicpay/models/isar/models/exchange/pair.dart';
-import 'package:epicpay/services/swap/change_now/DTOs/transaction.dart';
+import 'package:epicpay/services/swap/change_now/DTOs/transaction_dto.dart';
 import 'package:epicpay/services/swap/change_now/DTOs/transaction_status_dto.dart';
 import 'package:epicpay/services/swap/change_now/change_now_exchange.dart';
 import 'package:epicpay/services/swap/exchange_response.dart';
