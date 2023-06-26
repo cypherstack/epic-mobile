@@ -97,7 +97,7 @@ class _SVG {
   String get ellipsis => "assets/svg/gear-3.svg";
   String get chevronDown => "assets/svg/chevron-down.svg";
   String get chevronUp => "assets/svg/chevron-up.svg";
-  // String get swap => "assets/svg/swap.svg";
+  String get swap => "assets/svg/swap.svg";
   // String get downloadFolder => "assets/svg/folder-down.svg";
   String get lockFilled => "assets/svg/lock-filled.svg";
   String get lock => "assets/svg/lock.svg";
