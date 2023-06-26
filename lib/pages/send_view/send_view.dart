@@ -1,8 +1,6 @@
 import 'dart:async';
 
 import 'package:epicpay/models/send_view_auto_fill_data.dart';
-import 'package:epicpay/pages/address_book_views/address_book_view.dart';
-import 'package:epicpay/pages/home_view/home_view.dart';
 import 'package:epicpay/pages/send_view/send_amount_view.dart';
 import 'package:epicpay/providers/providers.dart';
 import 'package:epicpay/services/coins/manager.dart';
@@ -14,7 +12,6 @@ import 'package:epicpay/utilities/logger.dart';
 import 'package:epicpay/utilities/text_styles.dart';
 import 'package:epicpay/utilities/theme/stack_colors.dart';
 import 'package:epicpay/widgets/desktop/primary_button.dart';
-import 'package:epicpay/widgets/icon_widgets/addressbook_icon.dart';
 import 'package:epicpay/widgets/icon_widgets/clipboard_icon.dart';
 import 'package:epicpay/widgets/icon_widgets/qrcode_icon.dart';
 import 'package:epicpay/widgets/icon_widgets/x_icon.dart';
@@ -329,43 +326,43 @@ class _SendViewState extends ConsumerState<SendView> {
                                     },
                                     child: const QrCodeIcon(),
                                   ),
-                                  TextFieldIconButton(
-                                    key: const Key(
-                                        "sendViewAddressBookButtonKey"),
-                                    onTap: () async {
-                                      FocusScope.of(context).unfocus();
-
-                                      await Navigator.of(context).pushNamed(
-                                        AddressBookView.routeName,
-                                        arguments:
-                                            (String name, String address) {
-                                          _address = address;
-                                          sendToController.text = name;
-
-                                          Navigator.of(context).popUntil(
-                                              ModalRoute.withName(
-                                                  HomeView.routeName));
-                                          ref
-                                              .read(
-                                                  homeViewPageIndexStateProvider
-                                                      .state)
-                                              .state = 0;
-                                        },
-                                      );
-
-                                      setState(() {
-                                        _addressToggleFlag = _address != null &&
-                                            _address!.isNotEmpty;
-                                      });
-                                    },
-                                    child: AddressBookIcon(
-                                      width: 24,
-                                      height: 24,
-                                      color: Theme.of(context)
-                                          .extension<StackColors>()!
-                                          .textFieldActiveSearchIconRight,
-                                    ),
-                                  ),
+                                  // TextFieldIconButton(
+                                  //   key: const Key(
+                                  //       "sendViewAddressBookButtonKey"),
+                                  //   onTap: () async {
+                                  //     FocusScope.of(context).unfocus();
+                                  //
+                                  //     await Navigator.of(context).pushNamed(
+                                  //       AddressBookView.routeName,
+                                  //       arguments:
+                                  //           (String name, String address) {
+                                  //         _address = address;
+                                  //         sendToController.text = name;
+                                  //
+                                  //         Navigator.of(context).popUntil(
+                                  //             ModalRoute.withName(
+                                  //                 HomeView.routeName));
+                                  //         ref
+                                  //             .read(
+                                  //                 homeViewPageIndexStateProvider
+                                  //                     .state)
+                                  //             .state = 0;
+                                  //       },
+                                  //     );
+                                  //
+                                  //     setState(() {
+                                  //       _addressToggleFlag = _address != null &&
+                                  //           _address!.isNotEmpty;
+                                  //     });
+                                  //   },
+                                  //   child: AddressBookIcon(
+                                  //     width: 24,
+                                  //     height: 24,
+                                  //     color: Theme.of(context)
+                                  //         .extension<StackColors>()!
+                                  //         .textFieldActiveSearchIconRight,
+                                  //   ),
+                                  // ),
                                 ],
                               ),
                             ],

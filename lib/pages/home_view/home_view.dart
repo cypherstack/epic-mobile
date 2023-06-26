@@ -111,12 +111,12 @@ class _HomeViewState extends ConsumerState<HomeView> {
   void initState() {
     _pageController = PageController(initialPage: 1);
     _children = [
+      WalletView(
+        walletId: ref.read(walletProvider)!.walletId,
+      ),
       SendView(
         walletId: ref.read(walletProvider)!.walletId,
         coin: ref.read(walletProvider)!.coin,
-      ),
-      WalletView(
-        walletId: ref.read(walletProvider)!.walletId,
       ),
       ReceiveView(
         walletId: ref.read(walletProvider)!.walletId,
@@ -343,6 +343,22 @@ class _HomeViewState extends ConsumerState<HomeView> {
                     BottomNavigationBarItem(
                       icon: Padding(
                         padding: const EdgeInsets.all(8.0),
+                        child: SvgPicture.asset(Assets.svg.walletHome),
+                      ),
+                      activeIcon: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: SvgPicture.asset(
+                          Assets.svg.walletHome,
+                          color: Theme.of(context)
+                              .extension<StackColors>()!
+                              .buttonBackPrimary,
+                        ),
+                      ),
+                      label: 'WALLET',
+                    ),
+                    BottomNavigationBarItem(
+                      icon: Padding(
+                        padding: const EdgeInsets.all(8.0),
                         child: SvgPicture.asset(
                           Assets.svg.upload,
                         ),
@@ -361,22 +377,6 @@ class _HomeViewState extends ConsumerState<HomeView> {
                     BottomNavigationBarItem(
                       icon: Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: SvgPicture.asset(Assets.svg.walletHome),
-                      ),
-                      activeIcon: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: SvgPicture.asset(
-                          Assets.svg.walletHome,
-                          color: Theme.of(context)
-                              .extension<StackColors>()!
-                              .buttonBackPrimary,
-                        ),
-                      ),
-                      label: 'WALLET',
-                    ),
-                    BottomNavigationBarItem(
-                      icon: Padding(
-                        padding: const EdgeInsets.all(8.0),
                         child: SvgPicture.asset(Assets.svg.download),
                       ),
                       activeIcon: Padding(
@@ -390,6 +390,22 @@ class _HomeViewState extends ConsumerState<HomeView> {
                       ),
                       label: 'RECEIVE',
                     ),
+                    // BottomNavigationBarItem(
+                    //   icon: Padding(
+                    //     padding: const EdgeInsets.all(8.0),
+                    //     child: SvgPicture.asset(Assets.svg.swapArrows),
+                    //   ),
+                    //   activeIcon: Padding(
+                    //     padding: const EdgeInsets.all(8.0),
+                    //     child: SvgPicture.asset(
+                    //       Assets.svg.swapArrows,
+                    //       color: Theme.of(context)
+                    //           .extension<StackColors>()!
+                    //           .buttonBackPrimary,
+                    //     ),
+                    //   ),
+                    //   label: 'SWAP',
+                    // ),
                   ],
                   onTap: _onTappedBar,
                   currentIndex: currentIndex,
