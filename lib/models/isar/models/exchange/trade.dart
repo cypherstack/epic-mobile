@@ -8,7 +8,7 @@ class Trade {
 
   @Index(
     unique: true,
-    replace: false,
+    replace: true,
     composite: [
       CompositeIndex("exchangeName"),
     ],
@@ -31,6 +31,11 @@ class Trade {
   final String toNetwork;
   final String status;
 
+  final String? createdAt;
+  final String? updatedAt;
+  final String? payinHash;
+  final String? payoutHash;
+
   Trade({
     required this.exchangeName,
     required this.fromAmount,
@@ -48,6 +53,10 @@ class Trade {
     required this.fromNetwork,
     required this.toNetwork,
     required this.status,
+    required this.createdAt,
+    required this.updatedAt,
+    required this.payinHash,
+    required this.payoutHash,
   });
 
   factory Trade.fromJson(Map<String, dynamic> json, String exchangeName) {
@@ -68,12 +77,60 @@ class Trade {
       fromNetwork: json['fromNetwork'] as String,
       toNetwork: json['toNetwork'] as String,
       status: json['status'] as String? ?? "new",
+      createdAt: json['createdAt'] as String?,
+      updatedAt: json['updatedAt'] as String?,
+      payinHash: json['payinHash'] as String?,
+      payoutHash: json['payoutHash'] as String?,
+    );
+  }
+
+  Trade copyWith({
+    String? fromAmount,
+    String? toAmount,
+    String? flow,
+    String? type,
+    String? payinAddress,
+    String? payoutAddress,
+    String? payoutExtraId,
+    String? fromCurrency,
+    String? toCurrency,
+    String? refundAddress,
+    String? refundExtraId,
+    String? fromNetwork,
+    String? toNetwork,
+    String? status,
+    String? createdAt,
+    String? updatedAt,
+    String? payinHash,
+    String? payoutHash,
+  }) {
+    return Trade(
+      tradeId: tradeId,
+      exchangeName: exchangeName,
+      fromAmount: fromAmount ?? this.fromAmount,
+      toAmount: toAmount ?? this.toAmount,
+      flow: flow ?? this.flow,
+      type: type ?? this.type,
+      payinAddress: payinAddress ?? this.payinAddress,
+      payoutAddress: payoutAddress ?? this.payoutAddress,
+      payoutExtraId: payoutExtraId ?? this.payoutExtraId,
+      fromCurrency: fromCurrency ?? this.fromCurrency,
+      toCurrency: toCurrency ?? this.toCurrency,
+      refundAddress: refundAddress ?? this.refundAddress,
+      refundExtraId: refundExtraId ?? this.refundExtraId,
+      fromNetwork: fromNetwork ?? this.fromNetwork,
+      toNetwork: toNetwork ?? this.toNetwork,
+      status: status ?? this.status,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      payinHash: payinHash ?? this.payinHash,
+      payoutHash: payoutHash ?? this.payoutHash,
     );
   }
 
   @override
   String toString() {
-    return 'TransactionDTO('
+    return 'Trade('
         'exchangeName: $exchangeName, '
         'fromAmount: $fromAmount, '
         'toAmount: $toAmount, '
@@ -87,6 +144,10 @@ class Trade {
         'refundAddress: $refundAddress, '
         'refundExtraId: $refundExtraId, '
         'id: $id, '
+        'createdAt: $createdAt, '
+        'updatedAt: $updatedAt, '
+        'payinHash: $payinHash, '
+        'payoutHash: $payoutHash, '
         'fromNetwork: $fromNetwork, '
         'toNetwork: $toNetwork)';
   }

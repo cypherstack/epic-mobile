@@ -17,84 +17,104 @@ const TradeSchema = CollectionSchema(
   name: r'Trade',
   id: 4394246318675225554,
   properties: {
-    r'exchangeName': PropertySchema(
+    r'createdAt': PropertySchema(
       id: 0,
+      name: r'createdAt',
+      type: IsarType.string,
+    ),
+    r'exchangeName': PropertySchema(
+      id: 1,
       name: r'exchangeName',
       type: IsarType.string,
     ),
     r'flow': PropertySchema(
-      id: 1,
+      id: 2,
       name: r'flow',
       type: IsarType.string,
     ),
     r'fromAmount': PropertySchema(
-      id: 2,
+      id: 3,
       name: r'fromAmount',
       type: IsarType.string,
     ),
     r'fromCurrency': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'fromCurrency',
       type: IsarType.string,
     ),
     r'fromNetwork': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'fromNetwork',
       type: IsarType.string,
     ),
     r'payinAddress': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'payinAddress',
       type: IsarType.string,
     ),
+    r'payinHash': PropertySchema(
+      id: 7,
+      name: r'payinHash',
+      type: IsarType.string,
+    ),
     r'payoutAddress': PropertySchema(
-      id: 6,
+      id: 8,
       name: r'payoutAddress',
       type: IsarType.string,
     ),
     r'payoutExtraId': PropertySchema(
-      id: 7,
+      id: 9,
       name: r'payoutExtraId',
       type: IsarType.string,
     ),
+    r'payoutHash': PropertySchema(
+      id: 10,
+      name: r'payoutHash',
+      type: IsarType.string,
+    ),
     r'refundAddress': PropertySchema(
-      id: 8,
+      id: 11,
       name: r'refundAddress',
       type: IsarType.string,
     ),
     r'refundExtraId': PropertySchema(
-      id: 9,
+      id: 12,
       name: r'refundExtraId',
       type: IsarType.string,
     ),
     r'status': PropertySchema(
-      id: 10,
+      id: 13,
       name: r'status',
       type: IsarType.string,
     ),
     r'toAmount': PropertySchema(
-      id: 11,
+      id: 14,
       name: r'toAmount',
       type: IsarType.string,
     ),
     r'toCurrency': PropertySchema(
-      id: 12,
+      id: 15,
       name: r'toCurrency',
       type: IsarType.string,
     ),
     r'toNetwork': PropertySchema(
-      id: 13,
+      id: 16,
       name: r'toNetwork',
       type: IsarType.string,
     ),
     r'tradeId': PropertySchema(
-      id: 14,
+      id: 17,
       name: r'tradeId',
       type: IsarType.string,
     ),
     r'type': PropertySchema(
-      id: 15,
+      id: 18,
       name: r'type',
+      type: IsarType.string,
+    ),
+    r'updatedAt': PropertySchema(
+      id: 19,
+      name: r'updatedAt',
       type: IsarType.string,
     )
   },
@@ -108,7 +128,7 @@ const TradeSchema = CollectionSchema(
       id: 8333166771988835565,
       name: r'tradeId_exchangeName',
       unique: true,
-      replace: false,
+      replace: true,
       properties: [
         IndexPropertySchema(
           name: r'tradeId',
@@ -137,14 +157,32 @@ int _tradeEstimateSize(
   Map<Type, List<int>> allOffsets,
 ) {
   var bytesCount = offsets.last;
+  {
+    final value = object.createdAt;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   bytesCount += 3 + object.exchangeName.length * 3;
   bytesCount += 3 + object.flow.length * 3;
   bytesCount += 3 + object.fromAmount.length * 3;
   bytesCount += 3 + object.fromCurrency.length * 3;
   bytesCount += 3 + object.fromNetwork.length * 3;
   bytesCount += 3 + object.payinAddress.length * 3;
+  {
+    final value = object.payinHash;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   bytesCount += 3 + object.payoutAddress.length * 3;
   bytesCount += 3 + object.payoutExtraId.length * 3;
+  {
+    final value = object.payoutHash;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   bytesCount += 3 + object.refundAddress.length * 3;
   bytesCount += 3 + object.refundExtraId.length * 3;
   bytesCount += 3 + object.status.length * 3;
@@ -153,6 +191,12 @@ int _tradeEstimateSize(
   bytesCount += 3 + object.toNetwork.length * 3;
   bytesCount += 3 + object.tradeId.length * 3;
   bytesCount += 3 + object.type.length * 3;
+  {
+    final value = object.updatedAt;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   return bytesCount;
 }
 
@@ -162,22 +206,26 @@ void _tradeSerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeString(offsets[0], object.exchangeName);
-  writer.writeString(offsets[1], object.flow);
-  writer.writeString(offsets[2], object.fromAmount);
-  writer.writeString(offsets[3], object.fromCurrency);
-  writer.writeString(offsets[4], object.fromNetwork);
-  writer.writeString(offsets[5], object.payinAddress);
-  writer.writeString(offsets[6], object.payoutAddress);
-  writer.writeString(offsets[7], object.payoutExtraId);
-  writer.writeString(offsets[8], object.refundAddress);
-  writer.writeString(offsets[9], object.refundExtraId);
-  writer.writeString(offsets[10], object.status);
-  writer.writeString(offsets[11], object.toAmount);
-  writer.writeString(offsets[12], object.toCurrency);
-  writer.writeString(offsets[13], object.toNetwork);
-  writer.writeString(offsets[14], object.tradeId);
-  writer.writeString(offsets[15], object.type);
+  writer.writeString(offsets[0], object.createdAt);
+  writer.writeString(offsets[1], object.exchangeName);
+  writer.writeString(offsets[2], object.flow);
+  writer.writeString(offsets[3], object.fromAmount);
+  writer.writeString(offsets[4], object.fromCurrency);
+  writer.writeString(offsets[5], object.fromNetwork);
+  writer.writeString(offsets[6], object.payinAddress);
+  writer.writeString(offsets[7], object.payinHash);
+  writer.writeString(offsets[8], object.payoutAddress);
+  writer.writeString(offsets[9], object.payoutExtraId);
+  writer.writeString(offsets[10], object.payoutHash);
+  writer.writeString(offsets[11], object.refundAddress);
+  writer.writeString(offsets[12], object.refundExtraId);
+  writer.writeString(offsets[13], object.status);
+  writer.writeString(offsets[14], object.toAmount);
+  writer.writeString(offsets[15], object.toCurrency);
+  writer.writeString(offsets[16], object.toNetwork);
+  writer.writeString(offsets[17], object.tradeId);
+  writer.writeString(offsets[18], object.type);
+  writer.writeString(offsets[19], object.updatedAt);
 }
 
 Trade _tradeDeserialize(
@@ -187,22 +235,26 @@ Trade _tradeDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = Trade(
-    exchangeName: reader.readString(offsets[0]),
-    flow: reader.readString(offsets[1]),
-    fromAmount: reader.readString(offsets[2]),
-    fromCurrency: reader.readString(offsets[3]),
-    fromNetwork: reader.readString(offsets[4]),
-    payinAddress: reader.readString(offsets[5]),
-    payoutAddress: reader.readString(offsets[6]),
-    payoutExtraId: reader.readString(offsets[7]),
-    refundAddress: reader.readString(offsets[8]),
-    refundExtraId: reader.readString(offsets[9]),
-    status: reader.readString(offsets[10]),
-    toAmount: reader.readString(offsets[11]),
-    toCurrency: reader.readString(offsets[12]),
-    toNetwork: reader.readString(offsets[13]),
-    tradeId: reader.readString(offsets[14]),
-    type: reader.readString(offsets[15]),
+    createdAt: reader.readStringOrNull(offsets[0]),
+    exchangeName: reader.readString(offsets[1]),
+    flow: reader.readString(offsets[2]),
+    fromAmount: reader.readString(offsets[3]),
+    fromCurrency: reader.readString(offsets[4]),
+    fromNetwork: reader.readString(offsets[5]),
+    payinAddress: reader.readString(offsets[6]),
+    payinHash: reader.readStringOrNull(offsets[7]),
+    payoutAddress: reader.readString(offsets[8]),
+    payoutExtraId: reader.readString(offsets[9]),
+    payoutHash: reader.readStringOrNull(offsets[10]),
+    refundAddress: reader.readString(offsets[11]),
+    refundExtraId: reader.readString(offsets[12]),
+    status: reader.readString(offsets[13]),
+    toAmount: reader.readString(offsets[14]),
+    toCurrency: reader.readString(offsets[15]),
+    toNetwork: reader.readString(offsets[16]),
+    tradeId: reader.readString(offsets[17]),
+    type: reader.readString(offsets[18]),
+    updatedAt: reader.readStringOrNull(offsets[19]),
   );
   object.id = id;
   return object;
@@ -216,7 +268,7 @@ P _tradeDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 1:
       return (reader.readString(offset)) as P;
     case 2:
@@ -230,13 +282,13 @@ P _tradeDeserializeProp<P>(
     case 6:
       return (reader.readString(offset)) as P;
     case 7:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 8:
       return (reader.readString(offset)) as P;
     case 9:
       return (reader.readString(offset)) as P;
     case 10:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 11:
       return (reader.readString(offset)) as P;
     case 12:
@@ -247,6 +299,14 @@ P _tradeDeserializeProp<P>(
       return (reader.readString(offset)) as P;
     case 15:
       return (reader.readString(offset)) as P;
+    case 16:
+      return (reader.readString(offset)) as P;
+    case 17:
+      return (reader.readString(offset)) as P;
+    case 18:
+      return (reader.readString(offset)) as P;
+    case 19:
+      return (reader.readStringOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -521,6 +581,152 @@ extension TradeQueryWhere on QueryBuilder<Trade, Trade, QWhereClause> {
 }
 
 extension TradeQueryFilter on QueryBuilder<Trade, Trade, QFilterCondition> {
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> createdAtIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'createdAt',
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> createdAtIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'createdAt',
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> createdAtEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'createdAt',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> createdAtGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'createdAt',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> createdAtLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'createdAt',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> createdAtBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'createdAt',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> createdAtStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'createdAt',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> createdAtEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'createdAt',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> createdAtContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'createdAt',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> createdAtMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'createdAt',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> createdAtIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'createdAt',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> createdAtIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'createdAt',
+        value: '',
+      ));
+    });
+  }
+
   QueryBuilder<Trade, Trade, QAfterFilterCondition> exchangeNameEqualTo(
     String value, {
     bool caseSensitive = true,
@@ -1351,6 +1557,152 @@ extension TradeQueryFilter on QueryBuilder<Trade, Trade, QFilterCondition> {
     });
   }
 
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> payinHashIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'payinHash',
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> payinHashIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'payinHash',
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> payinHashEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'payinHash',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> payinHashGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'payinHash',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> payinHashLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'payinHash',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> payinHashBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'payinHash',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> payinHashStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'payinHash',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> payinHashEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'payinHash',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> payinHashContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'payinHash',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> payinHashMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'payinHash',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> payinHashIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'payinHash',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> payinHashIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'payinHash',
+        value: '',
+      ));
+    });
+  }
+
   QueryBuilder<Trade, Trade, QAfterFilterCondition> payoutAddressEqualTo(
     String value, {
     bool caseSensitive = true,
@@ -1606,6 +1958,152 @@ extension TradeQueryFilter on QueryBuilder<Trade, Trade, QFilterCondition> {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'payoutExtraId',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> payoutHashIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'payoutHash',
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> payoutHashIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'payoutHash',
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> payoutHashEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'payoutHash',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> payoutHashGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'payoutHash',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> payoutHashLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'payoutHash',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> payoutHashBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'payoutHash',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> payoutHashStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'payoutHash',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> payoutHashEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'payoutHash',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> payoutHashContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'payoutHash',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> payoutHashMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'payoutHash',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> payoutHashIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'payoutHash',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> payoutHashIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'payoutHash',
         value: '',
       ));
     });
@@ -2647,6 +3145,152 @@ extension TradeQueryFilter on QueryBuilder<Trade, Trade, QFilterCondition> {
       ));
     });
   }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> updatedAtIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'updatedAt',
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> updatedAtIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'updatedAt',
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> updatedAtEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'updatedAt',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> updatedAtGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'updatedAt',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> updatedAtLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'updatedAt',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> updatedAtBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'updatedAt',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> updatedAtStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'updatedAt',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> updatedAtEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'updatedAt',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> updatedAtContains(
+      String value,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'updatedAt',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> updatedAtMatches(
+      String pattern,
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'updatedAt',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> updatedAtIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'updatedAt',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> updatedAtIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'updatedAt',
+        value: '',
+      ));
+    });
+  }
 }
 
 extension TradeQueryObject on QueryBuilder<Trade, Trade, QFilterCondition> {}
@@ -2654,6 +3298,18 @@ extension TradeQueryObject on QueryBuilder<Trade, Trade, QFilterCondition> {}
 extension TradeQueryLinks on QueryBuilder<Trade, Trade, QFilterCondition> {}
 
 extension TradeQuerySortBy on QueryBuilder<Trade, Trade, QSortBy> {
+  QueryBuilder<Trade, Trade, QAfterSortBy> sortByCreatedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'createdAt', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterSortBy> sortByCreatedAtDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'createdAt', Sort.desc);
+    });
+  }
+
   QueryBuilder<Trade, Trade, QAfterSortBy> sortByExchangeName() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'exchangeName', Sort.asc);
@@ -2726,6 +3382,18 @@ extension TradeQuerySortBy on QueryBuilder<Trade, Trade, QSortBy> {
     });
   }
 
+  QueryBuilder<Trade, Trade, QAfterSortBy> sortByPayinHash() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'payinHash', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterSortBy> sortByPayinHashDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'payinHash', Sort.desc);
+    });
+  }
+
   QueryBuilder<Trade, Trade, QAfterSortBy> sortByPayoutAddress() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'payoutAddress', Sort.asc);
@@ -2747,6 +3415,18 @@ extension TradeQuerySortBy on QueryBuilder<Trade, Trade, QSortBy> {
   QueryBuilder<Trade, Trade, QAfterSortBy> sortByPayoutExtraIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'payoutExtraId', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterSortBy> sortByPayoutHash() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'payoutHash', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterSortBy> sortByPayoutHashDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'payoutHash', Sort.desc);
     });
   }
 
@@ -2845,9 +3525,33 @@ extension TradeQuerySortBy on QueryBuilder<Trade, Trade, QSortBy> {
       return query.addSortBy(r'type', Sort.desc);
     });
   }
+
+  QueryBuilder<Trade, Trade, QAfterSortBy> sortByUpdatedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'updatedAt', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterSortBy> sortByUpdatedAtDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'updatedAt', Sort.desc);
+    });
+  }
 }
 
 extension TradeQuerySortThenBy on QueryBuilder<Trade, Trade, QSortThenBy> {
+  QueryBuilder<Trade, Trade, QAfterSortBy> thenByCreatedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'createdAt', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterSortBy> thenByCreatedAtDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'createdAt', Sort.desc);
+    });
+  }
+
   QueryBuilder<Trade, Trade, QAfterSortBy> thenByExchangeName() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'exchangeName', Sort.asc);
@@ -2932,6 +3636,18 @@ extension TradeQuerySortThenBy on QueryBuilder<Trade, Trade, QSortThenBy> {
     });
   }
 
+  QueryBuilder<Trade, Trade, QAfterSortBy> thenByPayinHash() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'payinHash', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterSortBy> thenByPayinHashDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'payinHash', Sort.desc);
+    });
+  }
+
   QueryBuilder<Trade, Trade, QAfterSortBy> thenByPayoutAddress() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'payoutAddress', Sort.asc);
@@ -2953,6 +3669,18 @@ extension TradeQuerySortThenBy on QueryBuilder<Trade, Trade, QSortThenBy> {
   QueryBuilder<Trade, Trade, QAfterSortBy> thenByPayoutExtraIdDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'payoutExtraId', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterSortBy> thenByPayoutHash() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'payoutHash', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterSortBy> thenByPayoutHashDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'payoutHash', Sort.desc);
     });
   }
 
@@ -3051,9 +3779,28 @@ extension TradeQuerySortThenBy on QueryBuilder<Trade, Trade, QSortThenBy> {
       return query.addSortBy(r'type', Sort.desc);
     });
   }
+
+  QueryBuilder<Trade, Trade, QAfterSortBy> thenByUpdatedAt() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'updatedAt', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterSortBy> thenByUpdatedAtDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'updatedAt', Sort.desc);
+    });
+  }
 }
 
 extension TradeQueryWhereDistinct on QueryBuilder<Trade, Trade, QDistinct> {
+  QueryBuilder<Trade, Trade, QDistinct> distinctByCreatedAt(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'createdAt', caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<Trade, Trade, QDistinct> distinctByExchangeName(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -3096,6 +3843,13 @@ extension TradeQueryWhereDistinct on QueryBuilder<Trade, Trade, QDistinct> {
     });
   }
 
+  QueryBuilder<Trade, Trade, QDistinct> distinctByPayinHash(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'payinHash', caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<Trade, Trade, QDistinct> distinctByPayoutAddress(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -3109,6 +3863,13 @@ extension TradeQueryWhereDistinct on QueryBuilder<Trade, Trade, QDistinct> {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'payoutExtraId',
           caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QDistinct> distinctByPayoutHash(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'payoutHash', caseSensitive: caseSensitive);
     });
   }
 
@@ -3169,12 +3930,25 @@ extension TradeQueryWhereDistinct on QueryBuilder<Trade, Trade, QDistinct> {
       return query.addDistinctBy(r'type', caseSensitive: caseSensitive);
     });
   }
+
+  QueryBuilder<Trade, Trade, QDistinct> distinctByUpdatedAt(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'updatedAt', caseSensitive: caseSensitive);
+    });
+  }
 }
 
 extension TradeQueryProperty on QueryBuilder<Trade, Trade, QQueryProperty> {
   QueryBuilder<Trade, int, QQueryOperations> idProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'id');
+    });
+  }
+
+  QueryBuilder<Trade, String?, QQueryOperations> createdAtProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'createdAt');
     });
   }
 
@@ -3214,6 +3988,12 @@ extension TradeQueryProperty on QueryBuilder<Trade, Trade, QQueryProperty> {
     });
   }
 
+  QueryBuilder<Trade, String?, QQueryOperations> payinHashProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'payinHash');
+    });
+  }
+
   QueryBuilder<Trade, String, QQueryOperations> payoutAddressProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'payoutAddress');
@@ -3223,6 +4003,12 @@ extension TradeQueryProperty on QueryBuilder<Trade, Trade, QQueryProperty> {
   QueryBuilder<Trade, String, QQueryOperations> payoutExtraIdProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'payoutExtraId');
+    });
+  }
+
+  QueryBuilder<Trade, String?, QQueryOperations> payoutHashProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'payoutHash');
     });
   }
 
@@ -3271,6 +4057,12 @@ extension TradeQueryProperty on QueryBuilder<Trade, Trade, QQueryProperty> {
   QueryBuilder<Trade, String, QQueryOperations> typeProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'type');
+    });
+  }
+
+  QueryBuilder<Trade, String?, QQueryOperations> updatedAtProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'updatedAt');
     });
   }
 }
