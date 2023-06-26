@@ -93,9 +93,9 @@ const CurrencySchema = CollectionSchema(
         )
       ],
     ),
-    r'ticker_exchangeName_name_network': IndexSchema(
-      id: -407125090869990481,
-      name: r'ticker_exchangeName_name_network',
+    r'ticker_exchangeName_network': IndexSchema(
+      id: 3239534738008339353,
+      name: r'ticker_exchangeName_network',
       unique: true,
       replace: true,
       properties: [
@@ -106,11 +106,6 @@ const CurrencySchema = CollectionSchema(
         ),
         IndexPropertySchema(
           name: r'exchangeName',
-          type: IndexType.hash,
-          caseSensitive: true,
-        ),
-        IndexPropertySchema(
-          name: r'name',
           type: IndexType.hash,
           caseSensitive: true,
         ),
@@ -253,144 +248,103 @@ void _currencyAttach(IsarCollection<dynamic> col, Id id, Currency object) {
 }
 
 extension CurrencyByIndex on IsarCollection<Currency> {
-  Future<Currency?> getByTickerExchangeNameNameNetwork(
-      String ticker, String exchangeName, String name, String network) {
-    return getByIndex(r'ticker_exchangeName_name_network',
-        [ticker, exchangeName, name, network]);
+  Future<Currency?> getByTickerExchangeNameNetwork(
+      String ticker, String exchangeName, String network) {
+    return getByIndex(
+        r'ticker_exchangeName_network', [ticker, exchangeName, network]);
   }
 
-  Currency? getByTickerExchangeNameNameNetworkSync(
-      String ticker, String exchangeName, String name, String network) {
-    return getByIndexSync(r'ticker_exchangeName_name_network',
-        [ticker, exchangeName, name, network]);
+  Currency? getByTickerExchangeNameNetworkSync(
+      String ticker, String exchangeName, String network) {
+    return getByIndexSync(
+        r'ticker_exchangeName_network', [ticker, exchangeName, network]);
   }
 
-  Future<bool> deleteByTickerExchangeNameNameNetwork(
-      String ticker, String exchangeName, String name, String network) {
-    return deleteByIndex(r'ticker_exchangeName_name_network',
-        [ticker, exchangeName, name, network]);
+  Future<bool> deleteByTickerExchangeNameNetwork(
+      String ticker, String exchangeName, String network) {
+    return deleteByIndex(
+        r'ticker_exchangeName_network', [ticker, exchangeName, network]);
   }
 
-  bool deleteByTickerExchangeNameNameNetworkSync(
-      String ticker, String exchangeName, String name, String network) {
-    return deleteByIndexSync(r'ticker_exchangeName_name_network',
-        [ticker, exchangeName, name, network]);
+  bool deleteByTickerExchangeNameNetworkSync(
+      String ticker, String exchangeName, String network) {
+    return deleteByIndexSync(
+        r'ticker_exchangeName_network', [ticker, exchangeName, network]);
   }
 
-  Future<List<Currency?>> getAllByTickerExchangeNameNameNetwork(
+  Future<List<Currency?>> getAllByTickerExchangeNameNetwork(
       List<String> tickerValues,
       List<String> exchangeNameValues,
-      List<String> nameValues,
       List<String> networkValues) {
     final len = tickerValues.length;
-    assert(
-        exchangeNameValues.length == len &&
-            nameValues.length == len &&
-            networkValues.length == len,
+    assert(exchangeNameValues.length == len && networkValues.length == len,
         'All index values must have the same length');
     final values = <List<dynamic>>[];
     for (var i = 0; i < len; i++) {
-      values.add([
-        tickerValues[i],
-        exchangeNameValues[i],
-        nameValues[i],
-        networkValues[i]
-      ]);
+      values.add([tickerValues[i], exchangeNameValues[i], networkValues[i]]);
     }
 
-    return getAllByIndex(r'ticker_exchangeName_name_network', values);
+    return getAllByIndex(r'ticker_exchangeName_network', values);
   }
 
-  List<Currency?> getAllByTickerExchangeNameNameNetworkSync(
+  List<Currency?> getAllByTickerExchangeNameNetworkSync(
       List<String> tickerValues,
       List<String> exchangeNameValues,
-      List<String> nameValues,
       List<String> networkValues) {
     final len = tickerValues.length;
-    assert(
-        exchangeNameValues.length == len &&
-            nameValues.length == len &&
-            networkValues.length == len,
+    assert(exchangeNameValues.length == len && networkValues.length == len,
         'All index values must have the same length');
     final values = <List<dynamic>>[];
     for (var i = 0; i < len; i++) {
-      values.add([
-        tickerValues[i],
-        exchangeNameValues[i],
-        nameValues[i],
-        networkValues[i]
-      ]);
+      values.add([tickerValues[i], exchangeNameValues[i], networkValues[i]]);
     }
 
-    return getAllByIndexSync(r'ticker_exchangeName_name_network', values);
+    return getAllByIndexSync(r'ticker_exchangeName_network', values);
   }
 
-  Future<int> deleteAllByTickerExchangeNameNameNetwork(
-      List<String> tickerValues,
-      List<String> exchangeNameValues,
-      List<String> nameValues,
-      List<String> networkValues) {
+  Future<int> deleteAllByTickerExchangeNameNetwork(List<String> tickerValues,
+      List<String> exchangeNameValues, List<String> networkValues) {
     final len = tickerValues.length;
-    assert(
-        exchangeNameValues.length == len &&
-            nameValues.length == len &&
-            networkValues.length == len,
+    assert(exchangeNameValues.length == len && networkValues.length == len,
         'All index values must have the same length');
     final values = <List<dynamic>>[];
     for (var i = 0; i < len; i++) {
-      values.add([
-        tickerValues[i],
-        exchangeNameValues[i],
-        nameValues[i],
-        networkValues[i]
-      ]);
+      values.add([tickerValues[i], exchangeNameValues[i], networkValues[i]]);
     }
 
-    return deleteAllByIndex(r'ticker_exchangeName_name_network', values);
+    return deleteAllByIndex(r'ticker_exchangeName_network', values);
   }
 
-  int deleteAllByTickerExchangeNameNameNetworkSync(
-      List<String> tickerValues,
-      List<String> exchangeNameValues,
-      List<String> nameValues,
-      List<String> networkValues) {
+  int deleteAllByTickerExchangeNameNetworkSync(List<String> tickerValues,
+      List<String> exchangeNameValues, List<String> networkValues) {
     final len = tickerValues.length;
-    assert(
-        exchangeNameValues.length == len &&
-            nameValues.length == len &&
-            networkValues.length == len,
+    assert(exchangeNameValues.length == len && networkValues.length == len,
         'All index values must have the same length');
     final values = <List<dynamic>>[];
     for (var i = 0; i < len; i++) {
-      values.add([
-        tickerValues[i],
-        exchangeNameValues[i],
-        nameValues[i],
-        networkValues[i]
-      ]);
+      values.add([tickerValues[i], exchangeNameValues[i], networkValues[i]]);
     }
 
-    return deleteAllByIndexSync(r'ticker_exchangeName_name_network', values);
+    return deleteAllByIndexSync(r'ticker_exchangeName_network', values);
   }
 
-  Future<Id> putByTickerExchangeNameNameNetwork(Currency object) {
-    return putByIndex(r'ticker_exchangeName_name_network', object);
+  Future<Id> putByTickerExchangeNameNetwork(Currency object) {
+    return putByIndex(r'ticker_exchangeName_network', object);
   }
 
-  Id putByTickerExchangeNameNameNetworkSync(Currency object,
+  Id putByTickerExchangeNameNetworkSync(Currency object,
       {bool saveLinks = true}) {
-    return putByIndexSync(r'ticker_exchangeName_name_network', object,
+    return putByIndexSync(r'ticker_exchangeName_network', object,
         saveLinks: saveLinks);
   }
 
-  Future<List<Id>> putAllByTickerExchangeNameNameNetwork(
-      List<Currency> objects) {
-    return putAllByIndex(r'ticker_exchangeName_name_network', objects);
+  Future<List<Id>> putAllByTickerExchangeNameNetwork(List<Currency> objects) {
+    return putAllByIndex(r'ticker_exchangeName_network', objects);
   }
 
-  List<Id> putAllByTickerExchangeNameNameNetworkSync(List<Currency> objects,
+  List<Id> putAllByTickerExchangeNameNetworkSync(List<Currency> objects,
       {bool saveLinks = true}) {
-    return putAllByIndexSync(r'ticker_exchangeName_name_network', objects,
+    return putAllByIndexSync(r'ticker_exchangeName_network', objects,
         saveLinks: saveLinks);
   }
 }
@@ -515,28 +469,28 @@ extension CurrencyQueryWhere on QueryBuilder<Currency, Currency, QWhereClause> {
   }
 
   QueryBuilder<Currency, Currency, QAfterWhereClause>
-      tickerEqualToAnyExchangeNameNameNetwork(String ticker) {
+      tickerEqualToAnyExchangeNameNetwork(String ticker) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r'ticker_exchangeName_name_network',
+        indexName: r'ticker_exchangeName_network',
         value: [ticker],
       ));
     });
   }
 
   QueryBuilder<Currency, Currency, QAfterWhereClause>
-      tickerNotEqualToAnyExchangeNameNameNetwork(String ticker) {
+      tickerNotEqualToAnyExchangeNameNetwork(String ticker) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
         return query
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'ticker_exchangeName_name_network',
+              indexName: r'ticker_exchangeName_network',
               lower: [],
               upper: [ticker],
               includeUpper: false,
             ))
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'ticker_exchangeName_name_network',
+              indexName: r'ticker_exchangeName_network',
               lower: [ticker],
               includeLower: false,
               upper: [],
@@ -544,13 +498,13 @@ extension CurrencyQueryWhere on QueryBuilder<Currency, Currency, QWhereClause> {
       } else {
         return query
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'ticker_exchangeName_name_network',
+              indexName: r'ticker_exchangeName_network',
               lower: [ticker],
               includeLower: false,
               upper: [],
             ))
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'ticker_exchangeName_name_network',
+              indexName: r'ticker_exchangeName_network',
               lower: [],
               upper: [ticker],
               includeUpper: false,
@@ -560,30 +514,29 @@ extension CurrencyQueryWhere on QueryBuilder<Currency, Currency, QWhereClause> {
   }
 
   QueryBuilder<Currency, Currency, QAfterWhereClause>
-      tickerExchangeNameEqualToAnyNameNetwork(
-          String ticker, String exchangeName) {
+      tickerExchangeNameEqualToAnyNetwork(String ticker, String exchangeName) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r'ticker_exchangeName_name_network',
+        indexName: r'ticker_exchangeName_network',
         value: [ticker, exchangeName],
       ));
     });
   }
 
   QueryBuilder<Currency, Currency, QAfterWhereClause>
-      tickerEqualToExchangeNameNotEqualToAnyNameNetwork(
+      tickerEqualToExchangeNameNotEqualToAnyNetwork(
           String ticker, String exchangeName) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
         return query
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'ticker_exchangeName_name_network',
+              indexName: r'ticker_exchangeName_network',
               lower: [ticker],
               upper: [ticker, exchangeName],
               includeUpper: false,
             ))
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'ticker_exchangeName_name_network',
+              indexName: r'ticker_exchangeName_network',
               lower: [ticker, exchangeName],
               includeLower: false,
               upper: [ticker],
@@ -591,13 +544,13 @@ extension CurrencyQueryWhere on QueryBuilder<Currency, Currency, QWhereClause> {
       } else {
         return query
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'ticker_exchangeName_name_network',
+              indexName: r'ticker_exchangeName_network',
               lower: [ticker, exchangeName],
               includeLower: false,
               upper: [ticker],
             ))
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'ticker_exchangeName_name_network',
+              indexName: r'ticker_exchangeName_network',
               lower: [ticker],
               upper: [ticker, exchangeName],
               includeUpper: false,
@@ -607,93 +560,46 @@ extension CurrencyQueryWhere on QueryBuilder<Currency, Currency, QWhereClause> {
   }
 
   QueryBuilder<Currency, Currency, QAfterWhereClause>
-      tickerExchangeNameNameEqualToAnyNetwork(
-          String ticker, String exchangeName, String name) {
+      tickerExchangeNameNetworkEqualTo(
+          String ticker, String exchangeName, String network) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r'ticker_exchangeName_name_network',
-        value: [ticker, exchangeName, name],
+        indexName: r'ticker_exchangeName_network',
+        value: [ticker, exchangeName, network],
       ));
     });
   }
 
   QueryBuilder<Currency, Currency, QAfterWhereClause>
-      tickerExchangeNameEqualToNameNotEqualToAnyNetwork(
-          String ticker, String exchangeName, String name) {
+      tickerExchangeNameEqualToNetworkNotEqualTo(
+          String ticker, String exchangeName, String network) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
         return query
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'ticker_exchangeName_name_network',
+              indexName: r'ticker_exchangeName_network',
               lower: [ticker, exchangeName],
-              upper: [ticker, exchangeName, name],
+              upper: [ticker, exchangeName, network],
               includeUpper: false,
             ))
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'ticker_exchangeName_name_network',
-              lower: [ticker, exchangeName, name],
+              indexName: r'ticker_exchangeName_network',
+              lower: [ticker, exchangeName, network],
               includeLower: false,
               upper: [ticker, exchangeName],
             ));
       } else {
         return query
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'ticker_exchangeName_name_network',
-              lower: [ticker, exchangeName, name],
+              indexName: r'ticker_exchangeName_network',
+              lower: [ticker, exchangeName, network],
               includeLower: false,
               upper: [ticker, exchangeName],
             ))
             .addWhereClause(IndexWhereClause.between(
-              indexName: r'ticker_exchangeName_name_network',
+              indexName: r'ticker_exchangeName_network',
               lower: [ticker, exchangeName],
-              upper: [ticker, exchangeName, name],
-              includeUpper: false,
-            ));
-      }
-    });
-  }
-
-  QueryBuilder<Currency, Currency, QAfterWhereClause>
-      tickerExchangeNameNameNetworkEqualTo(
-          String ticker, String exchangeName, String name, String network) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.equalTo(
-        indexName: r'ticker_exchangeName_name_network',
-        value: [ticker, exchangeName, name, network],
-      ));
-    });
-  }
-
-  QueryBuilder<Currency, Currency, QAfterWhereClause>
-      tickerExchangeNameNameEqualToNetworkNotEqualTo(
-          String ticker, String exchangeName, String name, String network) {
-    return QueryBuilder.apply(this, (query) {
-      if (query.whereSort == Sort.asc) {
-        return query
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'ticker_exchangeName_name_network',
-              lower: [ticker, exchangeName, name],
-              upper: [ticker, exchangeName, name, network],
-              includeUpper: false,
-            ))
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'ticker_exchangeName_name_network',
-              lower: [ticker, exchangeName, name, network],
-              includeLower: false,
-              upper: [ticker, exchangeName, name],
-            ));
-      } else {
-        return query
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'ticker_exchangeName_name_network',
-              lower: [ticker, exchangeName, name, network],
-              includeLower: false,
-              upper: [ticker, exchangeName, name],
-            ))
-            .addWhereClause(IndexWhereClause.between(
-              indexName: r'ticker_exchangeName_name_network',
-              lower: [ticker, exchangeName, name],
-              upper: [ticker, exchangeName, name, network],
+              upper: [ticker, exchangeName, network],
               includeUpper: false,
             ));
       }

@@ -10,11 +10,14 @@ class Currency {
   @Index()
   final String exchangeName;
 
-  @Index(unique: true, replace: true, composite: [
-    CompositeIndex("exchangeName"),
-    CompositeIndex("name"),
-    CompositeIndex("network"),
-  ])
+  @Index(
+    unique: true,
+    replace: true,
+    composite: [
+      CompositeIndex("exchangeName"),
+      CompositeIndex("network"),
+    ],
+  )
   final String ticker;
 
   final String network;
