@@ -4,14 +4,12 @@ import 'package:decimal/decimal.dart';
 import 'package:epicpay/models/models.dart';
 import 'package:epicpay/pages/home_view/home_view.dart';
 import 'package:epicpay/pages/wallet_view/transaction_views/dialogs/cancelling_transaction_progress_dialog.dart';
-import 'package:epicpay/providers/global/address_book_service_provider.dart';
 import 'package:epicpay/providers/providers.dart';
 import 'package:epicpay/services/coins/epiccash/epiccash_wallet.dart';
 import 'package:epicpay/services/coins/manager.dart';
 import 'package:epicpay/utilities/clipboard_interface.dart';
 import 'package:epicpay/utilities/enums/coin_enum.dart';
 import 'package:epicpay/utilities/format.dart';
-import 'package:epicpay/utilities/logger.dart';
 import 'package:epicpay/utilities/text_styles.dart';
 import 'package:epicpay/utilities/theme/stack_colors.dart';
 import 'package:epicpay/widgets/background.dart';
@@ -151,23 +149,23 @@ class _TransactionDetailsViewState
   }
 
   Future<String> fetchContactNameFor(String address) async {
-    if (address.isEmpty) {
-      return address;
-    }
-    try {
-      final contacts = ref.read(addressBookServiceProvider).contacts.where(
-          (element) => element.addresses
-              .where((element) => element.address == address)
-              .isNotEmpty);
-      if (contacts.isNotEmpty) {
-        return contacts.first.name;
-      } else {
-        return address;
-      }
-    } catch (e, s) {
-      Logging.instance.log("$e\n$s", level: LogLevel.Warning);
-      return address;
-    }
+    // if (address.isEmpty) {
+    //   return address;
+    // }
+    // try {
+    // final contacts = ref.read(addressBookServiceProvider).contacts.where(
+    //     (element) => element.addresses
+    //         .where((element) => element.address == address)
+    //         .isNotEmpty);
+    // if (contacts.isNotEmpty) {
+    //   return contacts.first.name;
+    // } else {
+    return address;
+    // }
+    // } catch (e, s) {
+    //   Logging.instance.log("$e\n$s", level: LogLevel.Warning);
+    //   return address;
+    // }
   }
 
   Future<bool> showExplorerWarning(String explorer) async {

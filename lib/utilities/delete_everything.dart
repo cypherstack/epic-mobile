@@ -4,8 +4,8 @@ import 'package:hive/hive.dart';
 
 Future<bool> deleteEverything() async {
   try {
-    await Hive.box(DB.boxNameAddressBook).clear();
-    await Hive.box(DB.boxNameDebugInfo).clear();
+    // await Hive.box(DB.boxNameAddressBook).clear();
+    // await Hive.box(DB.boxNameDebugInfo).clear();
     await Hive.box(DB.boxNameNodeModels).clear();
     await Hive.box(DB.boxNamePrimaryNodes).clear();
     await Hive.box(DB.boxNameEpicBoxModels).clear();

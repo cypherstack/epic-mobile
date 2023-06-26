@@ -1,11 +1,11 @@
-import 'package:epicpay/models/contact_address_entry.dart';
+// import 'package:epicpay/models/contact_address_entry.dart';
 import 'package:epicpay/models/paymint/transactions_model.dart';
 import 'package:epicpay/pages/add_wallet_views/create_restore_wallet_view.dart';
 import 'package:epicpay/pages/add_wallet_views/restore_wallet_view/restore_options_view/restore_options_view.dart';
 import 'package:epicpay/pages/add_wallet_views/restore_wallet_view/restore_wallet_view.dart';
-import 'package:epicpay/pages/address_book_views/address_book_view.dart';
-import 'package:epicpay/pages/address_book_views/subviews/add_address_book_entry_view.dart';
-import 'package:epicpay/pages/address_book_views/subviews/edit_contact_address_view.dart';
+// import 'package:epicpay/pages/address_book_views/address_book_view.dart';
+// import 'package:epicpay/pages/address_book_views/subviews/add_address_book_entry_view.dart';
+// import 'package:epicpay/pages/address_book_views/subviews/edit_contact_address_view.dart';
 import 'package:epicpay/pages/help/help_view.dart';
 import 'package:epicpay/pages/home_view/home_view.dart';
 import 'package:epicpay/pages/intro_view.dart';
@@ -101,25 +101,25 @@ class RouteGenerator {
             builder: (_) => const HelpView(),
             settings: RouteSettings(name: settings.name));
 
-      case AddressBookView.routeName:
-        if (args is void Function(String, String)) {
-          return getRoute(
-            shouldUseMaterialRoute: useMaterialPageRoute,
-            builder: (_) => AddressBookView(
-              onSendPressed: args,
-            ),
-            settings: RouteSettings(
-              name: settings.name,
-            ),
-          );
-        }
-        return getRoute(
-          shouldUseMaterialRoute: useMaterialPageRoute,
-          builder: (_) => const AddressBookView(),
-          settings: RouteSettings(
-            name: settings.name,
-          ),
-        );
+      // case AddressBookView.routeName:
+      //   if (args is void Function(String, String)) {
+      //     return getRoute(
+      //       shouldUseMaterialRoute: useMaterialPageRoute,
+      //       builder: (_) => AddressBookView(
+      //         onSendPressed: args,
+      //       ),
+      //       settings: RouteSettings(
+      //         name: settings.name,
+      //       ),
+      //     );
+      //   }
+      //   return getRoute(
+      //     shouldUseMaterialRoute: useMaterialPageRoute,
+      //     builder: (_) => const AddressBookView(),
+      //     settings: RouteSettings(
+      //       name: settings.name,
+      //     ),
+      //   );
 
       case SecurityView.routeName:
         if (args is bool) {
@@ -168,11 +168,11 @@ class RouteGenerator {
             builder: (_) => const ManageNodesView(),
             settings: RouteSettings(name: settings.name));
 
-      case AddAddressBookEntryView.routeName:
-        return getRoute(
-            shouldUseMaterialRoute: useMaterialPageRoute,
-            builder: (_) => const AddAddressBookEntryView(),
-            settings: RouteSettings(name: settings.name));
+      // case AddAddressBookEntryView.routeName:
+      //   return getRoute(
+      //       shouldUseMaterialRoute: useMaterialPageRoute,
+      //       builder: (_) => const AddAddressBookEntryView(),
+      //       settings: RouteSettings(name: settings.name));
 
       case HiddenSettings.routeName:
         return getRoute(
@@ -227,20 +227,20 @@ class RouteGenerator {
         }
         return _routeError("${settings.name} invalid args: ${args.toString()}");
 
-      case EditContactAddressView.routeName:
-        if (args is Tuple2<String, ContactAddressEntry>) {
-          return getRoute(
-            shouldUseMaterialRoute: useMaterialPageRoute,
-            builder: (_) => EditContactAddressView(
-              contactId: args.item1,
-              addressEntry: args.item2,
-            ),
-            settings: RouteSettings(
-              name: settings.name,
-            ),
-          );
-        }
-        return _routeError("${settings.name} invalid args: ${args.toString()}");
+      // case EditContactAddressView.routeName:
+      //   if (args is Tuple2<String, ContactAddressEntry>) {
+      //     return getRoute(
+      //       shouldUseMaterialRoute: useMaterialPageRoute,
+      //       builder: (_) => EditContactAddressView(
+      //         contactId: args.item1,
+      //         addressEntry: args.item2,
+      //       ),
+      //       settings: RouteSettings(
+      //         name: settings.name,
+      //       ),
+      //     );
+      //   }
+      //   return _routeError("${settings.name} invalid args: ${args.toString()}");
 
       case NetworkSettingsView.routeName:
         return getRoute(

@@ -9,8 +9,8 @@ import 'package:hive/hive.dart';
 import 'package:mutex/mutex.dart';
 
 class DB {
-  static const String boxNameAddressBook = "addressBook";
-  static const String boxNameDebugInfo = "debugInfoBox";
+  // static const String boxNameAddressBook = "addressBook";
+  // static const String boxNameDebugInfo = "debugInfoBox";
   static const String boxNameNodeModels = "nodeModels";
   static const String boxNamePrimaryNodes = "primaryNodes";
   static const String boxNameEpicBoxModels = "epicBoxModels";
@@ -35,8 +35,8 @@ class DB {
 
   static bool _initialized = false;
 
-  late final Box<dynamic> _boxAddressBook;
-  late final Box<String> _boxDebugInfo;
+  // late final Box<dynamic> _boxAddressBook;
+  // late final Box<String> _boxDebugInfo;
   late final Box<NodeModel> _boxNodeModels;
   late final Box<NodeModel> _boxPrimaryNodes;
   late final Box<EpicBoxServerModel> _boxEpicBoxModels;
@@ -90,8 +90,8 @@ class DB {
         _boxPrefs = await Hive.openBox<dynamic>(boxNamePrefs);
       }
 
-      _boxAddressBook = await Hive.openBox<dynamic>(boxNameAddressBook);
-      _boxDebugInfo = await Hive.openBox<String>(boxNameDebugInfo);
+      // _boxAddressBook = await Hive.openBox<dynamic>(boxNameAddressBook);
+      // _boxDebugInfo = await Hive.openBox<String>(boxNameDebugInfo);
 
       if (Hive.isBoxOpen(boxNameNodeModels)) {
         _boxNodeModels = Hive.box<NodeModel>(boxNameNodeModels);
