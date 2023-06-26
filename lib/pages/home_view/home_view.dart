@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:epicpay/pages/exchange_view/exchange_view.dart';
 import 'package:epicpay/pages/help/help_view.dart';
 import 'package:epicpay/pages/home_view/sub_widgets/connection_status_bar.dart';
 import 'package:epicpay/pages/receive_view/receive_view.dart';
@@ -109,7 +110,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
 
   @override
   void initState() {
-    _pageController = PageController(initialPage: 1);
+    _pageController = PageController(initialPage: 0);
     _children = [
       WalletView(
         walletId: ref.read(walletProvider)!.walletId,
@@ -122,6 +123,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
         walletId: ref.read(walletProvider)!.walletId,
         coin: ref.read(walletProvider)!.coin,
       ),
+      ExchangeView(),
     ];
 
     if (ref.read(walletProvider)!.isRefreshing) {
@@ -331,6 +333,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                 height: 75,
                 child: BottomNavigationBar(
                   elevation: 0,
+                  type: BottomNavigationBarType.fixed,
                   unselectedFontSize: 14.0,
                   unselectedLabelStyle: STextStyles.smallMed12(context)
                       .copyWith(
@@ -390,22 +393,22 @@ class _HomeViewState extends ConsumerState<HomeView> {
                       ),
                       label: 'RECEIVE',
                     ),
-                    // BottomNavigationBarItem(
-                    //   icon: Padding(
-                    //     padding: const EdgeInsets.all(8.0),
-                    //     child: SvgPicture.asset(Assets.svg.swapArrows),
-                    //   ),
-                    //   activeIcon: Padding(
-                    //     padding: const EdgeInsets.all(8.0),
-                    //     child: SvgPicture.asset(
-                    //       Assets.svg.swapArrows,
-                    //       color: Theme.of(context)
-                    //           .extension<StackColors>()!
-                    //           .buttonBackPrimary,
-                    //     ),
-                    //   ),
-                    //   label: 'SWAP',
-                    // ),
+                    BottomNavigationBarItem(
+                      icon: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: SvgPicture.asset(Assets.svg.swapArrows),
+                      ),
+                      activeIcon: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: SvgPicture.asset(
+                          Assets.svg.swapArrows,
+                          color: Theme.of(context)
+                              .extension<StackColors>()!
+                              .buttonBackPrimary,
+                        ),
+                      ),
+                      label: 'SWAP',
+                    ),
                   ],
                   onTap: _onTappedBar,
                   currentIndex: currentIndex,
