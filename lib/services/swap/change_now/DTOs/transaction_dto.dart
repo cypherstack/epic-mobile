@@ -1,23 +1,8 @@
-import 'package:isar/isar.dart';
+import 'package:decimal/decimal.dart';
 
-part 'trade.g.dart';
-
-@Collection(accessor: "trades")
-class Trade {
-  Id id = Isar.autoIncrement;
-
-  @Index(
-    unique: true,
-    replace: false,
-    composite: [
-      CompositeIndex("exchangeName"),
-    ],
-  )
-  final String tradeId;
-  final String exchangeName;
-
-  final String fromAmount;
-  final String toAmount;
+class TransactionDTO {
+  final Decimal fromAmount;
+  final Decimal toAmount;
   final String flow;
   final String type;
   final String payinAddress;
@@ -27,12 +12,11 @@ class Trade {
   final String toCurrency;
   final String refundAddress;
   final String refundExtraId;
+  final String id;
   final String fromNetwork;
   final String toNetwork;
-  final String status;
 
-  Trade({
-    required this.exchangeName,
+  TransactionDTO({
     required this.fromAmount,
     required this.toAmount,
     required this.flow,
@@ -44,17 +28,15 @@ class Trade {
     required this.toCurrency,
     required this.refundAddress,
     required this.refundExtraId,
-    required this.tradeId,
+    required this.id,
     required this.fromNetwork,
     required this.toNetwork,
-    required this.status,
   });
 
-  factory Trade.fromJson(Map<String, dynamic> json, String exchangeName) {
-    return Trade(
-      exchangeName: exchangeName,
-      fromAmount: json['fromAmount'].toString(),
-      toAmount: json['toAmount'].toString(),
+  factory TransactionDTO.fromJson(Map<String, dynamic> json) {
+    return TransactionDTO(
+      fromAmount: Decimal.parse(json['fromAmount'].toString()),
+      toAmount: Decimal.parse(json['toAmount'].toString()),
       flow: json['flow'] as String,
       type: json['type'] as String,
       payinAddress: json['payinAddress'] as String,
@@ -64,17 +46,15 @@ class Trade {
       toCurrency: json['toCurrency'] as String,
       refundAddress: json['refundAddress'] as String,
       refundExtraId: json['refundExtraId'] as String,
-      tradeId: json['id'] as String,
+      id: json['id'] as String,
       fromNetwork: json['fromNetwork'] as String,
       toNetwork: json['toNetwork'] as String,
-      status: json['status'] as String? ?? "new",
     );
   }
 
   @override
   String toString() {
     return 'TransactionDTO('
-        'exchangeName: $exchangeName, '
         'fromAmount: $fromAmount, '
         'toAmount: $toAmount, '
         'flow: $flow, '

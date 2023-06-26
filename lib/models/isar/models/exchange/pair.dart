@@ -19,11 +19,11 @@ class Pair {
   Id? id;
 
   @Index(
+    unique: true,
+    replace: true,
     composite: [
       CompositeIndex("computedIndex"),
     ],
-    unique: true,
-    replace: true,
   )
   final String exchangeName;
 
@@ -40,6 +40,23 @@ class Pair {
 
   String get computedIndex =>
       from + fromNetwork + to + toNetwork + rateType.name;
+
+  factory Pair.fromJson(Map<String, dynamic> json, String exchangeName) {
+    final standard = json["flow"]["standard"] == true;
+    final fixedRate = json["flow"]["fixed-rate"] == true;
+    return Pair(
+      exchangeName: exchangeName,
+      from: json["fromCurrency"] as String,
+      to: json["toCurrency"] as String,
+      fromNetwork: json["fromNetwork"] as String,
+      toNetwork: json["toNetwork"] as String,
+      rateType: standard && fixedRate
+          ? SupportedRateType.both
+          : standard
+              ? SupportedRateType.estimated
+              : SupportedRateType.fixed,
+    );
+  }
 
   Map<String, dynamic> toMap() {
     return {
