@@ -5,7 +5,7 @@ import 'dart:io';
 import 'dart:isolate';
 
 import 'package:decimal/decimal.dart';
-import 'package:epicpay/hive/db.dart';
+import 'package:epicpay/db/hive/db.dart';
 import 'package:epicpay/models/epicbox_config_model.dart';
 import 'package:epicpay/models/node_model.dart';
 import 'package:epicpay/models/paymint/fee_object_model.dart';
