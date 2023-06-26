@@ -11,7 +11,6 @@
 import 'package:epicpay/pages/exchange_view/exchange_form.dart';
 import 'package:epicpay/utilities/constants.dart';
 import 'package:epicpay/utilities/text_styles.dart';
-// import 'package:epicpay/db/isar/main_db.dart';
 // import 'package:stackwallet/models/isar/models/blockchain_data/transaction.dart';
 // import 'package:stackwallet/pages/exchange_view/exchange_form.dart';
 // import 'package:stackwallet/pages/exchange_view/trade_details_view.dart';
@@ -165,65 +164,68 @@ class _ExchangeViewState extends ConsumerState<ExchangeView> {
                       ),
                     ),
                     // if (hasHistory)
-                    //   SliverList(
-                    //     delegate: SliverChildBuilderDelegate((context, index) {
+                    // SliverList(
+                    //   delegate: SliverChildBuilderDelegate(
+                    //     (context, index) {
                     //       return Padding(
                     //         padding: const EdgeInsets.all(4),
                     //         child: TradeCard(
-                    //           key: Key("tradeCard_${trades[index].uuid}"),
+                    //           // key: Key("tradeCard_${trades[index].uuid}"),
                     //           trade: trades[index],
                     //           onTap: () async {
-                    //             final String tradeId = trades[index].tradeId;
-                    //
-                    //             final lookup = ref
-                    //                 .read(tradeSentFromStackLookupProvider)
-                    //                 .all;
-                    //
-                    //             //todo: check if print needed
-                    //             // debugPrint("ALL: $lookup");
-                    //
-                    //             final String? txid = ref
-                    //                 .read(tradeSentFromStackLookupProvider)
-                    //                 .getTxidForTradeId(tradeId);
-                    //             final List<String>? walletIds = ref
-                    //                 .read(tradeSentFromStackLookupProvider)
-                    //                 .getWalletIdsForTradeId(tradeId);
-                    //
-                    //             if (txid != null &&
-                    //                 walletIds != null &&
-                    //                 walletIds.isNotEmpty) {
-                    //               final manager = ref
-                    //                   .read(walletsChangeNotifierProvider)
-                    //                   .getManager(walletIds.first);
-                    //
-                    //               //todo: check if print needed
-                    //               // debugPrint("name: ${manager.walletName}");
-                    //
-                    //               final tx = await MainDB.instance
-                    //                   .getTransactions(walletIds.first)
-                    //                   .filter()
-                    //                   .txidEqualTo(txid)
-                    //                   .findFirst();
-                    //
-                    //               if (mounted) {
-                    //                 unawaited(Navigator.of(context).pushNamed(
-                    //                   TradeDetailsView.routeName,
-                    //                   arguments: Tuple4(tradeId, tx,
-                    //                       walletIds.first, manager.walletName),
-                    //                 ));
-                    //               }
-                    //             } else {
-                    //               unawaited(Navigator.of(context).pushNamed(
-                    //                 TradeDetailsView.routeName,
-                    //                 arguments: Tuple4(
-                    //                     tradeId, null, walletIds?.first, null),
-                    //               ));
-                    //             }
+                    //             // final String tradeId = trades[index].tradeId;
+                    //             //
+                    //             // final lookup = ref
+                    //             //     .read(tradeSentFromStackLookupProvider)
+                    //             //     .all;
+                    //             //
+                    //             // //todo: check if print needed
+                    //             // // debugPrint("ALL: $lookup");
+                    //             //
+                    //             // final String? txid = ref
+                    //             //     .read(tradeSentFromStackLookupProvider)
+                    //             //     .getTxidForTradeId(tradeId);
+                    //             // final List<String>? walletIds = ref
+                    //             //     .read(tradeSentFromStackLookupProvider)
+                    //             //     .getWalletIdsForTradeId(tradeId);
+                    //             //
+                    //             // if (txid != null &&
+                    //             //     walletIds != null &&
+                    //             //     walletIds.isNotEmpty) {
+                    //             //   final manager = ref
+                    //             //       .read(walletsChangeNotifierProvider)
+                    //             //       .getManager(walletIds.first);
+                    //             //
+                    //             //   //todo: check if print needed
+                    //             //   // debugPrint("name: ${manager.walletName}");
+                    //             //
+                    //             //   final tx = await MainDB.instance
+                    //             //       .getTransactions(walletIds.first)
+                    //             //       .filter()
+                    //             //       .txidEqualTo(txid)
+                    //             //       .findFirst();
+                    //             //
+                    //             //   if (mounted) {
+                    //             //     unawaited(Navigator.of(context).pushNamed(
+                    //             //       TradeDetailsView.routeName,
+                    //             //       arguments: Tuple4(tradeId, tx,
+                    //             //           walletIds.first, manager.walletName),
+                    //             //     ));
+                    //             //   }
+                    //             // } else {
+                    //             //   unawaited(Navigator.of(context).pushNamed(
+                    //             //     TradeDetailsView.routeName,
+                    //             //     arguments: Tuple4(
+                    //             //         tradeId, null, walletIds?.first, null),
+                    //             //   ));
+                    //             // }
                     //           },
                     //         ),
                     //       );
-                    //     }, childCount: tradeCount),
+                    //     },
+                    //     // childCount: tradeCount,
                     //   ),
+                    // ),
                     // if (!hasHistory)
                     SliverToBoxAdapter(
                       child: Padding(

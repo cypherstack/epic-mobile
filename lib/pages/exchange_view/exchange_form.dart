@@ -55,7 +55,13 @@
 //
 // // import '../../services/exchange/exchange_response.dart';
 //
+import 'dart:async';
+
 import 'package:epicpay/utilities/enums/coin_enum.dart';
+import 'package:epicpay/utilities/text_styles.dart';
+import 'package:epicpay/utilities/theme/stack_colors.dart';
+import 'package:epicpay/utilities/util.dart';
+import 'package:epicpay/widgets/custom_loading_overlay.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -85,64 +91,66 @@ class _ExchangeFormState extends ConsumerState<ExchangeForm> {
 //     // TrocadorExchange.instance,
 //   ];
 //
-//   late final TextEditingController _sendController;
-//   late final TextEditingController _receiveController;
-//   final isDesktop = Util.isDesktop;
-//   final FocusNode _sendFocusNode = FocusNode();
-//   final FocusNode _receiveFocusNode = FocusNode();
-//
-//   bool _swapLock = false;
-//
-//   // todo: check and adjust this value?
-//   static const _valueCheckInterval = Duration(milliseconds: 1500);
-//
-//   Future<T> showUpdatingExchangeRate<T>({
-//     required Future<T> whileFuture,
-//   }) async {
-//     unawaited(
-//       showDialog<void>(
-//         context: context,
-//         barrierDismissible: false,
-//         builder: (_) => WillPopScope(
-//           onWillPop: () async => false,
-//           child: Container(
-//             color: Theme.of(context)
-//                 .extension<StackColors>()!
-//                 .overlay
-//                 .withOpacity(0.6),
-//             child: const CustomLoadingOverlay(
-//               message: "Updating exchange rate",
-//               eventBus: null,
-//             ),
-//           ),
-//         ),
-//       ),
-//     );
-//
-//     final result = await whileFuture;
-//
-//     if (mounted) {
-//       Navigator.of(context, rootNavigator: isDesktop).pop();
-//     }
-//
-//     return result;
-//   }
-//
-//   Timer? _sendFieldOnChangedTimer;
-//   void sendFieldOnChanged(String value) {
-//     if (_sendFocusNode.hasFocus) {
-//       _sendFieldOnChangedTimer?.cancel();
-//
-//       _sendFieldOnChangedTimer = Timer(_valueCheckInterval, () async {
-//         final newFromAmount = _localizedStringToNum(value);
-//
-//         ref.read(efSendAmountProvider.notifier).state = newFromAmount;
-//         if (!_swapLock && !ref.read(efReversedProvider)) {
-//           unawaited(update());
-//         }
-//       });
-//     }
-//   }
+  late final TextEditingController _sendController;
+  late final TextEditingController _receiveController;
+  final FocusNode _sendFocusNode = FocusNode();
+  final FocusNode _receiveFocusNode = FocusNode();
+
+  final isDesktop = Util.isDesktop;
+
+  bool _swapLock = false;
+
+  // todo: check and adjust this value?
+  static const _valueCheckInterval = Duration(milliseconds: 1500);
+
+  Future<T> showUpdatingExchangeRate<T>({
+    required Future<T> whileFuture,
+  }) async {
+    unawaited(
+      showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => WillPopScope(
+          onWillPop: () async => false,
+          child: Container(
+            color: Theme.of(context)
+                .extension<StackColors>()!
+                .overlay
+                .withOpacity(0.6),
+            child: const CustomLoadingOverlay(
+              message: "Updating exchange rate",
+              eventBus: null,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final result = await whileFuture;
+
+    if (mounted) {
+      Navigator.of(context, rootNavigator: isDesktop).pop();
+    }
+
+    return result;
+  }
+
+  Timer? _sendFieldOnChangedTimer;
+  // void sendFieldOnChanged(String value) {
+  //   if (_sendFocusNode.hasFocus) {
+  //     _sendFieldOnChangedTimer?.cancel();
+  //
+  //     _sendFieldOnChangedTimer = Timer(_valueCheckInterval, () async {
+  //       final newFromAmount = _localizedStringToNum(value);
+  //
+  //       ref.read(efSendAmountProvider.notifier).state = newFromAmount;
+  //       if (!_swapLock && !ref.read(efReversedProvider)) {
+  //         unawaited(update());
+  //       }
+  //     });
+  //   }
+  // }
+
 //
 //   Timer? _receiveFieldOnChangedTimer;
 //   void receiveFieldOnChanged(String value) async {
@@ -722,12 +730,12 @@ class _ExchangeFormState extends ConsumerState<ExchangeForm> {
 //
   @override
   void initState() {
-//     _sendController = TextEditingController();
-//     _receiveController = TextEditingController();
-//
-//     walletId = widget.walletId;
-//     coin = widget.coin;
-//     walletInitiated = walletId != null && coin != null;
+    _sendController = TextEditingController();
+    _receiveController = TextEditingController();
+
+    walletId = widget.walletId;
+    coin = widget.coin;
+    walletInitiated = walletId != null && coin != null;
 //
 //     _sendFocusNode.addListener(() {
 //       if (_sendFocusNode.hasFocus) {
@@ -791,14 +799,13 @@ class _ExchangeFormState extends ConsumerState<ExchangeForm> {
 //
   @override
   void dispose() {
-//     _receiveController.dispose();
-//     _sendController.dispose();
-//     _receiveFocusNode.dispose();
-//     _sendFocusNode.dispose();
+    _receiveController.dispose();
+    _sendController.dispose();
+    _receiveFocusNode.dispose();
+    _sendFocusNode.dispose();
     super.dispose();
   }
 
-//
   @override
   Widget build(BuildContext context) {
     debugPrint("BUILD: $runtimeType");
@@ -846,15 +853,15 @@ class _ExchangeFormState extends ConsumerState<ExchangeForm> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-//         Text(
-//           "You will send",
-//           style: STextStyles.itemSubtitle(context).copyWith(
-//             color: Theme.of(context).extension<StackColors>()!.textDark3,
-//           ),
-//         ),
-//         SizedBox(
-//           height: isDesktop ? 10 : 4,
-//         ),
+        Text(
+          "You will send",
+          style: STextStyles.itemSubtitle(context).copyWith(
+            color: Theme.of(context).extension<StackColors>()!.textMedium,
+          ),
+        ),
+        SizedBox(
+          height: isDesktop ? 10 : 4,
+        ),
 //         ExchangeTextField(
 //           key: Key("exchangeTextFieldKeyFor_"
 //               "${Theme.of(context).extension<StackColors>()!.themeId}"
