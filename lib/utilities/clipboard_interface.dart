@@ -24,7 +24,7 @@ class FakeClipboard implements ClipboardInterface {
 
   @override
   Future<ClipboardData> getData(String format) async {
-    return ClipboardData(text: _value);
+    return ClipboardData(text: _value ?? "");
   }
 
   @override

@@ -269,7 +269,10 @@ class _MaterialAppWithThemeState extends ConsumerState<MaterialAppWithTheme>
         title: 'Epic Pay',
         onGenerateRoute: RouteGenerator.generateRoute,
         theme: ThemeData(
-          accentColor: colorScheme.textGold,
+          colorScheme: Theme.of(context).colorScheme.copyWith(
+                secondary: colorScheme.textGold,
+                brightness: Brightness.dark,
+              ),
           extensions: [colorScheme],
           highlightColor: colorScheme.highlight,
           brightness: Brightness.dark,
