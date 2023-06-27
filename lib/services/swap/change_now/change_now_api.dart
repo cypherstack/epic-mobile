@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:decimal/decimal.dart';
+import 'package:epicpay/external_api_keys.dart';
 import 'package:epicpay/models/exchange/estimate.dart';
 import 'package:epicpay/models/exchange/range.dart';
 import 'package:epicpay/models/isar/models/exchange/currency.dart';
@@ -12,8 +13,6 @@ import 'package:epicpay/services/swap/exchange_response.dart';
 import 'package:epicpay/utilities/logger.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-
-final kApiKey = "";
 
 enum CNEstimateType { direct, reverse }
 
@@ -47,7 +46,7 @@ class ChangeNowAPI {
       final response = await http.get(
         uri,
         headers: {
-          'x-changenow-api-key': kApiKey,
+          'x-changenow-api-key': kChangeNowApiKey,
         },
       );
 
@@ -72,7 +71,7 @@ class ChangeNowAPI {
         uri,
         headers: {
           'Content-Type': 'application/json',
-          'x-changenow-api-key': kApiKey,
+          'x-changenow-api-key': kChangeNowApiKey,
         },
         body: jsonEncode(body),
       );
@@ -120,8 +119,10 @@ class ChangeNowAPI {
         );
         return result;
       } catch (e, s) {
-        Logging.instance
-            .log("getCurrencies exception: $e\n$s", level: LogLevel.Error);
+        Logging.instance.log(
+          "getCurrencies exception: $e\n$s",
+          level: LogLevel.Error,
+        );
         return ExchangeResponse(
           exception: ExchangeException(
             "Error: $jsonArray",
@@ -129,8 +130,10 @@ class ChangeNowAPI {
         );
       }
     } catch (e, s) {
-      Logging.instance
-          .log("getCurrencies exception: $e\n$s", level: LogLevel.Error);
+      Logging.instance.log(
+        "getCurrencies exception: $e\n$s",
+        level: LogLevel.Error,
+      );
       return ExchangeResponse(
         exception: ExchangeException(
           e.toString(),

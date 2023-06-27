@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:epicpay/db/isar/isar_db.dart';
 import 'package:epicpay/db/hive/db.dart';
+import 'package:epicpay/db/isar/isar_db.dart';
 import 'package:epicpay/models/epicbox_config_model.dart';
 import 'package:epicpay/models/epicbox_server_model.dart';
 import 'package:epicpay/models/isar/models/exchange/currency.dart';
@@ -26,6 +26,7 @@ import 'package:epicpay/services/coins/manager.dart';
 import 'package:epicpay/services/debug_service.dart';
 import 'package:epicpay/services/locale_service.dart';
 import 'package:epicpay/services/node_service.dart';
+import 'package:epicpay/services/swap/swap_data_service.dart';
 import 'package:epicpay/utilities/constants.dart';
 import 'package:epicpay/utilities/db_version_migration.dart';
 import 'package:epicpay/utilities/logger.dart';
@@ -172,6 +173,8 @@ class _MaterialAppWithThemeState extends ConsumerState<MaterialAppWithTheme>
       }
       didLoad = true;
 
+      final swapDataLoadingFuture = ref.read(pSwapDataService).updateAll();
+
       await DB.instance.init();
       await _prefs.init();
 
@@ -206,6 +209,8 @@ class _MaterialAppWithThemeState extends ConsumerState<MaterialAppWithTheme>
         ref.read(txCountOnStartUpProvider.state).state =
             ref.read(walletProvider)!.txCount;
       }
+
+      await swapDataLoadingFuture;
 
       loadingCompleter.complete();
       // TODO: this should probably run unawaited. Keep commented out for now as proper community nodes ui hasn't been implemented yet
