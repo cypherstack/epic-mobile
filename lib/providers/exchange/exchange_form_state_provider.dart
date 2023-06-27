@@ -12,9 +12,9 @@ import 'package:decimal/decimal.dart';
 import 'package:epicpay/models/exchange/active_pair.dart';
 import 'package:epicpay/models/exchange/estimate.dart';
 import 'package:epicpay/models/exchange/range.dart';
+import 'package:epicpay/models/isar/models/exchange/pair.dart';
 import 'package:epicpay/services/swap/exchange.dart';
 import 'package:epicpay/services/swap/exchange_response.dart';
-import 'package:epicpay/utilities/enums/exchange_rate_type_enum.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tuple/tuple.dart';
 
@@ -23,7 +23,7 @@ final efEstimatesListProvider = StateProvider.family<
     String>((ref, exchangeName) => null);
 
 final efRateTypeProvider =
-    StateProvider<ExchangeRateType>((ref) => ExchangeRateType.estimated);
+    StateProvider<SupportedRateType>((ref) => SupportedRateType.estimated);
 
 final efExchangeProvider =
     StateProvider<Exchange>((ref) => Exchange.defaultExchange);
@@ -68,7 +68,7 @@ final efEstimateProvider = StateProvider<Estimate?>((ref) {
   final exchange = ref.watch(efExchangeProvider);
   final provider = ref.watch(efExchangeProviderNameProvider);
   final reversed = ref.watch(efReversedProvider);
-  final fixedRate = ref.watch(efRateTypeProvider) == ExchangeRateType.fixed;
+  final fixedRate = ref.watch(efRateTypeProvider) == SupportedRateType.fixed;
 
   final matches = ref
       .watch(efEstimatesListProvider(exchange.name))
