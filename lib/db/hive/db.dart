@@ -2,6 +2,7 @@ import 'dart:isolate';
 
 import 'package:epicpay/models/epicbox_server_model.dart';
 import 'package:epicpay/models/node_model.dart';
+import 'package:epicpay/models/trade_wallet_lookup.dart';
 import 'package:epicpay/services/wallets_service.dart';
 import 'package:epicpay/utilities/enums/coin_enum.dart';
 import 'package:epicpay/utilities/logger.dart';
@@ -16,6 +17,8 @@ class DB {
   static const String boxNameEpicBoxModels = "epicBoxModels";
   static const String boxNamePrimaryEpicBox = "primaryEpicBox";
   static const String boxNameAllWalletsData = "wallets";
+  static const String boxNameTradeLookup = "tradeToTxidLookUpBox";
+  static const String boxNameTradeNotes = "tradeNotesBox";
   static const String boxNameNotifications = "notificationModels";
   static const String boxNameWatchedTransactions =
       "watchedTxNotificationModels";
@@ -46,6 +49,8 @@ class DB {
   late final Box<String> _boxFavoriteWallets;
   // late final Box<xmr.WalletInfo> _walletInfoSource;
   late final Box<dynamic> _boxPrefs;
+  Box<TradeWalletLookup>? _boxTradeLookup;
+  Box<String>? _boxTradeNotes;
   late final Box<dynamic> _boxDBInfo;
 
   final Map<String, Box<dynamic>> _walletBoxes = {};
@@ -129,6 +134,9 @@ class DB {
       // _walletInfoSource =
       //     await Hive.openBox<xmr.WalletInfo>(xmr.WalletInfo.boxName);
       _boxFavoriteWallets = await Hive.openBox<String>(boxNameFavoriteWallets);
+      _boxTradeLookup =
+          await Hive.openBox<TradeWalletLookup>(boxNameTradeLookup);
+      _boxTradeNotes = await Hive.openBox<String>(boxNameTradeNotes);
 
       await Future.wait([
         Hive.openBox<dynamic>(boxNamePriceCache),

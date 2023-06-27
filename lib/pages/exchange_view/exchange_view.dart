@@ -8,7 +8,14 @@
  *
  */
 
+import 'dart:async';
+
+import 'package:epicpay/db/isar/isar_db.dart';
+import 'package:epicpay/models/isar/models/exchange/trade.dart';
 import 'package:epicpay/pages/exchange_view/exchange_form.dart';
+import 'package:epicpay/pages/exchange_view/trade_details_view.dart';
+import 'package:epicpay/providers/global/wallet_provider.dart';
+import 'package:epicpay/services/swap/trade_sent_from_stack_service.dart';
 import 'package:epicpay/utilities/constants.dart';
 import 'package:epicpay/utilities/text_styles.dart';
 // import 'package:stackwallet/models/isar/models/blockchain_data/transaction.dart';
@@ -20,8 +27,10 @@ import 'package:epicpay/utilities/text_styles.dart';
 import 'package:epicpay/utilities/theme/stack_colors.dart';
 import 'package:epicpay/widgets/conditional_parent.dart';
 import 'package:epicpay/widgets/custom_loading_overlay.dart';
+import 'package:epicpay/widgets/trade_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:isar/isar.dart';
 
 class ExchangeView extends ConsumerStatefulWidget {
   const ExchangeView({Key? key}) : super(key: key);
@@ -122,12 +131,17 @@ class _ExchangeViewState extends ConsumerState<ExchangeView> {
               )
             ];
           },
-          body: Builder(
-            builder: (buildContext) {
-              // final trades = ref
-              //     .watch(tradesServiceProvider.select((value) => value.trades));
-              // final tradeCount = trades.length;
-              // final hasHistory = tradeCount > 0;
+          body: StreamBuilder(
+            stream: ref.watch(pIsarDB).isar.trades.watchLazy(),
+            builder: (buildContext, snapshot) {
+              final internalTradeIds = ref
+                  .watch(pIsarDB)
+                  .isar
+                  .trades
+                  .where()
+                  .idProperty()
+                  .findAllSync();
+              final hasHistory = internalTradeIds.isNotEmpty;
 
               return Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -150,11 +164,6 @@ class _ExchangeViewState extends ConsumerState<ExchangeView> {
                             Text(
                               "Trades",
                               style: STextStyles.itemSubtitle(context),
-                              // style: STextStyles.itemSubtitle(context).copyWith(
-                              //   color: Theme.of(context)
-                              //       .extension<StackColors>()!
-                              //       .textDark3,
-                              // ),
                             ),
                             const SizedBox(
                               height: 12,
@@ -163,93 +172,104 @@ class _ExchangeViewState extends ConsumerState<ExchangeView> {
                         ),
                       ),
                     ),
-                    // if (hasHistory)
-                    // SliverList(
-                    //   delegate: SliverChildBuilderDelegate(
-                    //     (context, index) {
-                    //       return Padding(
-                    //         padding: const EdgeInsets.all(4),
-                    //         child: TradeCard(
-                    //           // key: Key("tradeCard_${trades[index].uuid}"),
-                    //           trade: trades[index],
-                    //           onTap: () async {
-                    //             // final String tradeId = trades[index].tradeId;
-                    //             //
-                    //             // final lookup = ref
-                    //             //     .read(tradeSentFromStackLookupProvider)
-                    //             //     .all;
-                    //             //
-                    //             // //todo: check if print needed
-                    //             // // debugPrint("ALL: $lookup");
-                    //             //
-                    //             // final String? txid = ref
-                    //             //     .read(tradeSentFromStackLookupProvider)
-                    //             //     .getTxidForTradeId(tradeId);
-                    //             // final List<String>? walletIds = ref
-                    //             //     .read(tradeSentFromStackLookupProvider)
-                    //             //     .getWalletIdsForTradeId(tradeId);
-                    //             //
-                    //             // if (txid != null &&
-                    //             //     walletIds != null &&
-                    //             //     walletIds.isNotEmpty) {
-                    //             //   final manager = ref
-                    //             //       .read(walletsChangeNotifierProvider)
-                    //             //       .getManager(walletIds.first);
-                    //             //
-                    //             //   //todo: check if print needed
-                    //             //   // debugPrint("name: ${manager.walletName}");
-                    //             //
-                    //             //   final tx = await MainDB.instance
-                    //             //       .getTransactions(walletIds.first)
-                    //             //       .filter()
-                    //             //       .txidEqualTo(txid)
-                    //             //       .findFirst();
-                    //             //
-                    //             //   if (mounted) {
-                    //             //     unawaited(Navigator.of(context).pushNamed(
-                    //             //       TradeDetailsView.routeName,
-                    //             //       arguments: Tuple4(tradeId, tx,
-                    //             //           walletIds.first, manager.walletName),
-                    //             //     ));
-                    //             //   }
-                    //             // } else {
-                    //             //   unawaited(Navigator.of(context).pushNamed(
-                    //             //     TradeDetailsView.routeName,
-                    //             //     arguments: Tuple4(
-                    //             //         tradeId, null, walletIds?.first, null),
-                    //             //   ));
-                    //             // }
-                    //           },
-                    //         ),
-                    //       );
-                    //     },
-                    //     // childCount: tradeCount,
-                    //   ),
-                    // ),
-                    // if (!hasHistory)
-                    SliverToBoxAdapter(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: Theme.of(context)
-                                .extension<StackColors>()!
-                                .popupBG,
-                            borderRadius: BorderRadius.circular(
-                              Constants.size.circularBorderRadius,
+                    if (hasHistory)
+                      SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) {
+                            return StreamBuilder<Trade?>(
+                              stream: ref
+                                  .watch(pIsarDB)
+                                  .isar
+                                  .trades
+                                  .watchObject(internalTradeIds[index]),
+                              builder:
+                                  (context, AsyncSnapshot<Trade?> snapshot) {
+                                final trade = snapshot.data!;
+                                return Padding(
+                                  padding: const EdgeInsets.all(4),
+                                  child: TradeCard(
+                                    key: Key(
+                                        "tradeCard_${trade.tradeId + trade.updatedAt.toString()}"),
+                                    trade: trade,
+                                    onTap: () async {
+                                      final String? txid = ref
+                                          .read(
+                                              tradeSentFromStackLookupProvider)
+                                          .getTxidForTradeId(trade.tradeId);
+                                      final List<String>? walletIds = ref
+                                          .read(
+                                              tradeSentFromStackLookupProvider)
+                                          .getWalletIdsForTradeId(
+                                              trade.tradeId);
+
+                                      if (txid != null &&
+                                          walletIds != null &&
+                                          walletIds.isNotEmpty) {
+                                        final manager =
+                                            ref.read(walletProvider)!;
+
+                                        final tx =
+                                            (await manager.transactionData)
+                                                .findTransaction(txid);
+
+                                        if (mounted) {
+                                          unawaited(
+                                            Navigator.of(context).pushNamed(
+                                              TradeDetailsView.routeName,
+                                              arguments: (
+                                                tradeId: trade.tradeId,
+                                                transactionIfSentFromStack: tx,
+                                                walletId: walletIds.first,
+                                                walletName: manager.walletName,
+                                              ),
+                                            ),
+                                          );
+                                        }
+                                      } else {
+                                        unawaited(
+                                          Navigator.of(context).pushNamed(
+                                            TradeDetailsView.routeName,
+                                            arguments: (
+                                              tradeId: trade.tradeId,
+                                              transactionIfSentFromStack: null,
+                                              walletId: walletIds?.first,
+                                              walletName: null,
+                                            ),
+                                          ),
+                                        );
+                                      }
+                                    },
+                                  ),
+                                );
+                              },
+                            );
+                          },
+                        ),
+                      ),
+                    if (!hasHistory)
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 4),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Theme.of(context)
+                                  .extension<StackColors>()!
+                                  .popupBG,
+                              borderRadius: BorderRadius.circular(
+                                Constants.size.circularBorderRadius,
+                              ),
                             ),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(12),
-                            child: Text(
-                              "Trades will appear here",
-                              textAlign: TextAlign.center,
-                              style: STextStyles.itemSubtitle(context),
+                            child: Padding(
+                              padding: const EdgeInsets.all(12),
+                              child: Text(
+                                "Trades will appear here",
+                                textAlign: TextAlign.center,
+                                style: STextStyles.itemSubtitle(context),
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
                   ],
                 ),
               );

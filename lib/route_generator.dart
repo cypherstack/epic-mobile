@@ -3,6 +3,8 @@ import 'package:epicpay/models/paymint/transactions_model.dart';
 import 'package:epicpay/pages/add_wallet_views/create_restore_wallet_view.dart';
 import 'package:epicpay/pages/add_wallet_views/restore_wallet_view/restore_options_view/restore_options_view.dart';
 import 'package:epicpay/pages/add_wallet_views/restore_wallet_view/restore_wallet_view.dart';
+import 'package:epicpay/pages/exchange_view/edit_trade_note_view.dart';
+import 'package:epicpay/pages/exchange_view/trade_details_view.dart';
 // import 'package:epicpay/pages/address_book_views/address_book_view.dart';
 // import 'package:epicpay/pages/address_book_views/subviews/add_address_book_entry_view.dart';
 // import 'package:epicpay/pages/address_book_views/subviews/edit_contact_address_view.dart';
@@ -463,6 +465,43 @@ class RouteGenerator {
             name: settings.name,
           ),
         );
+
+      case TradeDetailsView.routeName:
+        if (args is ({
+          String tradeId,
+          Transaction? transactionIfSentFromStack,
+          String? walletId,
+          String? walletName,
+        })) {
+          return getRoute(
+            shouldUseMaterialRoute: useMaterialPageRoute,
+            builder: (_) => TradeDetailsView(
+              walletId: args.walletId,
+              walletName: args.walletName,
+              tradeId: args.tradeId,
+              transactionIfSentFromStack: args.transactionIfSentFromStack,
+            ),
+            settings: RouteSettings(
+              name: settings.name,
+            ),
+          );
+        }
+        return _routeError("${settings.name} invalid args: ${args.toString()}");
+
+      case EditTradeNoteView.routeName:
+        if (args is ({String tradeId, String note})) {
+          return getRoute(
+            shouldUseMaterialRoute: useMaterialPageRoute,
+            builder: (_) => EditTradeNoteView(
+              tradeId: args.tradeId,
+              note: args.note,
+            ),
+            settings: RouteSettings(
+              name: settings.name,
+            ),
+          );
+        }
+        return _routeError("${settings.name} invalid args: ${args.toString()}");
 
       case GenerateUriQrCodeView.routeName:
         if (args is Tuple2<Coin, String>) {
