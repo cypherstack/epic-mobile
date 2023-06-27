@@ -1,4 +1,4 @@
-import 'package:epicpay/pages/exchange_view/aggregate_currency.dart';
+import 'package:epicpay/models/exchange/aggregate_currency.dart';
 import 'package:epicpay/providers/global/locale_provider.dart';
 import 'package:epicpay/utilities/amount/amount_input_formatter.dart';
 import 'package:epicpay/utilities/assets.dart';
@@ -302,11 +302,12 @@ Widget? getIconForTicker(
   String ticker, {
   double size = 20,
 }) {
-  String? iconAsset = /*isStackCoin(ticker)
-      ?*/
-      Assets.svg.iconFor(coin: coinFromTickerCaseInsensitive(ticker));
-  // : Assets.svg.buyIconFor(ticker);
-  return (iconAsset != null)
-      ? SvgPicture.asset(iconAsset, height: size, width: size)
-      : null;
+  try {
+    return SvgPicture.asset(
+        Assets.svg.iconFor(coin: coinFromTickerCaseInsensitive(ticker)),
+        height: size,
+        width: size);
+  } catch (_) {
+    return null;
+  }
 }

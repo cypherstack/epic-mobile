@@ -1,5 +1,5 @@
-import 'package:epicpay/services/coins/epiccash/epiccash_wallet.dart'
-    as epic;
+import 'package:epicpay/services/coins/epiccash/epiccash_wallet.dart' as epic;
+import 'package:epicpay/utilities/constants.dart';
 
 enum Coin {
   epicCash,
@@ -20,6 +20,13 @@ extension CoinExt on Coin {
     switch (this) {
       case Coin.epicCash:
         return "EPIC";
+    }
+  }
+
+  int get decimals {
+    switch (this) {
+      case Coin.epicCash:
+        return Constants.decimalPlaces;
     }
   }
 

@@ -1,5 +1,7 @@
 import 'package:epicpay/db/hive/db.dart';
+import 'package:epicpay/utilities/amount/amount_unit.dart';
 import 'package:epicpay/utilities/constants.dart';
+import 'package:epicpay/utilities/enums/coin_enum.dart';
 import 'package:epicpay/utilities/enums/languages_enum.dart';
 import 'package:epicpay/utilities/enums/sync_type_enum.dart';
 import 'package:flutter/cupertino.dart';
@@ -28,6 +30,8 @@ class Prefs extends ChangeNotifier {
       _showTestNetCoins = await _getShowTestNetCoins();
       _hideBlockExplorerWarning = await _getHideBlockExplorerWarning();
       _refreshPeriod = await _getRefreshPeriod();
+      await _setAmountUnits();
+      await _setMaxDecimals();
 
       _initialized = true;
     }
@@ -369,5 +373,64 @@ class Prefs extends ChangeNotifier {
     return await DB.instance.get<dynamic>(
             boxName: DB.boxNamePrefs, key: "refreshPeriod") as int? ??
         60;
+  }
+
+  // coin amount unit settings
+
+  final Map<Coin, AmountUnit> _amountUnits = {};
+
+  AmountUnit amountUnit(Coin coin) => _amountUnits[coin] ?? AmountUnit.normal;
+
+  void updateAmountUnit({required Coin coin, required AmountUnit amountUnit}) {
+    if (this.amountUnit(coin) != amountUnit) {
+      DB.instance.put<dynamic>(
+        boxName: DB.boxNamePrefs,
+        key: "amountUnitFor${coin.name}",
+        value: amountUnit.index,
+      );
+      _amountUnits[coin] = amountUnit;
+      notifyListeners();
+    }
+  }
+
+  Future<void> _setAmountUnits() async {
+    for (final coin in Coin.values) {
+      final unitIndex = await DB.instance.get<dynamic>(
+            boxName: DB.boxNamePrefs,
+            key: "amountUnitFor${coin.name}",
+          ) as int? ??
+          0; // 0 is "normal"
+      _amountUnits[coin] = AmountUnit.values[unitIndex];
+    }
+  }
+
+  // coin precision setting (max decimal places to show)
+
+  final Map<Coin, int> _amountDecimals = {};
+
+  int maxDecimals(Coin coin) => _amountDecimals[coin] ?? coin.decimals;
+
+  void updateMaxDecimals({required Coin coin, required int maxDecimals}) {
+    if (this.maxDecimals(coin) != maxDecimals) {
+      DB.instance.put<dynamic>(
+        boxName: DB.boxNamePrefs,
+        key: "maxDecimalsFor${coin.name}",
+        value: maxDecimals,
+      );
+      _amountDecimals[coin] = maxDecimals;
+      notifyListeners();
+    }
+  }
+
+  Future<void> _setMaxDecimals() async {
+    for (final coin in Coin.values) {
+      final decimals = await DB.instance.get<dynamic>(
+            boxName: DB.boxNamePrefs,
+            key: "maxDecimalsFor${coin.name}",
+          ) as int? ??
+          (coin.decimals > 18 ? 18 : coin.decimals);
+      // use some sane max rather than up to 30 that nano uses
+      _amountDecimals[coin] = decimals;
+    }
   }
 }
