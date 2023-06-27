@@ -1,17 +1,17 @@
 import 'package:epicpay/models/isar/models/exchange/currency.dart';
 import 'package:epicpay/models/isar/models/exchange/pair.dart';
-import 'package:tuple/tuple.dart';
 
 class AggregateCurrency {
   final Map<String, Currency?> _map = {};
 
   AggregateCurrency({
-    required List<Tuple2<String, Currency>> exchangeCurrencyPairs,
+    required List<({String exchangeName, Currency currency})>
+        exchangeCurrencyPairs,
   }) {
     assert(exchangeCurrencyPairs.isNotEmpty);
 
     for (final item in exchangeCurrencyPairs) {
-      _map[item.item1] = item.item2;
+      _map[item.exchangeName] = item.currency;
     }
   }
 
@@ -27,7 +27,7 @@ class AggregateCurrency {
 
   SupportedRateType get rateType => _map.values.first!.rateType;
 
-  // bool get isStackCoin => _map.values.first!.isStackCoin;
+  bool get isStackCoin => _map.values.first!.isStackCoin;
 
   @override
   String toString() {

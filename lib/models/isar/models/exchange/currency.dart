@@ -1,4 +1,5 @@
 import 'package:epicpay/models/isar/models/exchange/pair.dart';
+import 'package:epicpay/utilities/enums/coin_enum.dart';
 import 'package:isar/isar.dart';
 
 part 'currency.g.dart';
@@ -40,6 +41,16 @@ class Currency {
   bool get supportsEstimatedRate =>
       rateType == SupportedRateType.estimated ||
       rateType == SupportedRateType.both;
+
+  @ignore
+  bool get isStackCoin {
+    try {
+      coinFromTickerCaseInsensitive(ticker);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
 
   Currency({
     required this.exchangeName,

@@ -1,4 +1,4 @@
-import 'package:epicpay/pages/exchange_view/aggregate_currency.dart';
+import 'package:epicpay/models/exchange/aggregate_currency.dart';
 import 'package:flutter/material.dart';
 
 class ActivePair extends ChangeNotifier {

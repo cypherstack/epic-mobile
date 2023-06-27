@@ -1,4 +1,5 @@
 import 'package:epicpay/db/isar/isar_db.dart';
+import 'package:epicpay/models/exchange/aggregate_currency.dart';
 import 'package:epicpay/models/isar/models/exchange/currency.dart';
 import 'package:epicpay/models/isar/models/exchange/pair.dart';
 import 'package:epicpay/services/swap/change_now/change_now_exchange.dart';
@@ -128,5 +129,33 @@ class SwapDataService {
         "SwapDataService.updateCurrencies() failed for some unknown reason.",
       );
     }
+  }
+
+  //////////////////////////////////////////////////////////////////////////////
+
+  Future<AggregateCurrency?> getAggregateCurrency(
+    String ticker,
+    SupportedRateType rateType,
+    String? contract,
+  ) async {
+    final currencies = await isarDB.isar.currencies
+        .filter()
+        .rateTypeEqualTo(rateType)
+        .and()
+        .tickerEqualTo(
+          ticker,
+          caseSensitive: false,
+        )
+        .and()
+        .tokenContractEqualTo(contract)
+        .findAll();
+
+    final items = currencies
+        .map((e) => (exchangeName: e.exchangeName, currency: e))
+        .toList(growable: false);
+
+    return items.isNotEmpty
+        ? AggregateCurrency(exchangeCurrencyPairs: items)
+        : null;
   }
 }
