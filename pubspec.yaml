@@ -184,6 +184,7 @@ flutter:
     - assets/svg/chevron-down.svg
     - assets/svg/chevron-up.svg
     - assets/svg/lock-filled.svg
+    - assets/svg/unlocked.svg
     - assets/svg/lock.svg
     - assets/svg/globe.svg
     - assets/svg/wifi.svg
