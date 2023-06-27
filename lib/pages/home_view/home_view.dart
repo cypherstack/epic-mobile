@@ -63,14 +63,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
   // late StreamSubscription<dynamic> _nodeStatusSubscription;
   late StreamSubscription<dynamic> _refreshSubscription;
 
-  int currentIndex = 0;
-
-  void _onTappedBar(int value) {
-    setState(() {
-      currentIndex = value;
-    });
-    _pageController.jumpToPage(value);
-  }
+  bool _pageLock = false;
 
   Future<bool> _onWillPop() async {
     // go to home view when tapping back on the main exchange view
@@ -123,7 +116,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
         walletId: ref.read(walletProvider)!.walletId,
         coin: ref.read(walletProvider)!.coin,
       ),
-      ExchangeView(),
+      const ExchangeView(),
     ];
 
     if (ref.read(walletProvider)!.isRefreshing) {
@@ -220,13 +213,16 @@ class _HomeViewState extends ConsumerState<HomeView> {
   Widget build(BuildContext context) {
     debugPrint("BUILD: $runtimeType");
     ref.listen(homeViewPageIndexStateProvider, (previous, next) {
-      if (next is int) {
-        if (next >= 0 && next <= 1) {
+      if (!_pageLock) {
+        if ((previous != null && (previous - next).abs() <= 1) ||
+            previous == null) {
           _pageController.animateToPage(
             next,
             duration: const Duration(milliseconds: 300),
             curve: Curves.decelerate,
           );
+        } else {
+          _pageController.jumpToPage(next);
         }
       }
     });
@@ -410,8 +406,11 @@ class _HomeViewState extends ConsumerState<HomeView> {
                       label: 'SWAP',
                     ),
                   ],
-                  onTap: _onTappedBar,
-                  currentIndex: currentIndex,
+                  onTap: (value) => ref
+                      .read(homeViewPageIndexStateProvider.state)
+                      .state = value,
+                  currentIndex:
+                      ref.watch(homeViewPageIndexStateProvider.state).state,
                   selectedItemColor: Theme.of(context)
                       .extension<StackColors>()!
                       .buttonBackPrimary,
@@ -424,11 +423,10 @@ class _HomeViewState extends ConsumerState<HomeView> {
                       controller: _pageController,
                       children: _children,
                       onPageChanged: (pageIndex) {
+                        _pageLock = true;
                         ref.read(homeViewPageIndexStateProvider.state).state =
                             pageIndex;
-                        setState(() {
-                          currentIndex = pageIndex;
-                        });
+                        _pageLock = false;
                       },
                     ),
                   ),
