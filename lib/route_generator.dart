@@ -4,6 +4,7 @@ import 'package:epicpay/pages/add_wallet_views/create_restore_wallet_view.dart';
 import 'package:epicpay/pages/add_wallet_views/restore_wallet_view/restore_options_view/restore_options_view.dart';
 import 'package:epicpay/pages/add_wallet_views/restore_wallet_view/restore_wallet_view.dart';
 import 'package:epicpay/pages/exchange_view/edit_trade_note_view.dart';
+import 'package:epicpay/pages/exchange_view/exchange_step_views/step_1_view.dart';
 import 'package:epicpay/pages/exchange_view/trade_details_view.dart';
 // import 'package:epicpay/pages/address_book_views/address_book_view.dart';
 // import 'package:epicpay/pages/address_book_views/subviews/add_address_book_entry_view.dart';
@@ -465,6 +466,30 @@ class RouteGenerator {
             name: settings.name,
           ),
         );
+
+      case Step1View.routeName:
+        return getRoute(
+          shouldUseMaterialRoute: useMaterialPageRoute,
+          builder: (_) => const Step1View(),
+          settings: RouteSettings(
+            name: settings.name,
+          ),
+        );
+
+      // case Step1View.routeName:
+      // if (args is IncompleteExchangeModel)
+      // {
+      // return getRoute(
+      //   shouldUseMaterialRoute: useMaterialPageRoute,
+      //   builder: (_) => const Step1View(
+      //       // model: args,
+      //       ),
+      //   settings: RouteSettings(
+      //     name: settings.name,
+      //   ),
+      // );
+      // }
+      // return _routeError("${settings.name} invalid args: ${args.toString()}");
 
       case TradeDetailsView.routeName:
         if (args is ({
