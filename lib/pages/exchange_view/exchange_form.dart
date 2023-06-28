@@ -775,7 +775,7 @@ class _ExchangeFormState extends ConsumerState<ExchangeForm> {
                 radiusMultiplier: 0.75,
                 child: GestureDetector(
                   onTap: () async {
-                    // await _swap();
+                    await _swap();
                   },
                   child: Padding(
                     padding: const EdgeInsets.all(4),
@@ -785,7 +785,7 @@ class _ExchangeFormState extends ConsumerState<ExchangeForm> {
                       height: 20,
                       color: Theme.of(context)
                           .extension<StackColors>()!
-                          .accentColorDark,
+                          .textMedium,
                     ),
                   ),
                 ),
