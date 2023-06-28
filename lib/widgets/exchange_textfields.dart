@@ -8,7 +8,6 @@ import 'package:epicpay/utilities/theme/stack_colors.dart';
 import 'package:epicpay/utilities/util.dart';
 import 'package:epicpay/widgets/loading_indicator.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 
@@ -98,8 +97,6 @@ class _ExchangeTextFieldState extends ConsumerState<ExchangeTextField> {
 
   @override
   Widget build(BuildContext context) {
-    print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA: ${widget.currency}");
-
     return Container(
       decoration: BoxDecoration(
         color: background,
@@ -138,16 +135,10 @@ class _ExchangeTextFieldState extends ConsumerState<ExchangeTextField> {
                 ),
                 inputFormatters: [
                   AmountInputFormatter(
-                    decimals: 8, // todo change this
+                    decimals: 8, // todo change this?
                     locale: ref.watch(localeServiceChangeNotifierProvider
                         .select((value) => value.locale)),
                   ),
-                  // regex to validate a crypto amount with 8 decimal places
-                  TextInputFormatter.withFunction((oldValue, newValue) =>
-                      RegExp(r'^([0-9]*[,.]?[0-9]{0,8}|[,.][0-9]{0,8})$')
-                              .hasMatch(newValue.text)
-                          ? newValue
-                          : oldValue),
                 ],
               ),
             ),
@@ -271,34 +262,6 @@ class _ExchangeTextFieldState extends ConsumerState<ExchangeTextField> {
     );
   }
 }
-
-// class CoinIconForTicker extends ConsumerWidget {
-//   const CoinIconForTicker({
-//     Key? key,
-//     required this.ticker,
-//     required this.size,
-//   }) : super(key: key);
-//
-//   final String ticker;
-//   final double size;
-//
-//   @override
-//   Widget build(BuildContext context, WidgetRef ref) {
-//     try {
-//       final coin = coinFromTickerCaseInsensitive(ticker);
-//       return SvgPicture.file(
-//         File(
-//           ref.watch(coinIconProvider(coin)),
-//         ),
-//         width: size,
-//         height: size,
-//       );
-//     } catch (e, s) {
-//       Logging.instance.log("$e\n$s", level: LogLevel.Fatal);
-//       rethrow;
-//     }
-//   }
-// }
 
 Widget? getIconForTicker(
   String ticker, {
