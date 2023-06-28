@@ -69,7 +69,7 @@ class PriceAPI {
       {required String baseCurrency}) async {
     final now = DateTime.now();
     if (_lastUsedBaseCurrency != baseCurrency ||
-        now.difference(_lastCalled).inSeconds > 0) {
+        now.difference(_lastCalled) > refreshIntervalDuration) {
       _lastCalled = now;
       _lastUsedBaseCurrency = baseCurrency;
     } else {
