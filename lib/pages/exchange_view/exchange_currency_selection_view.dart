@@ -5,18 +5,15 @@ import 'package:epicpay/models/isar/models/exchange/pair.dart';
 import 'package:epicpay/services/swap/change_now/change_now_exchange.dart';
 import 'package:epicpay/services/swap/swap_data_service.dart';
 import 'package:epicpay/utilities/assets.dart';
-import 'package:epicpay/utilities/constants.dart';
 import 'package:epicpay/utilities/enums/coin_enum.dart';
 import 'package:epicpay/utilities/text_styles.dart';
 import 'package:epicpay/utilities/theme/stack_colors.dart';
 import 'package:epicpay/widgets/background.dart';
 import 'package:epicpay/widgets/custom_buttons/app_bar_icon_button.dart';
 import 'package:epicpay/widgets/custom_loading_overlay.dart';
-import 'package:epicpay/widgets/icon_widgets/x_icon.dart';
+import 'package:epicpay/widgets/icon_widgets/search_icon.dart';
 import 'package:epicpay/widgets/loading_indicator.dart';
 import 'package:epicpay/widgets/rounded_white_container.dart';
-import 'package:epicpay/widgets/stack_text_field.dart';
-import 'package:epicpay/widgets/textfield_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
@@ -288,51 +285,58 @@ class _ExchangeCurrencySelectionViewState
               const SizedBox(
                 height: 16,
               ),
-              ClipRRect(
-                borderRadius: BorderRadius.circular(
-                  Constants.size.circularBorderRadius,
-                ),
-                child: TextField(
-                  controller: _searchController,
-                  focusNode: _searchFocusNode,
-                  onChanged: (value) => setState(() => _searchString = value),
-                  style: STextStyles.field(context),
-                  decoration: standardInputDecoration(
-                    "Search",
-                    _searchFocusNode,
-                    context,
-                  ).copyWith(
-                    prefixIcon: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 16,
-                      ),
-                      child: SvgPicture.asset(
-                        Assets.svg.search,
-                        width: 16,
-                        height: 16,
-                      ),
+              TextField(
+                controller: _searchController,
+                focusNode: _searchFocusNode,
+                onChanged: (value) => setState(() => _searchString = value),
+                style: STextStyles.field(context),
+                decoration: InputDecoration(
+                  prefixIconConstraints: const BoxConstraints(
+                    maxHeight: 24,
+                    maxWidth: 32,
+                  ),
+                  prefixIcon: const Row(
+                    children: [
+                      SearchIcon(),
+                    ],
+                  ),
+                  hintText: "Search...",
+                  filled: false,
+                  contentPadding: const EdgeInsets.only(
+                    top: 2,
+                    left: 12,
+                    right: 12,
+                  ),
+                  hintStyle: STextStyles.fieldLabel(context),
+                  enabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(
+                      color:
+                          Theme.of(context).extension<StackColors>()!.textGold,
                     ),
-                    suffixIcon: _searchController.text.isNotEmpty
-                        ? Padding(
-                            padding: const EdgeInsets.only(right: 0),
-                            child: UnconstrainedBox(
-                              child: Row(
-                                children: [
-                                  TextFieldIconButton(
-                                    child: const XIcon(),
-                                    onTap: () async {
-                                      setState(() {
-                                        _searchController.text = "";
-                                        _searchString = "";
-                                      });
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ),
-                          )
-                        : null,
+                  ),
+                  focusedBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(
+                      color:
+                          Theme.of(context).extension<StackColors>()!.textGold,
+                    ),
+                  ),
+                  errorBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(
+                      color:
+                          Theme.of(context).extension<StackColors>()!.textGold,
+                    ),
+                  ),
+                  disabledBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(
+                      color:
+                          Theme.of(context).extension<StackColors>()!.textGold,
+                    ),
+                  ),
+                  focusedErrorBorder: UnderlineInputBorder(
+                    borderSide: BorderSide(
+                      color:
+                          Theme.of(context).extension<StackColors>()!.textGold,
+                    ),
                   ),
                 ),
               ),
