@@ -134,7 +134,7 @@ class SwapDataService {
   //////////////////////////////////////////////////////////////////////////////
 
   Future<AggregateCurrency?> getAggregateCurrency(
-    String ticker,
+    Currency currency,
     SupportedRateType rateType,
     String? contract,
   ) async {
@@ -142,8 +142,13 @@ class SwapDataService {
         .filter()
         .rateTypeEqualTo(rateType)
         .and()
+        .networkEqualTo(
+          currency.network,
+          caseSensitive: false,
+        )
+        .and()
         .tickerEqualTo(
-          ticker,
+          currency.ticker,
           caseSensitive: false,
         )
         .and()
