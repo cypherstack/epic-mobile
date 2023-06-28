@@ -9,13 +9,12 @@
  */
 
 import 'package:epicpay/models/exchange/aggregate_currency.dart';
+import 'package:epicpay/pages/exchange_view/sub_widgets/exchange_provider_option.dart';
+import 'package:epicpay/providers/exchange/exchange_form_state_provider.dart';
+import 'package:epicpay/services/swap/change_now/change_now_exchange.dart';
 import 'package:epicpay/widgets/rounded_white_container.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import '../../../providers/exchange/exchange_form_state_provider.dart';
-import '../../../services/swap/change_now/change_now_exchange.dart';
-import 'exchange_provider_option.dart';
 
 class ExchangeProviderOptions extends ConsumerStatefulWidget {
   const ExchangeProviderOptions({

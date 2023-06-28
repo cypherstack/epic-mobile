@@ -653,7 +653,6 @@ class _ExchangeFormState extends ConsumerState<ExchangeForm> {
     //   _receiveController.text = ref.read(efReceiveAmountStringProvider);
     // });
     // }
-
     super.initState();
   }
 
@@ -677,20 +676,20 @@ class _ExchangeFormState extends ConsumerState<ExchangeForm> {
     ref.listen(efReceiveAmountStringProvider, (previous, String next) {
       if (!_receiveFocusNode.hasFocus) {
         _receiveController.text = isEstimated && next.isEmpty ? "-" : next;
-        // if (_swapLock) {
-        _sendController.text = ref.read(efSendAmountStringProvider);
-        // }
+        if (_swapLock) {
+          _sendController.text = ref.read(efSendAmountStringProvider);
+        }
       }
     });
     ref.listen(efSendAmountStringProvider, (previous, String next) {
       if (!_sendFocusNode.hasFocus) {
         _sendController.text = next;
-        // if (_swapLock) {
-        _receiveController.text =
-            isEstimated && ref.read(efReceiveAmountStringProvider).isEmpty
-                ? "-"
-                : ref.read(efReceiveAmountStringProvider);
-        // }
+        if (_swapLock) {
+          _receiveController.text =
+              isEstimated && ref.read(efReceiveAmountStringProvider).isEmpty
+                  ? "-"
+                  : ref.read(efReceiveAmountStringProvider);
+        }
       }
     });
 

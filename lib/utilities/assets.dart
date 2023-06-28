@@ -1,3 +1,4 @@
+import 'package:epicpay/services/swap/change_now/change_now_exchange.dart';
 import 'package:epicpay/utilities/enums/coin_enum.dart';
 import 'package:epicpay/utilities/theme/color_theme.dart';
 import 'package:epicpay/utilities/theme/stack_colors.dart';
@@ -25,6 +26,16 @@ class _EXCHANGE {
 
   String get changeNow => "assets/svg/exchange_icons/change_now_logo_1.svg";
   String get simpleSwap => "assets/svg/exchange_icons/simpleswap-icon.svg";
+
+  String getIconFor({required String exchangeName}) {
+    switch (exchangeName) {
+      case ChangeNowExchange.exchangeName:
+        return changeNow;
+      default:
+        throw ArgumentError("Invalid exchange name passed to "
+            "Assets.exchange.getIconFor()");
+    }
+  }
 }
 
 class _SVG {
