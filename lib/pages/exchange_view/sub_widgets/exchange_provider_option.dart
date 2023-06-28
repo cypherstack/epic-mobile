@@ -302,7 +302,9 @@ class _ProviderOptionState extends ConsumerState<_ProviderOption> {
               //     children: [
               Text(
                 "ESTIMATED RATE",
-                style: STextStyles.overLineBold(context),
+                style: STextStyles.overLineBold(context).copyWith(
+                  color: Theme.of(context).extension<StackColors>()!.textLight,
+                ),
                 // widget.exchange.name,
                 // style: STextStyles.titleBold12_400(context).copyWith(
                 //   color: Theme.of(context).extension<StackColors>()!.textGold,
@@ -316,8 +318,11 @@ class _ProviderOptionState extends ConsumerState<_ProviderOption> {
                         "Loading..",
                         "Loading...",
                       ],
-
-                      style: STextStyles.overLineBold(context),
+                      style: STextStyles.overLineBold(context).copyWith(
+                        color: Theme.of(context)
+                            .extension<StackColors>()!
+                            .textLight,
+                      ),
                       // style: STextStyles.itemSubtitle12(context).copyWith(
                       //   color: Theme.of(context)
                       //       .extension<StackColors>()!
@@ -326,8 +331,12 @@ class _ProviderOptionState extends ConsumerState<_ProviderOption> {
                     )
                   : Text(
                       widget.rateString,
+                      style: STextStyles.overLineBold(context).copyWith(
+                        color: Theme.of(context)
+                            .extension<StackColors>()!
+                            .textLight,
+                      ),
 
-                      style: STextStyles.overLineBold(context),
                       // style: STextStyles.itemSubtitle12(context).copyWith(
                       //   color: widget.rateColor ??
                       //       Theme.of(context)

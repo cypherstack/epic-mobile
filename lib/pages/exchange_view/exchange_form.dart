@@ -715,8 +715,8 @@ class _ExchangeFormState extends ConsumerState<ExchangeForm> {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         Text(
-          "You will send",
-          style: STextStyles.itemSubtitle(context).copyWith(
+          "YOU WILL SEND",
+          style: STextStyles.overLineBold(context).copyWith(
             color: Theme.of(context).extension<StackColors>()!.textMedium,
           ),
         ),
@@ -729,8 +729,8 @@ class _ExchangeFormState extends ConsumerState<ExchangeForm> {
               "${ref.watch(efCurrencyPairProvider.select((value) => value.send?.ticker))}"),
           controller: _sendController,
           focusNode: _sendFocusNode,
-          textStyle: STextStyles.smallMed14(context).copyWith(
-            color: Theme.of(context).extension<StackColors>()!.textDark,
+          textStyle: STextStyles.w400_16(context).copyWith(
+            color: Theme.of(context).extension<StackColors>()!.textMedium,
           ),
           buttonColor:
               Theme.of(context).extension<StackColors>()!.buttonBackSecondary,
@@ -759,8 +759,8 @@ class _ExchangeFormState extends ConsumerState<ExchangeForm> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              "You will receive",
-              style: STextStyles.itemSubtitle(context).copyWith(
+              "YOU WILL RECEIVE",
+              style: STextStyles.overLineBold(context).copyWith(
                 color: Theme.of(context).extension<StackColors>()!.textMedium,
               ),
             ),
@@ -802,8 +802,8 @@ class _ExchangeFormState extends ConsumerState<ExchangeForm> {
               "exchangeTextFieldKeyFor1_${Theme.of(context).extension<StackColors>()!.themeType.name}"),
           focusNode: _receiveFocusNode,
           controller: _receiveController,
-          textStyle: STextStyles.smallMed14(context).copyWith(
-            color: Theme.of(context).extension<StackColors>()!.textDark,
+          textStyle: STextStyles.w400_16(context).copyWith(
+            color: Theme.of(context).extension<StackColors>()!.textMedium,
           ),
           buttonColor:
               Theme.of(context).extension<StackColors>()!.buttonBackSecondary,

@@ -6,6 +6,7 @@ import 'package:epicpay/utilities/enums/coin_enum.dart';
 import 'package:epicpay/utilities/text_styles.dart';
 import 'package:epicpay/utilities/theme/stack_colors.dart';
 import 'package:epicpay/utilities/util.dart';
+import 'package:epicpay/widgets/conditional_parent.dart';
 import 'package:epicpay/widgets/loading_indicator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -229,27 +230,47 @@ class _ExchangeTextFieldState extends ConsumerState<ExchangeTextField> {
                         const SizedBox(
                           width: 6,
                         ),
-                        Text(
-                          widget.currency?.ticker.toUpperCase() ?? "n/a",
-                          style: STextStyles.smallMed14(context).copyWith(
-                            color: Theme.of(context)
-                                .extension<StackColors>()!
-                                .textDark,
+                        if (widget.currency == null)
+                          Text(
+                            "n/a",
+                            style: STextStyles.body(context),
                           ),
-                        ),
-                        if (!widget.isWalletCoin)
-                          const SizedBox(
-                            width: 6,
+                        if (widget.currency != null)
+                          ConditionalParent(
+                            condition: widget.currency!.ticker != "epic",
+                            builder: (child) => Row(
+                              children: [
+                                child,
+                                const SizedBox(
+                                  width: 4,
+                                ),
+                                SvgPicture.asset(
+                                  Assets.svg.chevronDown,
+                                  width: 9,
+                                  color: Theme.of(context)
+                                      .extension<StackColors>()!
+                                      .textLight,
+                                ),
+                              ],
+                            ),
+                            child: Text(
+                              widget.currency!.ticker.toUpperCase(),
+                              style: STextStyles.body(context),
+                            ),
                           ),
-                        if (!widget.isWalletCoin)
-                          SvgPicture.asset(
-                            Assets.svg.chevronDown,
-                            width: 5,
-                            height: 2.5,
-                            color: Theme.of(context)
-                                .extension<StackColors>()!
-                                .textDark,
-                          ),
+                        // if (!widget.isWalletCoin)
+                        //   const SizedBox(
+                        //     width: 6,
+                        //   ),
+                        // if (!widget.isWalletCoin)
+                        //   SvgPicture.asset(
+                        //     Assets.svg.chevronDown,
+                        //     width: 5,
+                        //     height: 2.5,
+                        //     color: Theme.of(context)
+                        //         .extension<StackColors>()!
+                        //         .textDark,
+                        //   ),
                       ],
                     ),
                   ),

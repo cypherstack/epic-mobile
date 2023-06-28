@@ -165,8 +165,8 @@ class _ExchangeViewState extends ConsumerState<ExchangeView> {
                               height: 12,
                             ),
                             Text(
-                              "Trades",
-                              style: STextStyles.itemSubtitle(context),
+                              "TRADES",
+                              style: STextStyles.overLineBold(context),
                             ),
                             const SizedBox(
                               height: 12,

@@ -155,7 +155,7 @@ class STextStyles {
     }
   }
 
-  static TextStyle titleBold12_400(BuildContext context) {
+  static TextStyle w400_16(BuildContext context) {
     switch (_theme(context).themeType) {
       case ThemeType.light:
         return GoogleFonts.poppins(
