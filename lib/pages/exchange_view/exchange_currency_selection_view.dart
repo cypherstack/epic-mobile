@@ -13,7 +13,6 @@ import 'package:epicpay/widgets/custom_buttons/app_bar_icon_button.dart';
 import 'package:epicpay/widgets/custom_loading_overlay.dart';
 import 'package:epicpay/widgets/icon_widgets/search_icon.dart';
 import 'package:epicpay/widgets/loading_indicator.dart';
-import 'package:epicpay/widgets/rounded_white_container.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
@@ -274,68 +273,73 @@ class _ExchangeCurrencySelectionViewState
             style: STextStyles.pageTitleH2(context),
           ),
         ),
-        body: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 16,
-          ),
+        body: SafeArea(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.max,
             children: [
               const SizedBox(
-                height: 16,
+                height: 12,
               ),
-              TextField(
-                controller: _searchController,
-                focusNode: _searchFocusNode,
-                onChanged: (value) => setState(() => _searchString = value),
-                style: STextStyles.field(context),
-                decoration: InputDecoration(
-                  prefixIconConstraints: const BoxConstraints(
-                    maxHeight: 24,
-                    maxWidth: 32,
-                  ),
-                  prefixIcon: const Row(
-                    children: [
-                      SearchIcon(),
-                    ],
-                  ),
-                  hintText: "Search...",
-                  filled: false,
-                  contentPadding: const EdgeInsets.only(
-                    top: 2,
-                    left: 12,
-                    right: 12,
-                  ),
-                  hintStyle: STextStyles.fieldLabel(context),
-                  enabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(
-                      color:
-                          Theme.of(context).extension<StackColors>()!.textGold,
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
+                child: TextField(
+                  controller: _searchController,
+                  focusNode: _searchFocusNode,
+                  onChanged: (value) => setState(() => _searchString = value),
+                  style: STextStyles.field(context),
+                  decoration: InputDecoration(
+                    prefixIconConstraints: const BoxConstraints(
+                      maxHeight: 24,
+                      maxWidth: 32,
                     ),
-                  ),
-                  focusedBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(
-                      color:
-                          Theme.of(context).extension<StackColors>()!.textGold,
+                    prefixIcon: const Row(
+                      children: [
+                        SearchIcon(),
+                      ],
                     ),
-                  ),
-                  errorBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(
-                      color:
-                          Theme.of(context).extension<StackColors>()!.textGold,
+                    hintText: "Search...",
+                    filled: false,
+                    contentPadding: const EdgeInsets.only(
+                      top: 2,
+                      left: 12,
+                      right: 12,
                     ),
-                  ),
-                  disabledBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(
-                      color:
-                          Theme.of(context).extension<StackColors>()!.textGold,
+                    hintStyle: STextStyles.fieldLabel(context),
+                    enabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Theme.of(context)
+                            .extension<StackColors>()!
+                            .textGold,
+                      ),
                     ),
-                  ),
-                  focusedErrorBorder: UnderlineInputBorder(
-                    borderSide: BorderSide(
-                      color:
-                          Theme.of(context).extension<StackColors>()!.textGold,
+                    focusedBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Theme.of(context)
+                            .extension<StackColors>()!
+                            .textGold,
+                      ),
+                    ),
+                    errorBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Theme.of(context)
+                            .extension<StackColors>()!
+                            .textGold,
+                      ),
+                    ),
+                    disabledBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Theme.of(context)
+                            .extension<StackColors>()!
+                            .textGold,
+                      ),
+                    ),
+                    focusedErrorBorder: UnderlineInputBorder(
+                      borderSide: BorderSide(
+                        color: Theme.of(context)
+                            .extension<StackColors>()!
+                            .textGold,
+                      ),
                     ),
                   ),
                 ),
@@ -372,80 +376,84 @@ class _ExchangeCurrencySelectionViewState
                       items.insert(0, c);
                     }
 
-                    return RoundedWhiteContainer(
-                      padding: const EdgeInsets.all(0),
-                      child: ListView.builder(
-                        shrinkWrap: true,
-                        itemCount: items.length,
-                        itemBuilder: (builderContext, index) {
-                          final bool hasImageUrl =
-                              items[index].image.startsWith("http");
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 4),
-                            child: GestureDetector(
-                              onTap: () {
-                                Navigator.of(context).pop(items[index]);
-                              },
-                              child: RoundedWhiteContainer(
-                                child: Row(
-                                  children: [
-                                    SizedBox(
-                                      width: 24,
-                                      height: 24,
-                                      child: isStackCoin(items[index].ticker)
-                                          ? getIconForTicker(
-                                              items[index].ticker,
-                                              size: 24,
-                                            )
-                                          : hasImageUrl
-                                              ? SvgPicture.network(
-                                                  items[index].image,
-                                                  width: 24,
-                                                  height: 24,
-                                                  placeholderBuilder: (_) =>
-                                                      const LoadingIndicator(),
-                                                )
-                                              : const SizedBox(
-                                                  width: 24,
-                                                  height: 24,
-                                                ),
-                                    ),
-                                    const SizedBox(
-                                      width: 10,
-                                    ),
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            items[index].name,
-                                            style: STextStyles.largeMedium14(
-                                                context),
+                    return ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: items.length,
+                      itemBuilder: (builderContext, index) {
+                        final bool hasImageUrl =
+                            items[index].image.startsWith("http");
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 6,
+                            horizontal: 24,
+                          ),
+                          child: GestureDetector(
+                            onTap: () {
+                              Navigator.of(context).pop(items[index]);
+                            },
+                            child: Padding(
+                              padding: const EdgeInsets.all(4),
+                              child: Row(
+                                children: [
+                                  SizedBox(
+                                    width: 32,
+                                    height: 32,
+                                    child: isStackCoin(items[index].ticker)
+                                        ? getIconForTicker(
+                                            items[index].ticker,
+                                            size: 32,
+                                          )
+                                        : hasImageUrl
+                                            ? SvgPicture.network(
+                                                items[index].image,
+                                                width: 32,
+                                                height: 32,
+                                                placeholderBuilder: (_) =>
+                                                    const LoadingIndicator(),
+                                              )
+                                            : const SizedBox(
+                                                width: 32,
+                                                height: 32,
+                                              ),
+                                  ),
+                                  const SizedBox(
+                                    width: 10,
+                                  ),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          items[index].name,
+                                          style: STextStyles.body(context)
+                                              .copyWith(
+                                            color: Theme.of(context)
+                                                .extension<StackColors>()!
+                                                .textLight,
                                           ),
-                                          const SizedBox(
-                                            height: 2,
+                                        ),
+                                        const SizedBox(
+                                          height: 1,
+                                        ),
+                                        Text(
+                                          items[index].ticker.toUpperCase(),
+                                          style: STextStyles.baseXS(context)
+                                              .copyWith(
+                                            color: Theme.of(context)
+                                                .extension<StackColors>()!
+                                                .textMedium,
                                           ),
-                                          Text(
-                                            items[index].ticker.toUpperCase(),
-                                            style:
-                                                STextStyles.smallMed12(context)
-                                                    .copyWith(
-                                              color: Theme.of(context)
-                                                  .extension<StackColors>()!
-                                                  .textSubtitle1,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
+                                        ),
+                                      ],
                                     ),
-                                  ],
-                                ),
+                                  ),
+                                ],
                               ),
                             ),
-                          );
-                        },
-                      ),
+                          ),
+                        );
+                      },
                     );
                   },
                 ),
