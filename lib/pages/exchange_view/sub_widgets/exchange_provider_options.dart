@@ -75,7 +75,10 @@ class _ExchangeProviderOptionsState
     // );
 
     return RoundedWhiteContainer(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.symmetric(
+        vertical: 17,
+        horizontal: 14,
+      ),
       child: Column(
         children: [
           if (showChangeNow)

@@ -17,7 +17,6 @@ import 'package:epicpay/services/swap/exchange.dart';
 import 'package:epicpay/utilities/amount/amount.dart';
 import 'package:epicpay/utilities/amount/amount_formatter.dart';
 import 'package:epicpay/utilities/amount/amount_unit.dart';
-import 'package:epicpay/utilities/assets.dart';
 import 'package:epicpay/utilities/enums/coin_enum.dart';
 import 'package:epicpay/utilities/logger.dart';
 import 'package:epicpay/utilities/text_styles.dart';
@@ -26,7 +25,6 @@ import 'package:epicpay/widgets/animated_text.dart';
 import 'package:epicpay/widgets/conditional_parent.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_svg/svg.dart';
 
 class ExchangeOption extends ConsumerStatefulWidget {
   const ExchangeOption({
@@ -237,104 +235,109 @@ class _ProviderOptionState extends ConsumerState<_ProviderOption> {
 
   @override
   Widget build(BuildContext context) {
-    String groupValue = ref.watch(currentCombinedExchangeIdProvider);
-
-    if (ref.watch(efExchangeProvider).name ==
-        (widget.estimate?.exchangeProvider ?? widget.exchange.name)) {
-      groupValue = _id;
-    }
+    // String groupValue = ref.watch(currentCombinedExchangeIdProvider);
+    //
+    // if (ref.watch(efExchangeProvider).name ==
+    //     (widget.estimate?.exchangeProvider ?? widget.exchange.name)) {
+    //   groupValue = _id;
+    // }
 
     return GestureDetector(
-      onTap: () {
-        ref.read(efExchangeProvider.notifier).state = widget.exchange;
-        ref.read(efExchangeProviderNameProvider.notifier).state =
-            widget.exchange.name;
-      },
+      // onTap: () {
+      //   ref.read(efExchangeProvider.notifier).state = widget.exchange;
+      //   ref.read(efExchangeProviderNameProvider.notifier).state =
+      //       widget.exchange.name;
+      // },
       child: Container(
         color: Colors.transparent,
         child: Padding(
           padding: const EdgeInsets.all(0),
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              SizedBox(
-                width: 20,
-                height: 20,
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 15.0),
-                  child: Radio(
-                    activeColor: Theme.of(context)
-                        .extension<StackColors>()!
-                        .radioButtonIconEnabled,
-                    value: _id,
-                    groupValue: groupValue,
-                    onChanged: (_) {
-                      ref.read(efExchangeProvider.notifier).state =
-                          widget.exchange;
-                      ref.read(efExchangeProviderNameProvider.notifier).state =
-                          widget.exchange.name;
-                    },
-                  ),
-                ),
+              // SizedBox(
+              //   width: 20,
+              //   height: 20,
+              //   child: Padding(
+              //     padding: const EdgeInsets.only(top: 15.0),
+              //     child: Radio(
+              //       activeColor: Theme.of(context)
+              //           .extension<StackColors>()!
+              //           .radioButtonIconEnabled,
+              //       value: _id,
+              //       groupValue: groupValue,
+              //       onChanged: (_) {
+              //         ref.read(efExchangeProvider.notifier).state =
+              //             widget.exchange;
+              //         ref.read(efExchangeProviderNameProvider.notifier).state =
+              //             widget.exchange.name;
+              //       },
+              //     ),
+              //   ),
+              // ),
+              // const SizedBox(
+              //   width: 14,
+              // ),
+              // Padding(
+              //   padding: const EdgeInsets.only(top: 5.0),
+              //   child: SizedBox(
+              //     width: 24,
+              //     height: 24,
+              //     child: SvgPicture.asset(
+              //       Assets.exchange.changeNow,
+              //       width: 24,
+              //       height: 24,
+              //     ),
+              //   ),
+              // ),
+              // const SizedBox(
+              //   width: 10,
+              // ),
+              // Expanded(
+              //   child: Column(
+              //     mainAxisAlignment: MainAxisAlignment.start,
+              //     mainAxisSize: MainAxisSize.min,
+              //     crossAxisAlignment: CrossAxisAlignment.start,
+              //     children: [
+              Text(
+                "ESTIMATED RATE",
+                style: STextStyles.overLineBold(context),
+                // widget.exchange.name,
+                // style: STextStyles.titleBold12_400(context).copyWith(
+                //   color: Theme.of(context).extension<StackColors>()!.textGold,
+                // ),
               ),
-              const SizedBox(
-                width: 14,
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 5.0),
-                child: SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: SvgPicture.asset(
-                    Assets.exchange.changeNow,
-                    width: 24,
-                    height: 24,
-                  ),
-                ),
-              ),
-              const SizedBox(
-                width: 10,
-              ),
-              Expanded(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      widget.exchange.name,
-                      style: STextStyles.titleBold12_400(context).copyWith(
-                        color: Theme.of(context)
-                            .extension<StackColors>()!
-                            .textGold,
-                      ),
+              widget.loadingString
+                  ? AnimatedText(
+                      stringsToLoopThrough: const [
+                        "Loading",
+                        "Loading.",
+                        "Loading..",
+                        "Loading...",
+                      ],
+
+                      style: STextStyles.overLineBold(context),
+                      // style: STextStyles.itemSubtitle12(context).copyWith(
+                      //   color: Theme.of(context)
+                      //       .extension<StackColors>()!
+                      //       .textSubtitle1,
+                      // ),
+                    )
+                  : Text(
+                      widget.rateString,
+
+                      style: STextStyles.overLineBold(context),
+                      // style: STextStyles.itemSubtitle12(context).copyWith(
+                      //   color: widget.rateColor ??
+                      //       Theme.of(context)
+                      //           .extension<StackColors>()!
+                      //           .textSubtitle1,
+                      // ),
                     ),
-                    widget.loadingString
-                        ? AnimatedText(
-                            stringsToLoopThrough: const [
-                              "Loading",
-                              "Loading.",
-                              "Loading..",
-                              "Loading...",
-                            ],
-                            style: STextStyles.itemSubtitle12(context).copyWith(
-                              color: Theme.of(context)
-                                  .extension<StackColors>()!
-                                  .textSubtitle1,
-                            ),
-                          )
-                        : Text(
-                            widget.rateString,
-                            style: STextStyles.itemSubtitle12(context).copyWith(
-                              color: widget.rateColor ??
-                                  Theme.of(context)
-                                      .extension<StackColors>()!
-                                      .textSubtitle1,
-                            ),
-                          ),
-                  ],
-                ),
-              ),
+              //     ],
+              //   ),
+              // ),
               // if (widget.kycRating != null)
               //   TrocadorKYCInfoButton(
               //     kycType: TrocadorKYCType.fromString(
