@@ -59,20 +59,23 @@ import 'dart:async';
 
 import 'package:decimal/decimal.dart';
 import 'package:epicpay/models/exchange/estimate.dart';
+import 'package:epicpay/models/exchange/incomplete_exchange.dart';
 import 'package:epicpay/models/exchange/range.dart';
+import 'package:epicpay/models/isar/models/exchange/currency.dart';
 import 'package:epicpay/models/isar/models/exchange/pair.dart';
-import 'package:epicpay/pages/exchange_view/sub_widgets/rate_type_toggle.dart';
+import 'package:epicpay/pages/exchange_view/exchange_currency_selection_view.dart';
+import 'package:epicpay/pages/exchange_view/sub_widgets/exchange_provider_options.dart';
 import 'package:epicpay/providers/exchange/exchange_form_state_provider.dart';
 import 'package:epicpay/services/swap/change_now/change_now_exchange.dart';
 import 'package:epicpay/services/swap/exchange_response.dart';
+import 'package:epicpay/services/swap/swap_data_service.dart';
 import 'package:epicpay/utilities/assets.dart';
 import 'package:epicpay/utilities/constants.dart';
 import 'package:epicpay/utilities/enums/coin_enum.dart';
 import 'package:epicpay/utilities/text_styles.dart';
 import 'package:epicpay/utilities/theme/stack_colors.dart';
-import 'package:epicpay/utilities/util.dart';
-import 'package:epicpay/widgets/conditional_parent.dart';
 import 'package:epicpay/widgets/custom_loading_overlay.dart';
+import 'package:epicpay/widgets/desktop/primary_button.dart';
 import 'package:epicpay/widgets/exchange_textfields.dart';
 import 'package:epicpay/widgets/rounded_container.dart';
 import 'package:flutter/material.dart';
@@ -80,6 +83,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:tuple/tuple.dart';
 import 'package:uuid/uuid.dart';
+
+final exchangeSendFromWalletIdStateProvider =
+    StateProvider<Tuple2<String, Coin>?>((ref) => null);
 
 class ExchangeForm extends ConsumerStatefulWidget {
   const ExchangeForm({
@@ -112,12 +118,24 @@ class _ExchangeFormState extends ConsumerState<ExchangeForm> {
   final FocusNode _sendFocusNode = FocusNode();
   final FocusNode _receiveFocusNode = FocusNode();
 
-  final isDesktop = Util.isDesktop;
-
   bool _swapLock = false;
 
   // todo: check and adjust this value?
   static const _valueCheckInterval = Duration(milliseconds: 1500);
+
+  // dummy currency to use network and ticker to look up actual currency
+  final dummyEpic = Currency(
+    exchangeName: ChangeNowExchange.exchangeName,
+    ticker: "epic",
+    name: "EpicCash",
+    image: "",
+    hasExternalId: false,
+    isFiat: false,
+    network: "epic",
+    buy: true,
+    sell: true,
+    rateType: SupportedRateType.estimated,
+  );
 
   Future<T> showUpdatingExchangeRate<T>({
     required Future<T> whileFuture,
@@ -145,7 +163,7 @@ class _ExchangeFormState extends ConsumerState<ExchangeForm> {
     final result = await whileFuture;
 
     if (mounted) {
-      Navigator.of(context, rootNavigator: isDesktop).pop();
+      Navigator.of(context).pop();
     }
 
     return result;
@@ -207,34 +225,6 @@ class _ExchangeFormState extends ConsumerState<ExchangeForm> {
     }
   }
 
-  // Future<AggregateCurrency> _getAggregateCurrency(Currency currency) async {
-  //   final rateType = ref.read(efRateTypeProvider);
-  //   final currencies = await ref
-  //       .read(pSwapDataService)
-  //       .isarDB
-  //       .isar
-  //       .currencies
-  //       .filter()
-  //       .rateTypeEqualTo(rateType)
-  //       .and()
-  //       .tickerEqualTo(
-  //         currency.ticker,
-  //         caseSensitive: false,
-  //       )
-  //       .and()
-  //       .tokenContractEqualTo(currency.tokenContract)
-  //       .findAll();
-  //
-  //   final items = [(currency, currency.exchangeName)];
-  //
-  //   for (final currency in currencies) {
-  //     items.add((currency, currency.exchangeName));
-  //   }
-  //
-  //   // return AggregateCurrency(exchangeCurrencyPairs: items);
-  //   return AggregateCurrency(exchangeCurrencyPairs: items.toList());
-  // }
-
   void selectSendCurrency() async {
     final type = ref.read(efRateTypeProvider);
     final fromTicker = ref.read(efCurrencyPairProvider).send?.ticker ?? "";
@@ -251,28 +241,34 @@ class _ExchangeFormState extends ConsumerState<ExchangeForm> {
       }
     }
 
-    // final selectedCurrency = await _showCurrencySelectionSheet(
-    //   willChange: ref.read(efCurrencyPairProvider).send?.ticker,
-    //   willChangeIsSend: true,
-    //   paired: ref.read(efCurrencyPairProvider).receive?.ticker,
-    //   isFixedRate: type == ExchangeRateType.fixed,
-    // );
+    final selectedCurrency = await _showCurrencySelectionSheet(
+      willChange: ref.read(efCurrencyPairProvider).send?.ticker,
+      willChangeIsSend: true,
+      paired: ref.read(efCurrencyPairProvider).receive?.ticker,
+      isFixedRate: type == SupportedRateType.fixed,
+    );
 
-    final selectedCurrency = coin!;
-
-    // if (selectedCurrency != null) {
-    //   await showUpdatingExchangeRate(
-    //     whileFuture: _getAggregateCurrency(selectedCurrency).then(
-    //       (aggregateSelected) => ref.read(efCurrencyPairProvider).setSend(
-    //             aggregateSelected,
-    //             notifyListeners: true,
-    //           ),
-    //     ),
-    //   );
-    // }
+    if (selectedCurrency != null) {
+      await showUpdatingExchangeRate(
+        whileFuture: ref
+            .read(pSwapDataService)
+            .getAggregateCurrency(
+              selectedCurrency,
+              type,
+              null,
+            )
+            .then(
+              (aggregateSelected) => ref.read(efCurrencyPairProvider).setSend(
+                    aggregateSelected,
+                    notifyListeners: true,
+                  ),
+            ),
+      );
+    }
   }
 
   void selectReceiveCurrency() async {
+    final type = ref.read(efRateTypeProvider);
     final toTicker = ref.read(efCurrencyPairProvider).receive?.ticker ?? "";
     if (walletInitiated &&
         toTicker.toLowerCase() == coin!.ticker.toLowerCase()) {
@@ -280,135 +276,92 @@ class _ExchangeFormState extends ConsumerState<ExchangeForm> {
       return;
     }
 
-    // final selectedCurrency = await _showCurrencySelectionSheet(
-    //   willChange: ref.read(efCurrencyPairProvider).receive?.ticker,
-    //   willChangeIsSend: false,
-    //   paired: ref.read(efCurrencyPairProvider).send?.ticker,
-    //   isFixedRate: ref.read(efRateTypeProvider) == ExchangeRateType.fixed,
-    // );
+    final selectedCurrency = await _showCurrencySelectionSheet(
+      willChange: ref.read(efCurrencyPairProvider).receive?.ticker,
+      willChangeIsSend: false,
+      paired: ref.read(efCurrencyPairProvider).send?.ticker,
+      isFixedRate: ref.read(efRateTypeProvider) == SupportedRateType.fixed,
+    );
 
-    final selectedCurrency = coin!;
-    // if (selectedCurrency != null) {
-    // await showUpdatingExchangeRate(
-    //   whileFuture: _getAggregateCurrency(selectedCurrency).then(
-    //     (aggregateSelected) => ref.read(efCurrencyPairProvider).setReceive(
-    //           aggregateSelected,
-    //           notifyListeners: true,
-    //         ),
-    //   ),
-    // );
-    // }
+    print("RCV CURRENCY: $selectedCurrency");
+
+    if (selectedCurrency != null) {
+      await showUpdatingExchangeRate(
+        whileFuture: ref
+            .read(pSwapDataService)
+            .getAggregateCurrency(
+              selectedCurrency,
+              type,
+              null,
+            )
+            .then(
+          (aggregateSelected) {
+            print("ADDDDDDDDDDDDDDDDDDD: $aggregateSelected");
+
+            ref.read(efCurrencyPairProvider).setReceive(
+                  aggregateSelected,
+                  notifyListeners: true,
+                );
+          },
+        ),
+      );
+    }
   }
 
-//   Future<void> _swap() async {
-//     _swapLock = true;
-//     _sendFocusNode.unfocus();
-//     _receiveFocusNode.unfocus();
-//
-//     final temp = ref.read(efCurrencyPairProvider).send;
-//     ref.read(efCurrencyPairProvider).setSend(
-//           ref.read(efCurrencyPairProvider).receive,
-//           notifyListeners: true,
-//         );
-//     ref.read(efCurrencyPairProvider).setReceive(
-//           temp,
-//           notifyListeners: true,
-//         );
-//
-//     // final reversed = ref.read(efReversedProvider);
-//
-//     final amount = ref.read(efSendAmountProvider);
-//     ref.read(efSendAmountProvider.notifier).state =
-//         ref.read(efReceiveAmountProvider);
-//
-//     ref.read(efReceiveAmountProvider.notifier).state = amount;
-//
-//     unawaited(update());
-//
-//     _swapLock = false;
-//   }
-//
-//   Future<Currency?> _showCurrencySelectionSheet({
-//     required String? willChange,
-//     required String? paired,
-//     required bool isFixedRate,
-//     required bool willChangeIsSend,
-//   }) async {
-//     _sendFocusNode.unfocus();
-//     _receiveFocusNode.unfocus();
-//
-//     final result = isDesktop
-//         ? await showDialog<Currency?>(
-//             context: context,
-//             builder: (context) {
-//               return DesktopDialog(
-//                 maxHeight: 700,
-//                 maxWidth: 580,
-//                 child: Column(
-//                   children: [
-//                     Row(
-//                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//                       children: [
-//                         Padding(
-//                           padding: const EdgeInsets.only(
-//                             left: 32,
-//                           ),
-//                           child: Text(
-//                             "Choose a coin to exchange",
-//                             style: STextStyles.desktopH3(context),
-//                           ),
-//                         ),
-//                         const DesktopDialogCloseButton(),
-//                       ],
-//                     ),
-//                     Expanded(
-//                       child: Padding(
-//                         padding: const EdgeInsets.only(
-//                           left: 32,
-//                           right: 32,
-//                           bottom: 32,
-//                         ),
-//                         child: Row(
-//                           children: [
-//                             Expanded(
-//                               child: RoundedWhiteContainer(
-//                                 padding: const EdgeInsets.all(16),
-//                                 borderColor: Theme.of(context)
-//                                     .extension<StackColors>()!
-//                                     .background,
-//                                 child: ExchangeCurrencySelectionView(
-//                                   willChangeTicker: willChange,
-//                                   pairedTicker: paired,
-//                                   isFixedRate: isFixedRate,
-//                                   willChangeIsSend: willChangeIsSend,
-//                                 ),
-//                               ),
-//                             ),
-//                           ],
-//                         ),
-//                       ),
-//                     ),
-//                   ],
-//                 ),
-//               );
-//             })
-//         : await Navigator.of(context).push(
-//             MaterialPageRoute<dynamic>(
-//               builder: (_) => ExchangeCurrencySelectionView(
-//                 willChangeTicker: willChange,
-//                 pairedTicker: paired,
-//                 isFixedRate: isFixedRate,
-//                 willChangeIsSend: willChangeIsSend,
-//               ),
-//             ),
-//           );
-//
-//     if (mounted && result is Currency) {
-//       return result;
-//     } else {
-//       return null;
-//     }
-//   }
+  Future<void> _swap() async {
+    _swapLock = true;
+    _sendFocusNode.unfocus();
+    _receiveFocusNode.unfocus();
+
+    final temp = ref.read(efCurrencyPairProvider).send;
+    ref.read(efCurrencyPairProvider).setSend(
+          ref.read(efCurrencyPairProvider).receive,
+          notifyListeners: true,
+        );
+    ref.read(efCurrencyPairProvider).setReceive(
+          temp,
+          notifyListeners: true,
+        );
+
+    // final reversed = ref.read(efReversedProvider);
+
+    final amount = ref.read(efSendAmountProvider);
+    ref.read(efSendAmountProvider.notifier).state =
+        ref.read(efReceiveAmountProvider);
+
+    ref.read(efReceiveAmountProvider.notifier).state = amount;
+
+    unawaited(update());
+
+    _swapLock = false;
+  }
+
+  Future<Currency?> _showCurrencySelectionSheet({
+    required String? willChange,
+    required String? paired,
+    required bool isFixedRate,
+    required bool willChangeIsSend,
+  }) async {
+    _sendFocusNode.unfocus();
+    _receiveFocusNode.unfocus();
+
+    final result = await Navigator.of(context).push(
+      MaterialPageRoute<dynamic>(
+        builder: (_) => ExchangeCurrencySelectionView(
+          willChangeTicker: willChange,
+          pairedTicker: paired,
+          isFixedRate: isFixedRate,
+          willChangeIsSend: willChangeIsSend,
+        ),
+      ),
+    );
+
+    if (mounted && result is Currency) {
+      return result;
+    } else {
+      return null;
+    }
+  }
 
   void onRateTypeChanged(SupportedRateType newType) {
     _receiveFocusNode.unfocus();
@@ -418,224 +371,120 @@ class _ExchangeFormState extends ConsumerState<ExchangeForm> {
     update();
   }
 
-//   void onExchangePressed() async {
-//     final rateType = ref.read(efRateTypeProvider);
-//     final fromTicker = ref.read(efCurrencyPairProvider).send?.ticker ?? "";
-//     final toTicker = ref.read(efCurrencyPairProvider).receive?.ticker ?? "";
-//     final estimate = ref.read(efEstimateProvider)!;
-//     final sendAmount = ref.read(efSendAmountProvider)!;
-//
-//     if (rateType == ExchangeRateType.fixed && toTicker.toUpperCase() == "WOW") {
-//       await showDialog<void>(
-//         context: context,
-//         builder: (context) => const StackOkDialog(
-//           title: "WOW error",
-//           message:
-//               "Wownero is temporarily disabled as a receiving currency for fixed rate trades due to network issues",
-//         ),
-//       );
-//
-//       return;
-//     }
-//
-//     String rate;
-//
-//     final amountToSend =
-//         estimate.reversed ? estimate.estimatedAmount : sendAmount;
-//     final amountToReceive = estimate.reversed
-//         ? ref.read(efReceiveAmountProvider)!
-//         : estimate.estimatedAmount;
-//
-//     switch (rateType) {
-//       case ExchangeRateType.estimated:
-//         rate =
-//             "1 ${fromTicker.toUpperCase()} ~${(amountToReceive / sendAmount).toDecimal(scaleOnInfinitePrecision: 8).toStringAsFixed(8)} ${toTicker.toUpperCase()}";
-//         break;
-//       case ExchangeRateType.fixed:
-//         bool? shouldCancel;
-//
-//         if (estimate.warningMessage != null &&
-//             estimate.warningMessage!.isNotEmpty) {
-//           shouldCancel = await showDialog<bool?>(
-//             context: context,
-//             barrierDismissible: true,
-//             builder: (_) {
-//               if (isDesktop) {
-//                 return DesktopDialog(
-//                   maxWidth: 500,
-//                   maxHeight: 300,
-//                   child: Column(
-//                     crossAxisAlignment: CrossAxisAlignment.start,
-//                     children: [
-//                       Row(
-//                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//                         children: [
-//                           Text(
-//                             "Failed to update trade estimate",
-//                             style: STextStyles.desktopH3(context),
-//                           ),
-//                           const DesktopDialogCloseButton(),
-//                         ],
-//                       ),
-//                       const Spacer(),
-//                       Text(
-//                         estimate.warningMessage!,
-//                         style: STextStyles.desktopTextSmall(context),
-//                       ),
-//                       const Spacer(),
-//                       Text(
-//                         "Do you want to attempt trade anyways?",
-//                         style: STextStyles.desktopTextSmall(context),
-//                       ),
-//                       const Spacer(
-//                         flex: 2,
-//                       ),
-//                       Row(
-//                         children: [
-//                           Expanded(
-//                             child: SecondaryButton(
-//                               label: "Cancel",
-//                               buttonHeight: ButtonHeight.l,
-//                               onPressed: () => Navigator.of(
-//                                 context,
-//                                 rootNavigator: true,
-//                               ).pop(true),
-//                             ),
-//                           ),
-//                           const SizedBox(
-//                             width: 16,
-//                           ),
-//                           Expanded(
-//                             child: PrimaryButton(
-//                               label: "Attempt",
-//                               buttonHeight: ButtonHeight.l,
-//                               onPressed: () => Navigator.of(
-//                                 context,
-//                                 rootNavigator: true,
-//                               ).pop(false),
-//                             ),
-//                           ),
-//                         ],
-//                       )
-//                     ],
-//                   ),
-//                 );
-//               } else {
-//                 return StackDialog(
-//                   title: "Failed to update trade estimate",
-//                   message:
-//                       "${estimate.warningMessage!}\n\nDo you want to attempt trade anyways?",
-//                   leftButton: TextButton(
-//                     style: Theme.of(context)
-//                         .extension<StackColors>()!
-//                         .getSecondaryEnabledButtonStyle(context),
-//                     child: Text(
-//                       "Cancel",
-//                       style: STextStyles.itemSubtitle12(context),
-//                     ),
-//                     onPressed: () {
-//                       // notify return to cancel
-//                       Navigator.of(context).pop(true);
-//                     },
-//                   ),
-//                   rightButton: TextButton(
-//                     style: Theme.of(context)
-//                         .extension<StackColors>()!
-//                         .getPrimaryEnabledButtonStyle(context),
-//                     child: Text(
-//                       "Attempt",
-//                       style: STextStyles.button(context),
-//                     ),
-//                     onPressed: () {
-//                       // continue and try to attempt trade
-//                       Navigator.of(context).pop(false);
-//                     },
-//                   ),
-//                 );
-//               }
-//             },
-//           );
-//         }
-//
-//         if (shouldCancel is bool && shouldCancel) {
-//           return;
-//         }
-//         rate =
-//             "1 ${fromTicker.toUpperCase()} ~${(amountToReceive / amountToSend).toDecimal(
-//                   scaleOnInfinitePrecision: 12,
-//                 ).toStringAsFixed(8)} ${toTicker.toUpperCase()}";
-//         break;
-//     }
-//
-//     final model = IncompleteExchangeModel(
-//       sendTicker: fromTicker.toUpperCase(),
-//       receiveTicker: toTicker.toUpperCase(),
-//       rateInfo: rate,
-//       sendAmount: amountToSend,
-//       receiveAmount: amountToReceive,
-//       rateType: rateType,
-//       estimate: estimate,
-//       reversed: estimate.reversed,
-//       walletInitiated: walletInitiated,
-//     );
-//
-//     if (mounted) {
-//       if (walletInitiated) {
-//         ref.read(exchangeSendFromWalletIdStateProvider.state).state =
-//             Tuple2(walletId!, coin!);
-//         if (isDesktop) {
-//           ref.read(ssss.state).state = model;
-//           await showDialog<void>(
-//             context: context,
-//             barrierDismissible: false,
-//             builder: (context) {
-//               return const DesktopDialog(
-//                 maxWidth: 720,
-//                 maxHeight: double.infinity,
-//                 child: StepScaffold(
-//                   initialStep: 2,
-//                 ),
-//               );
-//             },
-//           );
-//         } else {
-//           unawaited(
-//             Navigator.of(context).pushNamed(
-//               Step2View.routeName,
-//               arguments: model,
-//             ),
-//           );
-//         }
-//       } else {
-//         ref.read(exchangeSendFromWalletIdStateProvider.state).state = null;
-//
-//         if (isDesktop) {
-//           ref.read(ssss.state).state = model;
-//           await showDialog<void>(
-//             context: context,
-//             barrierDismissible: false,
-//             builder: (context) {
-//               return const DesktopDialog(
-//                 maxWidth: 720,
-//                 maxHeight: double.infinity,
-//                 child: StepScaffold(
-//                   initialStep: 1,
-//                 ),
-//               );
-//             },
-//           );
-//         } else {
-//           unawaited(
-//             Navigator.of(context).pushNamed(
-//               Step1View.routeName,
-//               arguments: model,
-//             ),
-//           );
-//         }
-//       }
-//     }
-//   }
-//
+  void onExchangePressed() async {
+    final rateType = ref.read(efRateTypeProvider);
+    final fromTicker = ref.read(efCurrencyPairProvider).send?.ticker ?? "";
+    final toTicker = ref.read(efCurrencyPairProvider).receive?.ticker ?? "";
+    final estimate = ref.read(efEstimateProvider)!;
+    final sendAmount = ref.read(efSendAmountProvider)!;
+
+    String rate;
+
+    final amountToSend = estimate.reversed ? estimate.fromAmount : sendAmount;
+    final amountToReceive = estimate.reversed
+        ? ref.read(efReceiveAmountProvider)!
+        : estimate.toAmount;
+
+    switch (rateType) {
+      case SupportedRateType.estimated:
+        rate =
+            "1 ${fromTicker.toUpperCase()} ~${(amountToReceive / sendAmount).toDecimal(scaleOnInfinitePrecision: 8).toStringAsFixed(8)} ${toTicker.toUpperCase()}";
+        break;
+      case SupportedRateType.fixed:
+        bool? shouldCancel;
+
+        // if (estimate.warningMessage != null &&
+        //     estimate.warningMessage!.isNotEmpty) {
+        //   shouldCancel = await showDialog<bool?>(
+        //     context: context,
+        //     barrierDismissible: true,
+        //     builder: (_) {
+        //       return StackDialog(
+        //         title: "Failed to update trade estimate",
+        //         message:
+        //             "${estimate.warningMessage!}\n\nDo you want to attempt trade anyways?",
+        //         leftButton: TextButton(
+        //           style: Theme.of(context)
+        //               .extension<StackColors>()!
+        //               .getSecondaryEnabledButtonStyle(context),
+        //           child: Text(
+        //             "Cancel",
+        //             style: STextStyles.itemSubtitle12(context),
+        //           ),
+        //           onPressed: () {
+        //             // notify return to cancel
+        //             Navigator.of(context).pop(true);
+        //           },
+        //         ),
+        //         rightButton: TextButton(
+        //           style: Theme.of(context)
+        //               .extension<StackColors>()!
+        //               .getPrimaryEnabledButtonStyle(context),
+        //           child: Text(
+        //             "Attempt",
+        //             style: STextStyles.button(context),
+        //           ),
+        //           onPressed: () {
+        //             // continue and try to attempt trade
+        //             Navigator.of(context).pop(false);
+        //           },
+        //         ),
+        //       );
+        //     },
+        //   );
+        // }
+
+        if (shouldCancel is bool && shouldCancel) {
+          return;
+        }
+        rate =
+            "1 ${fromTicker.toUpperCase()} ~${(amountToReceive / amountToSend).toDecimal(
+                  scaleOnInfinitePrecision: 12,
+                ).toStringAsFixed(8)} ${toTicker.toUpperCase()}";
+        break;
+
+      case SupportedRateType.both:
+        throw Exception(
+          "SupportedRateType.both not supported when making an exchange!",
+        );
+    }
+
+    final model = IncompleteExchangeModel(
+      sendTicker: fromTicker.toUpperCase(),
+      receiveTicker: toTicker.toUpperCase(),
+      rateInfo: rate,
+      sendAmount: amountToSend,
+      receiveAmount: amountToReceive,
+      rateType: rateType,
+      estimate: estimate,
+      reversed: estimate.reversed,
+      walletInitiated: walletInitiated,
+    );
+
+    // if (mounted) {
+    //   if (walletInitiated) {
+    //     ref.read(exchangeSendFromWalletIdStateProvider.state).state =
+    //         Tuple2(walletId!, coin!);
+    //
+    //     unawaited(
+    //       Navigator.of(context).pushNamed(
+    //         Step2View.routeName,
+    //         arguments: model,
+    //       ),
+    //     );
+    //   } else {
+    //     ref.read(exchangeSendFromWalletIdStateProvider.state).state = null;
+    //
+    //     unawaited(
+    //       Navigator.of(context).pushNamed(
+    //         Step1View.routeName,
+    //         arguments: model,
+    //       ),
+    //     );
+    //   }
+    // }
+  }
+
   bool isWalletCoin(Coin? coin, bool isSend) {
     if (coin == null) {
       return false;
@@ -698,7 +547,7 @@ class _ExchangeFormState extends ConsumerState<ExchangeForm> {
         results.addAll(
           {
             exchange.name: Tuple2(
-              estimateResponse as ExchangeResponse<List<Estimate>>,
+              estimateResponse,
               rangeResponse.value,
             ),
           },
@@ -733,14 +582,13 @@ class _ExchangeFormState extends ConsumerState<ExchangeForm> {
     }
   }
 
-  // void updateSend(Estimate? estimate) {
-  //   ref.read(efSendAmountProvider.notifier).state = estimate?.;
-  // }
-  //
-  // void updateReceive(Estimate? estimate) {
-  //   ref.read(efReceiveAmountProvider.notifier).state =
-  //       estimate?.estimatedAmount;
-  // }
+  void updateSend(Estimate? estimate) {
+    ref.read(efSendAmountProvider.notifier).state = estimate?.fromAmount;
+  }
+
+  void updateReceive(Estimate? estimate) {
+    ref.read(efReceiveAmountProvider.notifier).state = estimate?.toAmount;
+  }
 
   @override
   void initState() {
@@ -776,35 +624,34 @@ class _ExchangeFormState extends ConsumerState<ExchangeForm> {
     });
 
     // if (walletInitiated) {
-    //   WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-    //     ref.read(efSendAmountProvider.notifier).state = null;
-    //     ref.read(efReceiveAmountProvider.notifier).state = null;
-    //     ref.read(efReversedProvider.notifier).state = false;
-    //     ref.read(efRefreshingProvider.notifier).state = false;
-    //     ref.read(efCurrencyPairProvider).setSend(null, notifyListeners: true);
-    //     ref
-    //         .read(efCurrencyPairProvider)
-    //         .setReceive(null, notifyListeners: true);
-    //     ExchangeDataLoadingService.instance
-    //         .getAggregateCurrency(
-    //       widget.contract == null ? coin!.ticker : widget.contract!.symbol,
-    //       ExchangeRateType.estimated,
-    //       widget.contract == null ? null : widget.contract!.address,
-    //     )
-    //         .then((value) {
-    //       if (value != null) {
-    //         ref.read(efCurrencyPairProvider).setSend(
-    //               value,
-    //               notifyListeners: true,
-    //             );
-    //       }
-    //     });
-    //   });
-    // } else {
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      _sendController.text = ref.read(efSendAmountStringProvider);
-      _receiveController.text = ref.read(efReceiveAmountStringProvider);
+      ref.read(efSendAmountProvider.notifier).state = null;
+      ref.read(efReceiveAmountProvider.notifier).state = null;
+      ref.read(efReversedProvider.notifier).state = false;
+      ref.read(efRefreshingProvider.notifier).state = false;
+      ref.read(efCurrencyPairProvider).setSend(null, notifyListeners: true);
+      ref.read(efCurrencyPairProvider).setReceive(null, notifyListeners: true);
+      ref
+          .read(pSwapDataService)
+          .getAggregateCurrency(
+            dummyEpic,
+            SupportedRateType.estimated,
+            null,
+          )
+          .then((value) {
+        if (value != null) {
+          ref.read(efCurrencyPairProvider).setSend(
+                value,
+                notifyListeners: true,
+              );
+        }
+      });
     });
+    // } else {
+    // WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+    //   _sendController.text = ref.read(efSendAmountStringProvider);
+    //   _receiveController.text = ref.read(efReceiveAmountStringProvider);
+    // });
     // }
 
     super.initState();
@@ -847,14 +694,14 @@ class _ExchangeFormState extends ConsumerState<ExchangeForm> {
       }
     });
 
-    // ref.listen(efEstimateProvider.notifier, (previous, next) {
-    //   final estimate = (next as StateController<Estimate?>).state;
-    //   if (ref.read(efReversedProvider)) {
-    //     updateSend(estimate);
-    //   } else {
-    //     updateReceive(estimate);
-    //   }
-    // });
+    ref.listen(efEstimateProvider.notifier, (previous, next) {
+      final estimate = next.state;
+      if (ref.read(efReversedProvider)) {
+        updateSend(estimate);
+      } else {
+        updateReceive(estimate);
+      }
+    });
 
     ref.listen(efCurrencyPairProvider, (previous, next) {
       if (!_swapLock) {
@@ -872,12 +719,12 @@ class _ExchangeFormState extends ConsumerState<ExchangeForm> {
             color: Theme.of(context).extension<StackColors>()!.textMedium,
           ),
         ),
-        SizedBox(
-          height: isDesktop ? 10 : 4,
+        const SizedBox(
+          height: 4,
         ),
         ExchangeTextField(
           key: Key("exchangeTextFieldKeyFor_"
-              "dark"
+              "${Theme.of(context).extension<StackColors>()!.themeType.name}"
               "${ref.watch(efCurrencyPairProvider.select((value) => value.send?.ticker))}"),
           controller: _sendController,
           focusNode: _sendFocusNode,
@@ -900,11 +747,11 @@ class _ExchangeFormState extends ConsumerState<ExchangeForm> {
           currency:
               ref.watch(efCurrencyPairProvider.select((value) => value.send)),
         ),
-        SizedBox(
-          height: isDesktop ? 10 : 4,
+        const SizedBox(
+          height: 4,
         ),
-        SizedBox(
-          height: isDesktop ? 10 : 4,
+        const SizedBox(
+          height: 4,
         ),
         Row(
           crossAxisAlignment: CrossAxisAlignment.end,
@@ -916,37 +763,28 @@ class _ExchangeFormState extends ConsumerState<ExchangeForm> {
                 color: Theme.of(context).extension<StackColors>()!.textMedium,
               ),
             ),
-            ConditionalParent(
-              condition: isDesktop,
-              builder: (child) => MouseRegion(
-                cursor: SystemMouseCursors.click,
-                child: child,
-              ),
-              child: Semantics(
-                label: "Swap Button. Reverse The Exchange Currencies.",
-                excludeSemantics: true,
-                child: RoundedContainer(
-                  padding: isDesktop
-                      ? const EdgeInsets.all(6)
-                      : const EdgeInsets.all(2),
-                  color: Theme.of(context)
-                      .extension<StackColors>()!
-                      .buttonBackSecondary,
-                  radiusMultiplier: 0.75,
-                  child: GestureDetector(
-                    onTap: () async {
-                      // await _swap();
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.all(4),
-                      child: SvgPicture.asset(
-                        Assets.svg.swap,
-                        width: 20,
-                        height: 20,
-                        color: Theme.of(context)
-                            .extension<StackColors>()!
-                            .accentColorDark,
-                      ),
+            Semantics(
+              label: "Swap Button. Reverse The Exchange Currencies.",
+              excludeSemantics: true,
+              child: RoundedContainer(
+                padding: const EdgeInsets.all(2),
+                color: Theme.of(context)
+                    .extension<StackColors>()!
+                    .buttonBackSecondary,
+                radiusMultiplier: 0.75,
+                child: GestureDetector(
+                  onTap: () async {
+                    // await _swap();
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.all(4),
+                    child: SvgPicture.asset(
+                      Assets.svg.swap,
+                      width: 20,
+                      height: 20,
+                      color: Theme.of(context)
+                          .extension<StackColors>()!
+                          .accentColorDark,
                     ),
                   ),
                 ),
@@ -954,12 +792,13 @@ class _ExchangeFormState extends ConsumerState<ExchangeForm> {
             ),
           ],
         ),
-        SizedBox(
-          height: isDesktop ? 10 : 7,
+
+        const SizedBox(
+          height: 7,
         ),
         ExchangeTextField(
-          // key: Key(
-          //     "exchangeTextFieldKeyFor1_${Theme.of(context).extension<StackColors>()!.themeId}"),
+          key: Key(
+              "exchangeTextFieldKeyFor1_${Theme.of(context).extension<StackColors>()!.themeType.name}"),
           focusNode: _receiveFocusNode,
           controller: _receiveController,
           textStyle: STextStyles.smallMed14(context).copyWith(
@@ -988,40 +827,40 @@ class _ExchangeFormState extends ConsumerState<ExchangeForm> {
               ref.watch(efExchangeProvider).name ==
                   ChangeNowExchange.exchangeName,
         ),
-        SizedBox(
-          height: isDesktop ? 20 : 12,
+
+        const SizedBox(
+          height: 12,
         ),
-        SizedBox(
-          height: isDesktop ? 60 : 40,
-          child: RateTypeToggle(
-            key: UniqueKey(),
-            onChanged: onRateTypeChanged,
-          ),
+        // SizedBox(
+        //   height: 40,
+        //   child: RateTypeToggle(
+        //     key: UniqueKey(),
+        //     onChanged: onRateTypeChanged,
+        //   ),
+        // ),
+        AnimatedSize(
+          duration: const Duration(milliseconds: 300),
+          child: ref.watch(efSendAmountProvider) == null &&
+                  ref.watch(efReceiveAmountProvider) == null
+              ? const SizedBox(
+                  height: 0,
+                )
+              : Padding(
+                  padding: const EdgeInsets.only(top: 12),
+                  child: ExchangeProviderOptions(
+                    fixedRate: rateType == SupportedRateType.fixed,
+                    reversed: ref.watch(efReversedProvider),
+                  ),
+                ),
         ),
-//         AnimatedSize(
-//           duration: const Duration(milliseconds: 300),
-//           child: ref.watch(efSendAmountProvider) == null &&
-//                   ref.watch(efReceiveAmountProvider) == null
-//               ? const SizedBox(
-//                   height: 0,
-//                 )
-//               : Padding(
-//                   padding: EdgeInsets.only(top: isDesktop ? 20 : 12),
-//                   child: ExchangeProviderOptions(
-//                     fixedRate: rateType == ExchangeRateType.fixed,
-//                     reversed: ref.watch(efReversedProvider),
-//                   ),
-//                 ),
-//         ),
-//         SizedBox(
-//           height: isDesktop ? 20 : 12,
-//         ),
-//         PrimaryButton(
-//           buttonHeight: isDesktop ? ButtonHeight.l : null,
-//           enabled: ref.watch(efCanExchangeProvider),
-//           onPressed: onExchangePressed,
-//           label: "Swap",
-//         )
+        const SizedBox(
+          height: 12,
+        ),
+        PrimaryButton(
+          enabled: ref.watch(efCanExchangeProvider),
+          onPressed: onExchangePressed,
+          label: "Swap",
+        )
       ],
     );
   }

@@ -98,6 +98,8 @@ class _ExchangeTextFieldState extends ConsumerState<ExchangeTextField> {
 
   @override
   Widget build(BuildContext context) {
+    print("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA: ${widget.currency}");
+
     return Container(
       decoration: BoxDecoration(
         color: background,
@@ -176,7 +178,7 @@ class _ExchangeTextFieldState extends ConsumerState<ExchangeTextField> {
                           ),
                           child: Builder(
                             builder: (context) {
-                              if (isStackCoin(widget.currency!.ticker)) {
+                              if (isStackCoin(widget.currency?.ticker)) {
                                 return Center(
                                   child: getIconForTicker(
                                     widget.currency!.ticker,

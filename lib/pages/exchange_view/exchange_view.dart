@@ -118,14 +118,17 @@ class _ExchangeViewState extends ConsumerState<ExchangeView> {
               SliverOverlapAbsorber(
                 handle:
                     NestedScrollView.sliverOverlapAbsorberHandleFor(context),
-                sliver: const SliverToBoxAdapter(
+                sliver: SliverToBoxAdapter(
                   child: Padding(
-                    padding: EdgeInsets.only(
+                    padding: const EdgeInsets.only(
                       left: 16,
                       right: 16,
                       top: 16,
                     ),
-                    child: ExchangeForm(),
+                    child: ExchangeForm(
+                      walletId: ref.watch(walletProvider)?.walletId,
+                      coin: ref.watch(walletProvider)?.coin,
+                    ),
                   ),
                 ),
               )
