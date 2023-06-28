@@ -34,7 +34,7 @@ class Estimate {
         fromAmount: Decimal.parse(map["fromAmount"].toString()),
         toAmount: Decimal.parse(map["toAmount"].toString()),
         fixedRate: map["flow"] == "fixed-rate",
-        reversed: map["type"] != "standard",
+        reversed: map["type"] == "reverse",
         warningMessage: map["warningMessage"] as String?,
         rateId: map["rateId"] as String?,
         exchangeProvider: exchangeProvider,

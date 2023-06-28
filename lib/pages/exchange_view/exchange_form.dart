@@ -69,6 +69,7 @@ import 'package:epicpay/providers/exchange/exchange_form_state_provider.dart';
 import 'package:epicpay/services/swap/change_now/change_now_exchange.dart';
 import 'package:epicpay/services/swap/exchange_response.dart';
 import 'package:epicpay/services/swap/swap_data_service.dart';
+import 'package:epicpay/utilities/amount/amount_formatter.dart';
 import 'package:epicpay/utilities/assets.dart';
 import 'package:epicpay/utilities/constants.dart';
 import 'package:epicpay/utilities/enums/coin_enum.dart';
@@ -175,9 +176,10 @@ class _ExchangeFormState extends ConsumerState<ExchangeForm> {
       _sendFieldOnChangedTimer?.cancel();
 
       _sendFieldOnChangedTimer = Timer(_valueCheckInterval, () async {
-        final newFromAmount = _localizedStringToNum(value);
+        final newFromAmount =
+            ref.read(pAmountFormatter(Coin.epicCash)).tryParse(value);
 
-        ref.read(efSendAmountProvider.notifier).state = newFromAmount;
+        ref.read(efSendAmountProvider.notifier).state = newFromAmount?.decimal;
         if (!_swapLock && !ref.read(efReversedProvider)) {
           unawaited(update());
         }
@@ -190,39 +192,14 @@ class _ExchangeFormState extends ConsumerState<ExchangeForm> {
     _receiveFieldOnChangedTimer?.cancel();
 
     _receiveFieldOnChangedTimer = Timer(_valueCheckInterval, () async {
-      final newToAmount = _localizedStringToNum(value);
+      final newToAmount =
+          ref.read(pAmountFormatter(Coin.epicCash)).tryParse(value);
 
-      ref.read(efReceiveAmountProvider.notifier).state = newToAmount;
+      ref.read(efReceiveAmountProvider.notifier).state = newToAmount?.decimal;
       if (!_swapLock && ref.read(efReversedProvider)) {
         unawaited(update());
       }
     });
-  }
-
-  Decimal? _localizedStringToNum(String? value) {
-    if (value == null) {
-      return null;
-    }
-    try {
-      // wtf Dart?????
-      // This turns "99999999999999999999" into 100000000000000000000.0
-      // final numFromLocalised = NumberFormat.decimalPattern(
-      //         ref.read(localeServiceChangeNotifierProvider).locale)
-      //     .parse(value);
-      // return Decimal.tryParse(numFromLocalised.toString());
-
-      try {
-        return Decimal.parse(value);
-      } catch (_) {
-        try {
-          return Decimal.parse(value.replaceAll(",", "."));
-        } catch (_) {
-          rethrow;
-        }
-      }
-    } catch (_) {
-      return null;
-    }
   }
 
   void selectSendCurrency() async {
@@ -283,8 +260,6 @@ class _ExchangeFormState extends ConsumerState<ExchangeForm> {
       isFixedRate: ref.read(efRateTypeProvider) == SupportedRateType.fixed,
     );
 
-    print("RCV CURRENCY: $selectedCurrency");
-
     if (selectedCurrency != null) {
       await showUpdatingExchangeRate(
         whileFuture: ref
@@ -296,8 +271,6 @@ class _ExchangeFormState extends ConsumerState<ExchangeForm> {
             )
             .then(
           (aggregateSelected) {
-            print("ADDDDDDDDDDDDDDDDDDD: $aggregateSelected");
-
             ref.read(efCurrencyPairProvider).setReceive(
                   aggregateSelected,
                   notifyListeners: true,
@@ -363,13 +336,14 @@ class _ExchangeFormState extends ConsumerState<ExchangeForm> {
     }
   }
 
-  void onRateTypeChanged(SupportedRateType newType) {
-    _receiveFocusNode.unfocus();
-    _sendFocusNode.unfocus();
-
-    ref.read(efRateTypeProvider.notifier).state = newType;
-    update();
-  }
+  // NOT USED IN EPIC PAY YET
+  // void onRateTypeChanged(SupportedRateType newType) {
+  //   _receiveFocusNode.unfocus();
+  //   _sendFocusNode.unfocus();
+  //
+  //   ref.read(efRateTypeProvider.notifier).state = newType;
+  //   update();
+  // }
 
   void onExchangePressed() async {
     final rateType = ref.read(efRateTypeProvider);

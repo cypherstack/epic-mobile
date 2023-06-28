@@ -95,7 +95,7 @@ class _ExchangeOptionState extends ConsumerState<ExchangeOption> {
                         }
                         Amount rate;
                         if (e.reversed) {
-                          rate = (amount / e.toAmount)
+                          rate = (amount / e.fromAmount)
                               .toDecimal(scaleOnInfinitePrecision: 18)
                               .toAmount(fractionDigits: decimals);
                         } else {
