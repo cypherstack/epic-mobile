@@ -134,20 +134,28 @@ class SwapDataService {
   //////////////////////////////////////////////////////////////////////////////
 
   Future<AggregateCurrency?> getAggregateCurrency(
-    String ticker,
+    Currency currency,
     SupportedRateType rateType,
     String? contract,
   ) async {
     final currencies = await isarDB.isar.currencies
         .filter()
-        .rateTypeEqualTo(rateType)
+        .group((q) => q
+            .rateTypeEqualTo(SupportedRateType.both)
+            .or()
+            .rateTypeEqualTo(rateType))
         .and()
-        .tickerEqualTo(
-          ticker,
+        .networkEqualTo(
+          currency.network,
           caseSensitive: false,
         )
         .and()
-        .tokenContractEqualTo(contract)
+        .tickerEqualTo(
+          currency.ticker,
+          caseSensitive: false,
+        )
+        // .and()
+        // .tokenContractEqualTo(contract)
         .findAll();
 
     final items = currencies
