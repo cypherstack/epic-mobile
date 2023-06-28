@@ -137,6 +137,18 @@ class _ExchangeFormState extends ConsumerState<ExchangeForm> {
     sell: true,
     rateType: SupportedRateType.estimated,
   );
+  final dummyBTC = Currency(
+    exchangeName: ChangeNowExchange.exchangeName,
+    ticker: "btc",
+    name: "Bitcoin",
+    image: "",
+    hasExternalId: false,
+    isFiat: false,
+    network: "btc",
+    buy: true,
+    sell: true,
+    rateType: SupportedRateType.both,
+  );
 
   Future<T> showUpdatingExchangeRate<T>({
     required Future<T> whileFuture,
@@ -615,6 +627,22 @@ class _ExchangeFormState extends ConsumerState<ExchangeForm> {
           .then((value) {
         if (value != null) {
           ref.read(efCurrencyPairProvider).setSend(
+                value,
+                notifyListeners: true,
+              );
+        }
+      });
+
+      ref
+          .read(pSwapDataService)
+          .getAggregateCurrency(
+            dummyBTC,
+            SupportedRateType.estimated,
+            null,
+          )
+          .then((value) {
+        if (value != null) {
+          ref.read(efCurrencyPairProvider).setReceive(
                 value,
                 notifyListeners: true,
               );
