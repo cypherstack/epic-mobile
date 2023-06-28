@@ -56,7 +56,7 @@ abstract class Exchange {
     bool fixedRate,
   );
 
-  Future<ExchangeResponse<Estimate>> getEstimate(
+  Future<ExchangeResponse<List<Estimate>>> getEstimate(
     Currency from,
     Currency to,
     Decimal amount,

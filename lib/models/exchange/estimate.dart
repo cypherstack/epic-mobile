@@ -31,10 +31,10 @@ class Estimate {
   }) {
     try {
       return Estimate(
-        fromAmount: Decimal.parse(map["fromAmount"] as String),
-        toAmount: Decimal.parse(map["toAmount"] as String),
-        fixedRate: map["fixedRate"] as bool,
-        reversed: map["reversed"] as bool,
+        fromAmount: Decimal.parse(map["fromAmount"].toString()),
+        toAmount: Decimal.parse(map["toAmount"].toString()),
+        fixedRate: map["flow"] == "fixed-rate",
+        reversed: map["type"] != "standard",
         warningMessage: map["warningMessage"] as String?,
         rateId: map["rateId"] as String?,
         exchangeProvider: exchangeProvider,

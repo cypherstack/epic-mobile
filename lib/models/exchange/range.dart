@@ -2,8 +2,8 @@ import 'package:decimal/decimal.dart';
 
 class Range {
   final String exchangeName;
-  final String from;
-  final String to;
+  final String fromCurrency;
+  final String toCurrency;
   final String fromNetwork;
   final String toNetwork;
   final bool fixedRate;
@@ -14,18 +14,18 @@ class Range {
     this.min,
     this.max,
     required this.exchangeName,
-    required this.from,
-    required this.to,
+    required this.fromCurrency,
+    required this.toCurrency,
     required this.fromNetwork,
     required this.toNetwork,
     required this.fixedRate,
   });
 
-  factory Range.fromJson(Map<String, dynamic> json) {
+  factory Range.fromJson(Map<String, dynamic> json, String exchangeName) {
     return Range(
-      exchangeName: json['exchangeName'] as String,
-      from: json['from'] as String,
-      to: json['to'] as String,
+      exchangeName: exchangeName,
+      fromCurrency: json['fromCurrency'] as String,
+      toCurrency: json['toCurrency'] as String,
       fromNetwork: json['fromNetwork'] as String,
       toNetwork: json['toNetwork'] as String,
       fixedRate: (json['flow'] as String) == "fixed-rate",
@@ -38,8 +38,8 @@ class Range {
     Decimal? min,
     Decimal? max,
     String? exchangeName,
-    String? from,
-    String? to,
+    String? fromCurrency,
+    String? toCurrency,
     String? fromNetwork,
     String? toNetwork,
     bool? fixedRate,
@@ -48,8 +48,8 @@ class Range {
       min: min ?? this.min,
       max: max ?? this.max,
       exchangeName: exchangeName ?? this.exchangeName,
-      from: from ?? this.from,
-      to: to ?? this.to,
+      fromCurrency: fromCurrency ?? this.fromCurrency,
+      toCurrency: toCurrency ?? this.toCurrency,
       fromNetwork: fromNetwork ?? this.fromNetwork,
       toNetwork: toNetwork ?? this.toNetwork,
       fixedRate: fixedRate ?? this.fixedRate,
@@ -60,8 +60,8 @@ class Range {
   String toString() {
     return 'Range('
         'exchangeName: $exchangeName, '
-        'from: $from, '
-        'to: $to, '
+        'from: $fromCurrency, '
+        'to: $toCurrency, '
         'fromNetwork: $fromNetwork, '
         'toNetwork: $toNetwork, '
         'fixedRate: $fixedRate, '

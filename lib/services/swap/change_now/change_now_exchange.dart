@@ -88,20 +88,31 @@ class ChangeNowExchange extends Exchange {
   }
 
   @override
-  Future<ExchangeResponse<Estimate>> getEstimate(
+  Future<ExchangeResponse<List<Estimate>>> getEstimate(
     Currency from,
     Currency to,
     Decimal amount,
     bool fixedRate,
     bool reversed,
   ) async {
-    return await ChangeNowAPI.instance.getEstimatedExchangeAmount(
+    final result = await ChangeNowAPI.instance.getEstimatedExchangeAmount(
       from: from,
       to: to,
       type: reversed ? CNEstimateType.reverse : CNEstimateType.direct,
       flow: fixedRate ? CNFlowType.fixedRate : CNFlowType.standard,
       amount: amount,
     );
+
+    if (result.value != null) {
+      return ExchangeResponse(
+        value: [result.value!],
+        exception: result.exception,
+      );
+    } else {
+      return ExchangeResponse(
+        exception: result.exception,
+      );
+    }
   }
 
   // @override

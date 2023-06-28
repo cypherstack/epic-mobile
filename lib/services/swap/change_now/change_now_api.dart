@@ -268,7 +268,10 @@ class ChangeNowAPI {
 
       final json = Map<String, dynamic>.from(jsonObject as Map);
       return ExchangeResponse(
-        value: Range.fromJson(json),
+        value: Range.fromJson(
+          json,
+          ChangeNowExchange.exchangeName,
+        ),
       );
     } catch (e, s) {
       Logging.instance.log(
