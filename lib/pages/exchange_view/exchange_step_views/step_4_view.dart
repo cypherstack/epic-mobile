@@ -409,46 +409,28 @@ class _Step4ViewState extends ConsumerState<Step4View> {
                               child: Column(
                                 children: [
                                   UnorderedListItem(
-                                      "Send [coin] to the address below"),
+                                    "Send [coin] to the address below",
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.only(left: 8.0),
+                                    child: Text(
+                                      // "If you send less than ${model.sendAmount.toString()} ${model.sendTicker}, your transaction may not be converted and it may not be refunded.",
+                                      "You must send at least []. If you send less than [], your transaction may not be converted and it may not be refunded.",
+                                      style:
+                                          STextStyles.label(context).copyWith(
+                                        color: Theme.of(context)
+                                            .extension<StackColors>()!
+                                            .warningForeground,
+                                      ),
+                                    ),
+                                  ),
+                                  UnorderedListItem(
+                                    "Once it is received, ChangeNOW will send the [] to the recipient address you provided.",
+                                  ),
+                                  UnorderedListItem(
+                                      "Find this trade details and check its status in the list of trades.")
                                 ],
                               ),
-                              // child: RichText(
-                              //   text: TextSpan(
-                              //     // text:
-                              //     //     // "You must send at least ${model.sendAmount.toString()} ${model.sendTicker}. ",
-                              //     //     "You must send at least []. ",
-                              //     // style: STextStyles.label(context).copyWith(
-                              //     //   color: Theme.of(context)
-                              //     //       .extension<StackColors>()!
-                              //     //       .warningForeground,
-                              //     // ),
-                              //     children: [
-                              //       TextSpan(
-                              //         // "Send ${model.sendTicker.toUpperCase()} to the address below",
-                              //         text:
-                              //             "• Send [coin] to the address below",
-                              //         style: STextStyles.label(context),
-                              //       ),
-                              //       TextSpan(
-                              //         text:
-                              //             // "If you send less than ${model.sendAmount.toString()} ${model.sendTicker}, your transaction may not be converted and it may not be refunded.",
-                              //             "\n \t\tYou must send at least []. If you send less than [], your transaction may not be converted and it may not be refunded.",
-                              //         style:
-                              //             STextStyles.label(context).copyWith(
-                              //           color: Theme.of(context)
-                              //               .extension<StackColors>()!
-                              //               .warningForeground,
-                              //         ),
-                              //       ),
-                              //       TextSpan(
-                              //         // "Send ${model.sendTicker.toUpperCase()} to the address below. Once it is received, ${model.trade!.exchangeName} will send the ${model.receiveTicker.toUpperCase()} to the recipient address you provided. You can find this trade details and check its status in the list of trades.",
-                              //         text:
-                              //             "Send [] to the address below. Once it is received, [] will send the [] to the recipient address you provided. You can find this trade details and check its status in the list of trades.",
-                              //         style: STextStyles.itemSubtitle(context),
-                              //       ),
-                              //     ],
-                              //   ),
-                              // ),
                             ),
                             const SizedBox(
                               height: 8,
