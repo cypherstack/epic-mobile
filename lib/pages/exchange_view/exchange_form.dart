@@ -73,6 +73,7 @@ import 'package:epicpay/utilities/amount/amount_formatter.dart';
 import 'package:epicpay/utilities/assets.dart';
 import 'package:epicpay/utilities/constants.dart';
 import 'package:epicpay/utilities/enums/coin_enum.dart';
+import 'package:epicpay/utilities/logger.dart';
 import 'package:epicpay/utilities/text_styles.dart';
 import 'package:epicpay/utilities/theme/stack_colors.dart';
 import 'package:epicpay/widgets/custom_loading_overlay.dart';
@@ -530,6 +531,13 @@ class _ExchangeFormState extends ConsumerState<ExchangeForm> {
             rateType == SupportedRateType.fixed,
             reversed);
 
+        if (estimateResponse.exception != null) {
+          Logging.instance.log(
+            "${estimateResponse.exception}::::::$rangeResponse",
+            level: LogLevel.Warning,
+          );
+        }
+
         results.addAll(
           {
             exchange.name: Tuple2(
@@ -576,25 +584,26 @@ class _ExchangeFormState extends ConsumerState<ExchangeForm> {
     ref.read(efReceiveAmountProvider.notifier).state = estimate?.toAmount;
   }
 
-  Text warningMessage(Range? range) {
+  Text fromWarningMessage(Range? range) {
     String string = "";
     Color color = Theme.of(context).extension<StackColors>()!.textGold;
 
     final min = range?.min;
     final max = range?.max;
     final amount = ref.read(efSendAmountProvider.state).state;
+    final ticker = range?.fromCurrency.toUpperCase();
 
     if (amount == null) {
       if (min != null) {
-        string = "Minimum amount is ${range!.min!} ${range.fromCurrency}";
+        string = "Minimum amount is $min $ticker";
       }
     } else {
       if (min != null && amount < min) {
-        string = "Minimum amount is ${range!.min!} ${range.fromCurrency}";
+        string = "Minimum amount is $min $ticker";
         color = Theme.of(context).extension<StackColors>()!.snackBarTextError;
       }
       if (max != null && amount > max) {
-        string = "Maximum amount is ${range!.min!} ${range.fromCurrency}";
+        string = "Maximum amount is $max $ticker";
         color = Theme.of(context).extension<StackColors>()!.snackBarTextError;
       }
     }
@@ -782,7 +791,7 @@ class _ExchangeFormState extends ConsumerState<ExchangeForm> {
         const SizedBox(
           height: 1,
         ),
-        warningMessage(
+        fromWarningMessage(
           ref
               .watch(efEstimatesListProvider(ChangeNowExchange.exchangeName)
                   .notifier)
