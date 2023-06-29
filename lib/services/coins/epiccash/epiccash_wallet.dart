@@ -655,11 +655,21 @@ class EpicCashWallet extends CoinServiceAPI {
   @override
   Future<String> get currentReceivingAddress async {
     final wallet = await _secureStore.read(key: '${_walletId}_wallet');
-    String? walletAddress;
-    //First check if wallet address is stored in hive and return
-    if (!DB.instance.containsKey<dynamic>(
-        boxName: walletId, key: 'currentReceivingAddress')) {
-      EpicBoxConfigModel epicboxConfig = await getEpicBoxConfig();
+
+    EpicBoxConfigModel epicboxConfig = await getEpicBoxConfig();
+
+    String? walletAddress = DB.instance.get<dynamic>(
+      boxName: walletId,
+      key: "currentReceivingAddress",
+    ) as String?;
+
+    // Logging.instance.log(
+    //   "WALLET ADDRESS FROM HIVE IS $walletAddress",
+    //   level: LogLevel.Info,
+    // );
+
+    // if address doesn't exist in Hive, fetch from rust and store it
+    if (walletAddress == null) {
       await m.protect(() async {
         walletAddress = await compute(
           _initGetAddressInfoWrapper,
@@ -668,22 +678,34 @@ class EpicCashWallet extends CoinServiceAPI {
       });
 
       await DB.instance.put<dynamic>(
-          boxName: walletId,
-          key: "currentReceivingAddress",
-          value: walletAddress);
+        boxName: walletId,
+        key: "currentReceivingAddress",
+        value: walletAddress,
+      );
 
-      Logging.instance.log("WALLET ADDRESS FROM RUST IS $walletAddress",
-          level: LogLevel.Info);
-    } else {
-      walletAddress = DB.instance.get<dynamic>(
-          boxName: walletId, key: "currentReceivingAddress") as String;
+      // Logging.instance.log(
+      //   "WALLET ADDRESS FROM RUST IS $walletAddress",
+      //   level: LogLevel.Info,
+      // );
+    } else if (!walletAddress.endsWith(epicboxConfig.host)) {
+      if (walletAddress.contains("@")) {
+        walletAddress = walletAddress.split("@").first;
+      }
 
-      Logging.instance.log("WALLET ADDRESS FROM HIVE IS $walletAddress",
-          level: LogLevel.Info);
+      // append current epic box domain
+      walletAddress += "@${epicboxConfig.host}";
+
+      await DB.instance.put<dynamic>(
+        boxName: walletId,
+        key: "currentReceivingAddress",
+        value: walletAddress,
+      );
     }
+    // Logging.instance.log(
+    //   "WALLET_ADDRESS_IS $walletAddress",
+    //   level: LogLevel.Info,
+    // );
 
-    Logging.instance
-        .log("WALLET_ADDRESS_IS $walletAddress", level: LogLevel.Info);
     return walletAddress!;
   }
   //     _currentReceivingAddress ??= _getCurrentAddressForChain(0);
@@ -1177,12 +1199,15 @@ class EpicCashWallet extends CoinServiceAPI {
 
     try {
       bool isEpicboxConnected = await testEpicboxServer(
-          _epicBoxConfig.host, _epicBoxConfig.port ?? 443);
+        _epicBoxConfig.host,
+        _epicBoxConfig.port ?? 443,
+      );
 
       if (!isEpicboxConnected) {
         Logging.instance.log(
-            "Error in getEpicBoxConfig (not connected to epicbox server)",
-            level: LogLevel.Error);
+          "Error in getEpicBoxConfig (not connected to epicbox server)",
+          level: LogLevel.Error,
+        );
       }
     } catch (e, s) {
       rethrow;

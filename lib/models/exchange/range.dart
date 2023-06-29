@@ -29,8 +29,12 @@ class Range {
       fromNetwork: json['fromNetwork'] as String,
       toNetwork: json['toNetwork'] as String,
       fixedRate: (json['flow'] as String) == "fixed-rate",
-      min: json['min'] != null ? Decimal.parse(json['min'] as String) : null,
-      max: json['max'] != null ? Decimal.parse(json['max'] as String) : null,
+      min: json['minAmount'] != null
+          ? Decimal.parse(json['minAmount'].toString())
+          : null,
+      max: json['maxAmount'] != null
+          ? Decimal.parse(json['maxAmount'].toString())
+          : null,
     );
   }
 

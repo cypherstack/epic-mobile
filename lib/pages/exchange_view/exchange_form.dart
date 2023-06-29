@@ -576,6 +576,37 @@ class _ExchangeFormState extends ConsumerState<ExchangeForm> {
     ref.read(efReceiveAmountProvider.notifier).state = estimate?.toAmount;
   }
 
+  Text warningMessage(Range? range) {
+    String string = "";
+    Color color = Theme.of(context).extension<StackColors>()!.textGold;
+
+    final min = range?.min;
+    final max = range?.max;
+    final amount = ref.read(efSendAmountProvider.state).state;
+
+    if (amount == null) {
+      if (min != null) {
+        string = "Minimum amount is ${range!.min!} ${range.fromCurrency}";
+      }
+    } else {
+      if (min != null && amount < min) {
+        string = "Minimum amount is ${range!.min!} ${range.fromCurrency}";
+        color = Theme.of(context).extension<StackColors>()!.snackBarTextError;
+      }
+      if (max != null && amount > max) {
+        string = "Maximum amount is ${range!.min!} ${range.fromCurrency}";
+        color = Theme.of(context).extension<StackColors>()!.snackBarTextError;
+      }
+    }
+
+    return Text(
+      string,
+      style: STextStyles.overLine(context).copyWith(
+        color: color,
+      ),
+    );
+  }
+
   @override
   void initState() {
     _sendController = TextEditingController();
@@ -721,7 +752,7 @@ class _ExchangeFormState extends ConsumerState<ExchangeForm> {
           ),
         ),
         const SizedBox(
-          height: 4,
+          height: 10,
         ),
         ExchangeTextField(
           key: Key("exchangeTextFieldKeyFor_"
@@ -749,10 +780,14 @@ class _ExchangeFormState extends ConsumerState<ExchangeForm> {
               ref.watch(efCurrencyPairProvider.select((value) => value.send)),
         ),
         const SizedBox(
-          height: 4,
+          height: 1,
         ),
-        const SizedBox(
-          height: 4,
+        warningMessage(
+          ref
+              .watch(efEstimatesListProvider(ChangeNowExchange.exchangeName)
+                  .notifier)
+              .state
+              ?.item2,
         ),
         Row(
           crossAxisAlignment: CrossAxisAlignment.end,
@@ -764,28 +799,31 @@ class _ExchangeFormState extends ConsumerState<ExchangeForm> {
                 color: Theme.of(context).extension<StackColors>()!.textMedium,
               ),
             ),
-            Semantics(
-              label: "Swap Button. Reverse The Exchange Currencies.",
-              excludeSemantics: true,
-              child: RoundedContainer(
-                padding: const EdgeInsets.all(2),
-                color: Theme.of(context)
-                    .extension<StackColors>()!
-                    .buttonBackSecondary,
-                radiusMultiplier: 0.75,
-                child: GestureDetector(
-                  onTap: () async {
-                    await _swap();
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.all(4),
-                    child: SvgPicture.asset(
-                      Assets.svg.swap,
-                      width: 20,
-                      height: 20,
-                      color: Theme.of(context)
-                          .extension<StackColors>()!
-                          .textMedium,
+            Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Semantics(
+                label: "Swap Button. Reverse The Exchange Currencies.",
+                excludeSemantics: true,
+                child: RoundedContainer(
+                  padding: const EdgeInsets.all(2),
+                  color: Theme.of(context)
+                      .extension<StackColors>()!
+                      .buttonBackSecondary,
+                  radiusMultiplier: 0.75,
+                  child: GestureDetector(
+                    onTap: () async {
+                      await _swap();
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.all(4),
+                      child: SvgPicture.asset(
+                        Assets.svg.swap,
+                        width: 20,
+                        height: 20,
+                        color: Theme.of(context)
+                            .extension<StackColors>()!
+                            .textMedium,
+                      ),
                     ),
                   ),
                 ),
@@ -795,7 +833,7 @@ class _ExchangeFormState extends ConsumerState<ExchangeForm> {
         ),
 
         const SizedBox(
-          height: 7,
+          height: 10,
         ),
         ExchangeTextField(
           key: Key(
