@@ -87,33 +87,38 @@ const TradeSchema = CollectionSchema(
       name: r'status',
       type: IsarType.string,
     ),
-    r'toAmount': PropertySchema(
+    r'timestampUTC': PropertySchema(
       id: 14,
+      name: r'timestampUTC',
+      type: IsarType.long,
+    ),
+    r'toAmount': PropertySchema(
+      id: 15,
       name: r'toAmount',
       type: IsarType.string,
     ),
     r'toCurrency': PropertySchema(
-      id: 15,
+      id: 16,
       name: r'toCurrency',
       type: IsarType.string,
     ),
     r'toNetwork': PropertySchema(
-      id: 16,
+      id: 17,
       name: r'toNetwork',
       type: IsarType.string,
     ),
     r'tradeId': PropertySchema(
-      id: 17,
+      id: 18,
       name: r'tradeId',
       type: IsarType.string,
     ),
     r'type': PropertySchema(
-      id: 18,
+      id: 19,
       name: r'type',
       type: IsarType.string,
     ),
     r'updatedAt': PropertySchema(
-      id: 19,
+      id: 20,
       name: r'updatedAt',
       type: IsarType.string,
     )
@@ -220,12 +225,13 @@ void _tradeSerialize(
   writer.writeString(offsets[11], object.refundAddress);
   writer.writeString(offsets[12], object.refundExtraId);
   writer.writeString(offsets[13], object.status);
-  writer.writeString(offsets[14], object.toAmount);
-  writer.writeString(offsets[15], object.toCurrency);
-  writer.writeString(offsets[16], object.toNetwork);
-  writer.writeString(offsets[17], object.tradeId);
-  writer.writeString(offsets[18], object.type);
-  writer.writeString(offsets[19], object.updatedAt);
+  writer.writeLong(offsets[14], object.timestampUTC);
+  writer.writeString(offsets[15], object.toAmount);
+  writer.writeString(offsets[16], object.toCurrency);
+  writer.writeString(offsets[17], object.toNetwork);
+  writer.writeString(offsets[18], object.tradeId);
+  writer.writeString(offsets[19], object.type);
+  writer.writeString(offsets[20], object.updatedAt);
 }
 
 Trade _tradeDeserialize(
@@ -249,12 +255,12 @@ Trade _tradeDeserialize(
     refundAddress: reader.readString(offsets[11]),
     refundExtraId: reader.readString(offsets[12]),
     status: reader.readString(offsets[13]),
-    toAmount: reader.readString(offsets[14]),
-    toCurrency: reader.readString(offsets[15]),
-    toNetwork: reader.readString(offsets[16]),
-    tradeId: reader.readString(offsets[17]),
-    type: reader.readString(offsets[18]),
-    updatedAt: reader.readStringOrNull(offsets[19]),
+    toAmount: reader.readString(offsets[15]),
+    toCurrency: reader.readString(offsets[16]),
+    toNetwork: reader.readString(offsets[17]),
+    tradeId: reader.readString(offsets[18]),
+    type: reader.readString(offsets[19]),
+    updatedAt: reader.readStringOrNull(offsets[20]),
   );
   object.id = id;
   return object;
@@ -296,7 +302,7 @@ P _tradeDeserializeProp<P>(
     case 13:
       return (reader.readString(offset)) as P;
     case 14:
-      return (reader.readString(offset)) as P;
+      return (reader.readLong(offset)) as P;
     case 15:
       return (reader.readString(offset)) as P;
     case 16:
@@ -306,6 +312,8 @@ P _tradeDeserializeProp<P>(
     case 18:
       return (reader.readString(offset)) as P;
     case 19:
+      return (reader.readString(offset)) as P;
+    case 20:
       return (reader.readStringOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -2498,6 +2506,59 @@ extension TradeQueryFilter on QueryBuilder<Trade, Trade, QFilterCondition> {
     });
   }
 
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> timestampUTCEqualTo(
+      int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'timestampUTC',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> timestampUTCGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'timestampUTC',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> timestampUTCLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'timestampUTC',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> timestampUTCBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'timestampUTC',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+      ));
+    });
+  }
+
   QueryBuilder<Trade, Trade, QAfterFilterCondition> toAmountEqualTo(
     String value, {
     bool caseSensitive = true,
@@ -3466,6 +3527,18 @@ extension TradeQuerySortBy on QueryBuilder<Trade, Trade, QSortBy> {
     });
   }
 
+  QueryBuilder<Trade, Trade, QAfterSortBy> sortByTimestampUTC() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'timestampUTC', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterSortBy> sortByTimestampUTCDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'timestampUTC', Sort.desc);
+    });
+  }
+
   QueryBuilder<Trade, Trade, QAfterSortBy> sortByToAmount() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'toAmount', Sort.asc);
@@ -3720,6 +3793,18 @@ extension TradeQuerySortThenBy on QueryBuilder<Trade, Trade, QSortThenBy> {
     });
   }
 
+  QueryBuilder<Trade, Trade, QAfterSortBy> thenByTimestampUTC() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'timestampUTC', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterSortBy> thenByTimestampUTCDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'timestampUTC', Sort.desc);
+    });
+  }
+
   QueryBuilder<Trade, Trade, QAfterSortBy> thenByToAmount() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'toAmount', Sort.asc);
@@ -3896,6 +3981,12 @@ extension TradeQueryWhereDistinct on QueryBuilder<Trade, Trade, QDistinct> {
     });
   }
 
+  QueryBuilder<Trade, Trade, QDistinct> distinctByTimestampUTC() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'timestampUTC');
+    });
+  }
+
   QueryBuilder<Trade, Trade, QDistinct> distinctByToAmount(
       {bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
@@ -4027,6 +4118,12 @@ extension TradeQueryProperty on QueryBuilder<Trade, Trade, QQueryProperty> {
   QueryBuilder<Trade, String, QQueryOperations> statusProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'status');
+    });
+  }
+
+  QueryBuilder<Trade, int, QQueryOperations> timestampUTCProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'timestampUTC');
     });
   }
 

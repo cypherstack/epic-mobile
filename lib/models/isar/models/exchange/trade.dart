@@ -36,6 +36,11 @@ class Trade {
   final String? payinHash;
   final String? payoutHash;
 
+  int get timestampUTC =>
+      (DateTime.tryParse(createdAt.toString())?.toUtc() ?? DateTime.now())
+          .millisecondsSinceEpoch ~/
+      1000;
+
   Trade({
     required this.exchangeName,
     required this.fromAmount,
