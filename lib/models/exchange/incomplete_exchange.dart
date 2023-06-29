@@ -1,12 +1,13 @@
 import 'package:decimal/decimal.dart';
 import 'package:epicpay/models/exchange/estimate.dart';
+import 'package:epicpay/models/isar/models/exchange/currency.dart';
 import 'package:epicpay/models/isar/models/exchange/pair.dart';
 import 'package:epicpay/models/isar/models/exchange/trade.dart';
 import 'package:flutter/foundation.dart';
 
 class IncompleteExchangeModel extends ChangeNotifier {
-  final String sendTicker;
-  final String receiveTicker;
+  final Currency from;
+  final Currency to;
 
   final String rateInfo;
 
@@ -63,8 +64,8 @@ class IncompleteExchangeModel extends ChangeNotifier {
   }
 
   IncompleteExchangeModel({
-    required this.sendTicker,
-    required this.receiveTicker,
+    required this.from,
+    required this.to,
     required this.rateInfo,
     required this.sendAmount,
     required this.receiveAmount,
