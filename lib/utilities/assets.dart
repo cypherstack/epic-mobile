@@ -24,8 +24,8 @@ class _SOCIALS {
 class _EXCHANGE {
   const _EXCHANGE();
 
-  String get changeNow => "assets/svg/exchange_icons/change_now_logo_1.svg";
-  String get simpleSwap => "assets/svg/exchange_icons/simpleswap-icon.svg";
+  String get changeNow => "assets/svg/change-now-logo.svg";
+  // String get simpleSwap => "assets/svg/exchange_icons/simpleswap-icon.svg";
 
   String getIconFor({required String exchangeName}) {
     switch (exchangeName) {
@@ -125,7 +125,7 @@ class _SVG {
   String get dollarSign => "assets/svg/dollar-sign.svg";
   String get language => "assets/svg/language2.svg";
   // String get sun => "assets/svg/sun-bright2.svg";
-  String get pencil => "assets/svg/pen-solid-fa.svg";
+  // String get pencil => "assets/svg/pen-solid-fa.svg";
   String get search => "assets/svg/magnifying-glass.svg";
   String get thickX => "assets/svg/x-fat.svg";
   String get x => "assets/svg/x.svg";
