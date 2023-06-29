@@ -10,6 +10,7 @@
 
 import 'dart:async';
 
+import 'package:epicpay/pages/exchange_view/sub_widgets/step_row.dart';
 import 'package:epicpay/utilities/assets.dart';
 import 'package:epicpay/utilities/clipboard_interface.dart';
 import 'package:epicpay/utilities/text_styles.dart';
@@ -103,6 +104,7 @@ class _Step4ViewState extends ConsumerState<Step4View> {
       FocusScope.of(context).unfocus();
       await Future<void>.delayed(const Duration(milliseconds: 75));
     }
+    Navigator.of(context).pop();
     // if (mounted) {
     //   Navigator.of(context).popUntil(
     //     ModalRoute.withName(
@@ -331,22 +333,40 @@ class _Step4ViewState extends ConsumerState<Step4View> {
           backgroundColor:
               Theme.of(context).extension<StackColors>()!.background,
           appBar: AppBar(
-            leading: Padding(
-              padding: const EdgeInsets.all(10),
-              child: AppBarIconButton(
-                size: 32,
-                color: Theme.of(context).extension<StackColors>()!.background,
-                shadows: const [],
-                icon: SvgPicture.asset(
-                  Assets.svg.x,
-                  width: 24,
-                  height: 24,
-                  color: Theme.of(context)
-                      .extension<StackColors>()!
-                      .topNavIconPrimary,
+            leading: Row(
+              children: [
+                Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: AppBarIconButton(
+                    size: 32,
+                    color:
+                        Theme.of(context).extension<StackColors>()!.background,
+                    shadows: const [],
+                    icon: SvgPicture.asset(
+                      Assets.svg.x,
+                      width: 24,
+                      height: 24,
+                      color: Theme.of(context)
+                          .extension<StackColors>()!
+                          .topNavIconPrimary,
+                    ),
+                    onPressed: _close,
+                  ),
                 ),
-                onPressed: _close,
-              ),
+              ],
+            ),
+            title: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                StepRow(
+                  count: 4,
+                  current: 3,
+                  width: 6,
+                ),
+                SizedBox(
+                  width: MediaQuery.of(context).size.width / 7,
+                ),
+              ],
             ),
           ),
           body: LayoutBuilder(
@@ -371,53 +391,64 @@ class _Step4ViewState extends ConsumerState<Step4View> {
                             //   width: width,
                             // ),
                             const SizedBox(
-                              height: 14,
-                            ),
-                            Text(
-                              // "Send ${model.sendTicker.toUpperCase()} to the address below",
-                              "Send [coin] to the address below",
-                              style: STextStyles.pageTitleH1(context),
-                            ),
-                            const SizedBox(
-                              height: 8,
-                            ),
-                            Text(
-                              // "Send ${model.sendTicker.toUpperCase()} to the address below. Once it is received, ${model.trade!.exchangeName} will send the ${model.receiveTicker.toUpperCase()} to the recipient address you provided. You can find this trade details and check its status in the list of trades.",
-                              "Send [] to the address below. Once it is received, [] will send the [] to the recipient address you provided. You can find this trade details and check its status in the list of trades.",
-                              style: STextStyles.itemSubtitle(context),
-                            ),
-                            const SizedBox(
                               height: 12,
+                            ),
+                            Center(
+                              child: Text(
+                                "Send deposit",
+                                style: STextStyles.pageTitleH1(context),
+                              ),
+                            ),
+                            const SizedBox(
+                              height: 20,
                             ),
                             RoundedContainer(
                               color: Theme.of(context)
                                   .extension<StackColors>()!
-                                  .warningBackground,
-                              child: RichText(
-                                text: TextSpan(
-                                  text:
-                                      // "You must send at least ${model.sendAmount.toString()} ${model.sendTicker}. ",
-                                      "You must send at least []. ",
-                                  style: STextStyles.label(context).copyWith(
-                                    color: Theme.of(context)
-                                        .extension<StackColors>()!
-                                        .warningForeground,
-                                  ),
-                                  children: [
-                                    TextSpan(
-                                      text:
-                                          // "If you send less than ${model.sendAmount.toString()} ${model.sendTicker}, your transaction may not be converted and it may not be refunded.",
-                                          "If you send less than [], your transaction may not be converted and it may not be refunded.",
-                                      style:
-                                          STextStyles.label(context).copyWith(
-                                        color: Theme.of(context)
-                                            .extension<StackColors>()!
-                                            .warningForeground,
-                                      ),
-                                    ),
-                                  ],
-                                ),
+                                  .coal,
+                              child: Column(
+                                children: [
+                                  UnorderedListItem(
+                                      "Send [coin] to the address below"),
+                                ],
                               ),
+                              // child: RichText(
+                              //   text: TextSpan(
+                              //     // text:
+                              //     //     // "You must send at least ${model.sendAmount.toString()} ${model.sendTicker}. ",
+                              //     //     "You must send at least []. ",
+                              //     // style: STextStyles.label(context).copyWith(
+                              //     //   color: Theme.of(context)
+                              //     //       .extension<StackColors>()!
+                              //     //       .warningForeground,
+                              //     // ),
+                              //     children: [
+                              //       TextSpan(
+                              //         // "Send ${model.sendTicker.toUpperCase()} to the address below",
+                              //         text:
+                              //             "• Send [coin] to the address below",
+                              //         style: STextStyles.label(context),
+                              //       ),
+                              //       TextSpan(
+                              //         text:
+                              //             // "If you send less than ${model.sendAmount.toString()} ${model.sendTicker}, your transaction may not be converted and it may not be refunded.",
+                              //             "\n \t\tYou must send at least []. If you send less than [], your transaction may not be converted and it may not be refunded.",
+                              //         style:
+                              //             STextStyles.label(context).copyWith(
+                              //           color: Theme.of(context)
+                              //               .extension<StackColors>()!
+                              //               .warningForeground,
+                              //         ),
+                              //       ),
+                              //       TextSpan(
+                              //         // "Send ${model.sendTicker.toUpperCase()} to the address below. Once it is received, ${model.trade!.exchangeName} will send the ${model.receiveTicker.toUpperCase()} to the recipient address you provided. You can find this trade details and check its status in the list of trades.",
+                              //         text:
+                              //             "Send [] to the address below. Once it is received, [] will send the [] to the recipient address you provided. You can find this trade details and check its status in the list of trades.",
+                              //         style: STextStyles.itemSubtitle(context),
+                              //       ),
+                              //     ],
+                              //   ),
+                              // ),
                             ),
                             const SizedBox(
                               height: 8,
@@ -695,10 +726,14 @@ class _Step4ViewState extends ConsumerState<Step4View> {
                               },
                               style: Theme.of(context)
                                   .extension<StackColors>()!
-                                  .getPrimaryEnabledButtonColor(context),
+                                  .getSecondaryEnabledButtonColor(context),
                               child: Text(
-                                "Show QR Code",
-                                style: STextStyles.buttonText(context),
+                                "SHOW QR CODE",
+                                style: STextStyles.buttonText(context).copyWith(
+                                  color: Theme.of(context)
+                                      .extension<StackColors>()!
+                                      .buttonTextSecondary,
+                                ),
                               ),
                             ),
                             // if (isWalletCoin)
@@ -708,7 +743,7 @@ class _Step4ViewState extends ConsumerState<Step4View> {
                             // if (isWalletCoin)
                             Builder(
                               builder: (context) {
-                                String buttonTitle = "Send from Stack Wallet";
+                                String buttonTitle = "SEND FROM EPIC PAY";
 
                                 // final tuple = ref
                                 //     .read(
@@ -765,14 +800,14 @@ class _Step4ViewState extends ConsumerState<Step4View> {
                                   //       },
                                   style: Theme.of(context)
                                       .extension<StackColors>()!
-                                      .getSecondaryEnabledButtonColor(context),
+                                      .getPrimaryEnabledButtonColor(context),
                                   child: Text(
                                     buttonTitle,
                                     style: STextStyles.buttonText(context)
                                         .copyWith(
                                       color: Theme.of(context)
                                           .extension<StackColors>()!
-                                          .buttonTextSecondary,
+                                          .overlay,
                                     ),
                                   ),
                                 );
@@ -789,6 +824,24 @@ class _Step4ViewState extends ConsumerState<Step4View> {
           ),
         ),
       ),
+    );
+  }
+}
+
+class UnorderedListItem extends StatelessWidget {
+  UnorderedListItem(this.text);
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        const Text("• "),
+        Expanded(
+          child: Text(text),
+        ),
+      ],
     );
   }
 }

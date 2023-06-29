@@ -11,6 +11,7 @@
 import 'dart:async';
 
 import 'package:epicpay/pages/exchange_view/exchange_step_views/step_4_view.dart';
+import 'package:epicpay/pages/exchange_view/sub_widgets/step_row.dart';
 import 'package:epicpay/providers/exchange/exchange_form_state_provider.dart';
 import 'package:epicpay/utilities/clipboard_interface.dart';
 import 'package:epicpay/utilities/text_styles.dart';
@@ -67,6 +68,19 @@ class _Step3ViewState extends ConsumerState<Step3View> {
               }
             },
           ),
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              StepRow(
+                count: 4,
+                current: 2,
+                width: 6,
+              ),
+              SizedBox(
+                width: MediaQuery.of(context).size.width / 7,
+              ),
+            ],
+          ),
         ),
         body: LayoutBuilder(
           builder: (context, constraints) {
@@ -84,11 +98,6 @@ class _Step3ViewState extends ConsumerState<Step3View> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          // StepRow(
-                          //   count: 4,
-                          //   current: 2,
-                          //   width: width,
-                          // ),
                           const SizedBox(
                             height: 14,
                           ),
