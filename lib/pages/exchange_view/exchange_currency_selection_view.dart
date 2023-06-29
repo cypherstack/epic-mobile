@@ -5,6 +5,7 @@ import 'package:epicpay/models/isar/models/exchange/pair.dart';
 import 'package:epicpay/services/swap/change_now/change_now_exchange.dart';
 import 'package:epicpay/services/swap/swap_data_service.dart';
 import 'package:epicpay/utilities/assets.dart';
+import 'package:epicpay/utilities/constants.dart';
 import 'package:epicpay/utilities/enums/coin_enum.dart';
 import 'package:epicpay/utilities/text_styles.dart';
 import 'package:epicpay/utilities/theme/stack_colors.dart';
@@ -387,8 +388,15 @@ class _ExchangeCurrencySelectionViewState
                             vertical: 6,
                             horizontal: 24,
                           ),
-                          child: GestureDetector(
-                            onTap: () {
+                          child: RawMaterialButton(
+                            materialTapTargetSize:
+                                MaterialTapTargetSize.shrinkWrap,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                Constants.size.circularBorderRadius,
+                              ),
+                            ),
+                            onPressed: () {
                               Navigator.of(context).pop(items[index]);
                             },
                             child: Padding(
