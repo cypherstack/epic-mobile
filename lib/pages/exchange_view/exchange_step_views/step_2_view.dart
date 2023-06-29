@@ -155,18 +155,15 @@ class _Step2ViewState extends ConsumerState<Step2View> {
               }
             },
           ),
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              StepRow(
-                count: 4,
-                current: 1,
-                width: 6,
-              ),
-              SizedBox(
-                width: MediaQuery.of(context).size.width / 7,
-              ),
-            ],
+          centerTitle: true,
+          title: const SizedBox(
+            width:
+                66, // 66 is the width of the StepRow based on the current hardcoded values
+            child: StepRow(
+              count: 4,
+              current: 1,
+              width: 6,
+            ),
           ),
         ),
         body: LayoutBuilder(
@@ -185,11 +182,6 @@ class _Step2ViewState extends ConsumerState<Step2View> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          // StepRow(
-                          //   count: 4,
-                          //   current: 1,
-                          //   width: width,
-                          // ),
                           const SizedBox(
                             height: 14,
                           ),
@@ -593,7 +585,7 @@ class _Step2ViewState extends ConsumerState<Step2View> {
                                   onPressed: () {
                                     Navigator.of(context).pushNamed(
                                       Step3View.routeName,
-                                      // arguments: model,
+                                      arguments: model,
                                     );
                                   },
                                 ),
