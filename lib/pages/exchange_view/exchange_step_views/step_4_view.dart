@@ -10,28 +10,41 @@
 
 import 'dart:async';
 
+import 'package:epicpay/models/exchange/incomplete_exchange.dart';
+import 'package:epicpay/pages/exchange_view/exchange_form.dart';
+import 'package:epicpay/pages/home_view/home_view.dart';
+import 'package:epicpay/pages/wallet_view/wallet_view.dart';
+import 'package:epicpay/providers/exchange/exchange_form_state_provider.dart';
+import 'package:epicpay/providers/global/wallet_provider.dart';
+import 'package:epicpay/route_generator.dart';
+import 'package:epicpay/utilities/amount/amount.dart';
 import 'package:epicpay/utilities/assets.dart';
 import 'package:epicpay/utilities/clipboard_interface.dart';
+import 'package:epicpay/utilities/enums/coin_enum.dart';
 import 'package:epicpay/utilities/text_styles.dart';
 import 'package:epicpay/utilities/theme/stack_colors.dart';
 import 'package:epicpay/widgets/background.dart';
 import 'package:epicpay/widgets/custom_buttons/app_bar_icon_button.dart';
+import 'package:epicpay/widgets/ep_dialog.dart';
 import 'package:epicpay/widgets/rounded_container.dart';
 import 'package:epicpay/widgets/stack_dialog.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:qr_flutter/qr_flutter.dart';
+import 'package:tuple/tuple.dart';
 
 class Step4View extends ConsumerStatefulWidget {
   const Step4View({
     Key? key,
-    // required this.model,
+    required this.model,
     this.clipboard = const ClipboardWrapper(),
   }) : super(key: key);
 
   static const String routeName = "/exchangeStep4";
 
-  // final IncompleteExchangeModel model;
+  final IncompleteExchangeModel model;
   final ClipboardInterface clipboard;
 
   @override
@@ -39,53 +52,49 @@ class Step4View extends ConsumerStatefulWidget {
 }
 
 class _Step4ViewState extends ConsumerState<Step4View> {
-  // late final IncompleteExchangeModel model;
+  late final IncompleteExchangeModel model;
   late final ClipboardInterface clipboard;
 
   String _statusString = "New";
 
   Timer? _statusTimer;
 
-  // bool _isWalletCoinAndHasWallet(String ticker, WidgetRef ref) {
-  //   try {
-  //     final coin = coinFromTickerCaseInsensitive(ticker);
-  //     return ref
-  //         .read(walletsChangeNotifierProvider)
-  //         .managers
-  //         .where((element) => element.coin == coin)
-  //         .isNotEmpty;
-  //   } catch (_) {
-  //     return false;
-  //   }
-  // }
+  bool _isWalletCoinAndHasWallet(String ticker, WidgetRef ref) {
+    try {
+      final coin = coinFromTickerCaseInsensitive(ticker);
+      return coin == Coin.epicCash;
+    } catch (_) {
+      return false;
+    }
+  }
 
-  // Future<void> _updateStatus() async {
-  //   // final statusResponse =
-  //   // await ref.read(efExchangeProvider).updateTrade(model.trade!);
-  //   String status = "Waiting";
-  //   if (statusResponse.value != null) {
-  //     status = statusResponse.value!.status;
-  //   }
-  //
-  //   // extra info if status is waiting
-  //   if (status == "Waiting") {
-  //     status += " for deposit";
-  //   }
-  //
-  //   if (mounted) {
-  //     setState(() {
-  //       _statusString = status;
-  //     });
-  //   }
-  // }
+  Future<void> _updateStatus() async {
+    final statusResponse =
+        await ref.read(efExchangeProvider).updateTrade(model.trade!);
+    String status = "Waiting";
+    if (statusResponse.value != null) {
+      status = statusResponse.value!.status;
+    }
+
+    // extra info if status is waiting
+    if (status == "Waiting") {
+      status += " for deposit";
+    }
+
+    if (mounted) {
+      setState(() {
+        _statusString = status;
+      });
+    }
+  }
 
   @override
   void initState() {
-    // model = widget.model;
+    model = widget.model;
     clipboard = widget.clipboard;
 
     _statusTimer = Timer.periodic(const Duration(seconds: 60), (_) {
-      // _updateStatus();
+      _updateStatus();
     });
 
     super.initState();
@@ -103,224 +112,134 @@ class _Step4ViewState extends ConsumerState<Step4View> {
       FocusScope.of(context).unfocus();
       await Future<void>.delayed(const Duration(milliseconds: 75));
     }
-    // if (mounted) {
-    //   Navigator.of(context).popUntil(
-    //     ModalRoute.withName(
-    //       model.walletInitiated ? WalletView.routeName : HomeView.routeName,
-    //     ),
-    //   );
-    // }
+    if (mounted) {
+      Navigator.of(context).popUntil(
+        ModalRoute.withName(
+          model.walletInitiated ? WalletView.routeName : HomeView.routeName,
+        ),
+      );
+    }
   }
 
-  // Future<bool?> _showSendFromFiroBalanceSelectSheet(String walletId) async {
-  //   final firoWallet = ref
-  //       .read(walletsChangeNotifierProvider)
-  //       .getManager(walletId)
-  //       .wallet as FiroWallet;
-  //   final locale = ref.read(localeServiceChangeNotifierProvider).locale;
-  //
-  //   return await showModalBottomSheet<bool?>(
-  //     context: context,
-  //     backgroundColor:
-  //     Theme.of(context).extension<StackColors>()!.backgroundAppBar,
-  //     shape: RoundedRectangleBorder(
-  //       borderRadius: BorderRadius.vertical(
-  //         top: Radius.circular(
-  //           Constants.size.circularBorderRadius * 3,
-  //         ),
-  //       ),
-  //     ),
-  //     builder: (context) {
-  //       return Padding(
-  //         padding: const EdgeInsets.symmetric(
-  //           horizontal: 16,
-  //         ),
-  //         child: Column(
-  //           mainAxisSize: MainAxisSize.min,
-  //           crossAxisAlignment: CrossAxisAlignment.stretch,
-  //           children: [
-  //             const SizedBox(
-  //               height: 32,
-  //             ),
-  //             Text(
-  //               "Select Firo balance",
-  //               style: STextStyles.pageTitleH2(context),
-  //             ),
-  //             const SizedBox(
-  //               height: 32,
-  //             ),
-  //             SecondaryButton(
-  //               label:
-  //               "${ref.watch(pAmountFormatter(firoWallet.coin)).format(firoWallet.balancePrivate.spendable)} (private)",
-  //               onPressed: () => Navigator.of(context).pop(false),
-  //             ),
-  //             const SizedBox(
-  //               height: 16,
-  //             ),
-  //             SecondaryButton(
-  //               label:
-  //               "${ref.watch(pAmountFormatter(firoWallet.coin)).format(firoWallet.balance.spendable)} (public)",
-  //               onPressed: () => Navigator.of(context).pop(true),
-  //             ),
-  //             const SizedBox(
-  //               height: 32,
-  //             ),
-  //           ],
-  //         ),
-  //       );
-  //     },
-  //   );
-  // }
+  Future<void> _confirmSend(Tuple2<String, Coin> tuple) async {
+    final bool firoPublicSend;
+    // if (tuple.item2 == Coin.firo) {
+    //   final result = await _showSendFromFiroBalanceSelectSheet(tuple.item1);
+    //   if (result == null) {
+    //     return;
+    //   } else {
+    //     firoPublicSend = result;
+    //   }
+    // } else {
+    firoPublicSend = false;
+    // }
 
-  // Future<void> _confirmSend(Tuple2<String, Coin> tuple) async {
-  //   final bool firoPublicSend;
-  //   if (tuple.item2 == Coin.firo) {
-  //     final result = await _showSendFromFiroBalanceSelectSheet(tuple.item1);
-  //     if (result == null) {
-  //       return;
-  //     } else {
-  //       firoPublicSend = result;
-  //     }
-  //   } else {
-  //     firoPublicSend = false;
-  //   }
-  //
-  //   final manager =
-  //   ref.read(walletsChangeNotifierProvider).getManager(tuple.item1);
-  //
-  //   final Amount amount = model.sendAmount.toAmount(
-  //     fractionDigits: manager.coin.decimals,
-  //   );
-  //   final address = model.trade!.payInAddress;
-  //
-  //   bool wasCancelled = false;
-  //   try {
-  //     if (!mounted) return;
-  //
-  //     unawaited(
-  //       showDialog<dynamic>(
-  //         context: context,
-  //         useSafeArea: false,
-  //         barrierDismissible: false,
-  //         builder: (context) {
-  //           return BuildingTransactionDialog(
-  //             coin: manager.coin,
-  //             onCancel: () {
-  //               wasCancelled = true;
-  //             },
-  //           );
-  //         },
-  //       ),
-  //     );
-  //
-  //     final time = Future<dynamic>.delayed(
-  //       const Duration(
-  //         milliseconds: 2500,
-  //       ),
-  //     );
-  //
-  //     Future<Map<String, dynamic>> txDataFuture;
-  //
-  //     if (firoPublicSend) {
-  //       txDataFuture = (manager.wallet as FiroWallet).prepareSendPublic(
-  //         address: address,
-  //         amount: amount,
-  //         args: {
-  //           "feeRate": FeeRateType.average,
-  //           // ref.read(feeRateTypeStateProvider)
-  //         },
-  //       );
-  //     } else {
-  //       txDataFuture = manager.prepareSend(
-  //         address: address,
-  //         amount: amount,
-  //         args: {
-  //           "feeRate": FeeRateType.average,
-  //           // ref.read(feeRateTypeStateProvider)
-  //         },
-  //       );
-  //     }
-  //
-  //     final results = await Future.wait([
-  //       txDataFuture,
-  //       time,
-  //     ]);
-  //
-  //     final txData = results.first as Map<String, dynamic>;
-  //
-  //     if (!wasCancelled) {
-  //       // pop building dialog
-  //
-  //       if (mounted) {
-  //         Navigator.of(context).pop();
-  //       }
-  //
-  //       txData["note"] =
-  //       "${model.trade!.payInCurrency.toUpperCase()}/${model.trade!.payOutCurrency.toUpperCase()} exchange";
-  //       txData["address"] = address;
-  //
-  //       if (mounted) {
-  //         unawaited(
-  //           Navigator.of(context).push(
-  //             RouteGenerator.getRoute(
-  //               shouldUseMaterialRoute: RouteGenerator.useMaterialPageRoute,
-  //               builder: (_) => ConfirmChangeNowSendView(
-  //                 transactionInfo: txData,
-  //                 walletId: tuple.item1,
-  //                 routeOnSuccessName: HomeView.routeName,
-  //                 trade: model.trade!,
-  //                 shouldSendPublicFiroFunds: firoPublicSend,
-  //               ),
-  //               settings: const RouteSettings(
-  //                 name: ConfirmChangeNowSendView.routeName,
-  //               ),
-  //             ),
-  //           ),
-  //         );
-  //       }
-  //     }
-  //   } catch (e) {
-  //     if (mounted && !wasCancelled) {
-  //       // pop building dialog
-  //       Navigator.of(context).pop();
-  //
-  //       unawaited(
-  //         showDialog<dynamic>(
-  //           context: context,
-  //           useSafeArea: false,
-  //           barrierDismissible: true,
-  //           builder: (context) {
-  //             return StackDialog(
-  //               title: "Transaction failed",
-  //               message: e.toString(),
-  //               rightButton: TextButton(
-  //                 style: Theme.of(context)
-  //                     .extension<StackColors>()!
-  //                     .getSecondaryEnabledButtonStyle(context),
-  //                 child: Text(
-  //                   "Ok",
-  //                   style: STextStyles.button(context).copyWith(
-  //                     color: Theme.of(context)
-  //                         .extension<StackColors>()!
-  //                         .buttonTextSecondary,
-  //                   ),
-  //                 ),
-  //                 onPressed: () {
-  //                   Navigator.of(context).pop();
-  //                 },
-  //               ),
-  //             );
-  //           },
-  //         ),
-  //       );
-  //     }
-  //   }
-  // }
+    final manager = ref.read(walletProvider)!;
+
+    final Amount amount = model.sendAmount.toAmount(
+      fractionDigits: manager.coin.decimals,
+    );
+    final address = model.trade!.payinAddress;
+
+    bool wasCancelled = false;
+    try {
+      if (!mounted) return;
+
+      unawaited(
+        showDialog<dynamic>(
+          context: context,
+          useSafeArea: false,
+          barrierDismissible: false,
+          builder: (context) {
+            return BuildingTransactionDialog(
+              coin: manager.coin,
+              onCancel: () {
+                wasCancelled = true;
+              },
+            );
+          },
+        ),
+      );
+
+      final time = Future<dynamic>.delayed(
+        const Duration(
+          milliseconds: 2500,
+        ),
+      );
+
+      Future<Map<String, dynamic>> txDataFuture = manager.prepareSend(
+        address: address,
+        satoshiAmount: amount.raw.toInt(),
+      );
+
+      final results = await Future.wait([
+        txDataFuture,
+        time,
+      ]);
+
+      final txData = results.first as Map<String, dynamic>;
+
+      if (!wasCancelled) {
+        // pop building dialog
+
+        if (mounted) {
+          Navigator.of(context).pop();
+        }
+
+        txData["note"] =
+            "${model.trade!.fromCurrency.toUpperCase()}/${model.trade!.toCurrency.toUpperCase()} exchange";
+        txData["address"] = address;
+
+        if (mounted) {
+          unawaited(
+            Navigator.of(context).push(
+              RouteGenerator.getRoute(
+                shouldUseMaterialRoute: RouteGenerator.useMaterialPageRoute,
+                builder: (_) => ConfirmChangeNowSendView(
+                  transactionInfo: txData,
+                  walletId: tuple.item1,
+                  routeOnSuccessName: HomeView.routeName,
+                  trade: model.trade!,
+                  shouldSendPublicFiroFunds: firoPublicSend,
+                ),
+                settings: const RouteSettings(
+                  name: ConfirmChangeNowSendView.routeName,
+                ),
+              ),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted && !wasCancelled) {
+        // pop building dialog
+        Navigator.of(context).pop();
+
+        unawaited(
+          showDialog<dynamic>(
+            context: context,
+            useSafeArea: false,
+            barrierDismissible: true,
+            builder: (context) {
+              return EPDialog(
+                title: "Transaction failed",
+                info: e.toString(),
+                confirmButtonTitle: "OK",
+                onConfirmPressed: () {
+                  Navigator.of(context).pop();
+                },
+              );
+            },
+          ),
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    // final bool isWalletCoin =
-    // _isWalletCoinAndHasWallet(model.trade!.payInCurrency, ref);
+    final bool isWalletCoin =
+        _isWalletCoinAndHasWallet(model.trade!.fromCurrency, ref);
     return WillPopScope(
       onWillPop: () async {
         await _close();
@@ -374,16 +293,21 @@ class _Step4ViewState extends ConsumerState<Step4View> {
                               height: 14,
                             ),
                             Text(
-                              // "Send ${model.sendTicker.toUpperCase()} to the address below",
-                              "Send [coin] to the address below",
+                              "Send ${model.from.ticker.toUpperCase()} to the "
+                              "address below",
                               style: STextStyles.pageTitleH1(context),
                             ),
                             const SizedBox(
                               height: 8,
                             ),
                             Text(
-                              // "Send ${model.sendTicker.toUpperCase()} to the address below. Once it is received, ${model.trade!.exchangeName} will send the ${model.receiveTicker.toUpperCase()} to the recipient address you provided. You can find this trade details and check its status in the list of trades.",
-                              "Send [] to the address below. Once it is received, [] will send the [] to the recipient address you provided. You can find this trade details and check its status in the list of trades.",
+                              "Send ${model.from.ticker.toUpperCase()} to the "
+                              "address below. Once it is received, "
+                              "${model.trade!.exchangeName} will send the "
+                              "${model.to.ticker.toUpperCase()} to the "
+                              "recipient address you provided. You can find "
+                              "this trade details and check its status in "
+                              "the list of trades.",
                               style: STextStyles.itemSubtitle(context),
                             ),
                             const SizedBox(
@@ -395,9 +319,8 @@ class _Step4ViewState extends ConsumerState<Step4View> {
                                   .warningBackground,
                               child: RichText(
                                 text: TextSpan(
-                                  text:
-                                      // "You must send at least ${model.sendAmount.toString()} ${model.sendTicker}. ",
-                                      "You must send at least []. ",
+                                  text: "You must send at least "
+                                      "${model.sendAmount.toString()} ${model.from}. ",
                                   style: STextStyles.label(context).copyWith(
                                     color: Theme.of(context)
                                         .extension<StackColors>()!
@@ -405,9 +328,11 @@ class _Step4ViewState extends ConsumerState<Step4View> {
                                   ),
                                   children: [
                                     TextSpan(
-                                      text:
-                                          // "If you send less than ${model.sendAmount.toString()} ${model.sendTicker}, your transaction may not be converted and it may not be refunded.",
-                                          "If you send less than [], your transaction may not be converted and it may not be refunded.",
+                                      text: "If you send less than "
+                                          "${model.sendAmount.toString()} "
+                                          "${model.from}, your transaction "
+                                          "may not be converted and it may "
+                                          "not be refunded.",
                                       style:
                                           STextStyles.label(context).copyWith(
                                         color: Theme.of(context)
@@ -430,26 +355,25 @@ class _Step4ViewState extends ConsumerState<Step4View> {
                                       MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
-                                      // "Send ${model.sendTicker.toUpperCase()} to this address",
-                                      "SEND [] TO THIS ADDRESS",
+                                      "Send ${model.from.ticker.toUpperCase()} "
+                                      "to this address",
                                       style: STextStyles.itemSubtitle(context),
                                     ),
                                     GestureDetector(
                                       onTap: () async {
-                                        // final data = ClipboardData(
-                                        //     text: ""
-                                        //     // model.trade!.payInAddress
-                                        // );
-                                        // await clipboard.setData(data);
-                                        // if (mounted) {
-                                        //   unawaited(
-                                        //     showFloatingFlushBar(
-                                        //       type: FlushBarType.info,
-                                        //       message: "Copied to clipboard",
-                                        //       context: context,
-                                        //     ),
-                                        //   );
-                                        // }
+                                        final data = ClipboardData(
+                                          text: model.trade!.payinAddress,
+                                        );
+                                        await clipboard.setData(data);
+                                        if (mounted) {
+                                          unawaited(
+                                            showFloatingFlushBar(
+                                              type: FlushBarType.info,
+                                              message: "Copied to clipboard",
+                                              context: context,
+                                            ),
+                                          );
+                                        }
                                       },
                                       child: Row(
                                         children: [
@@ -498,19 +422,19 @@ class _Step4ViewState extends ConsumerState<Step4View> {
                                 ),
                                 GestureDetector(
                                   onTap: () async {
-                                    // final data = ClipboardData(
-                                    //     text: "");
-                                    //         // model.sendAmount.toString());
-                                    // await clipboard.setData(data);
-                                    // if (mounted) {
-                                    //   unawaited(
-                                    //     showFloatingFlushBar(
-                                    //       type: FlushBarType.info,
-                                    //       message: "Copied to clipboard",
-                                    //       context: context,
-                                    //     ),
-                                    //   );
-                                    // }
+                                    final data = ClipboardData(
+                                      text: model.sendAmount.toString(),
+                                    );
+                                    await clipboard.setData(data);
+                                    if (mounted) {
+                                      unawaited(
+                                        showFloatingFlushBar(
+                                          type: FlushBarType.info,
+                                          message: "Copied to clipboard",
+                                          context: context,
+                                        ),
+                                      );
+                                    }
                                   },
                                   child: Row(
                                     children: [
@@ -550,8 +474,7 @@ class _Step4ViewState extends ConsumerState<Step4View> {
                                 Row(
                                   children: [
                                     Text(
-                                      // model.trade!.tradeId,
-                                      "",
+                                      model.trade!.tradeId,
                                       style:
                                           STextStyles.itemSubtitle12(context),
                                     ),
@@ -560,20 +483,19 @@ class _Step4ViewState extends ConsumerState<Step4View> {
                                     ),
                                     GestureDetector(
                                       onTap: () async {
-                                        // final data = ClipboardData(
-                                        //     text: ""
-                                        //     // model.trade!.tradeId
-                                        // );
-                                        // await clipboard.setData(data);
-                                        // if (mounted) {
-                                        //   unawaited(
-                                        //     showFloatingFlushBar(
-                                        //       type: FlushBarType.info,
-                                        //       message: "Copied to clipboard",
-                                        //       context: context,
-                                        //     ),
-                                        //   );
-                                        // }
+                                        final data = ClipboardData(
+                                          text: model.trade!.tradeId,
+                                        );
+                                        await clipboard.setData(data);
+                                        if (mounted) {
+                                          unawaited(
+                                            showFloatingFlushBar(
+                                              type: FlushBarType.info,
+                                              message: "Copied to clipboard",
+                                              context: context,
+                                            ),
+                                          );
+                                        }
                                       },
                                       child: SvgPicture.asset(
                                         Assets.svg.copy,
@@ -640,21 +562,16 @@ class _Step4ViewState extends ConsumerState<Step4View> {
                                             height: 24,
                                           ),
                                           Center(
-                                            child: Text(
-                                              "QR IMAGE VIEW",
+                                            child: QrImage(
+                                              data: model.trade!.payinAddress,
+                                              size: MediaQuery.of(context)
+                                                      .size
+                                                      .width /
+                                                  2,
+                                              foregroundColor: Theme.of(context)
+                                                  .extension<StackColors>()!
+                                                  .accentColorDark,
                                             ),
-                                            // QrImageView(
-                                            //   // TODO: grab coin uri scheme from somewhere
-                                            //   // data: "${coin.uriScheme}:$receivingAddress",
-                                            //   data: model.trade!.payInAddress,
-                                            //   size: MediaQuery.of(context)
-                                            //           .size
-                                            //           .width /
-                                            //       2,
-                                            //   foregroundColor: Theme.of(context)
-                                            //       .extension<StackColors>()!
-                                            //       .accentColorDark,
-                                            // ),
                                           ),
                                           const SizedBox(
                                             height: 24,
@@ -705,79 +622,76 @@ class _Step4ViewState extends ConsumerState<Step4View> {
                             const SizedBox(
                               height: 12,
                             ),
-                            // if (isWalletCoin)
-                            Builder(
-                              builder: (context) {
-                                String buttonTitle = "Send from Stack Wallet";
+                            if (isWalletCoin)
+                              Builder(
+                                builder: (context) {
+                                  String buttonTitle = "Send from Stack Wallet";
 
-                                // final tuple = ref
-                                //     .read(
-                                //         exchangeSendFromWalletIdStateProvider
-                                //             .state)
-                                //     .state;
-                                // if (tuple != null &&
-                                //     model.sendTicker.toLowerCase() ==
-                                //         tuple.item2.ticker.toLowerCase()) {
-                                //   final walletName = ref
-                                //       .read(walletsChangeNotifierProvider)
-                                //       .getManager(tuple.item1)
-                                //       .walletName;
-                                //   buttonTitle = "Send from $walletName";
-                                // }
+                                  final tuple = ref
+                                      .read(
+                                          exchangeSendFromWalletIdStateProvider
+                                              .state)
+                                      .state;
+                                  if (tuple != null &&
+                                      model.from.ticker.toLowerCase() ==
+                                          tuple.item2.ticker.toLowerCase()) {
+                                    buttonTitle =
+                                        "Send from ${ref.watch(walletProvider)!.walletName}";
+                                  }
 
-                                return TextButton(
-                                  onPressed: () {},
-                                  // tuple != null &&
-                                  //         model.sendTicker.toLowerCase() ==
-                                  //             tuple.item2.ticker.toLowerCase()
-                                  //     ? () async {
-                                  //         await _confirmSend(tuple);
-                                  //       }
-                                  //     : () {
-                                  //         Navigator.of(context).push(
-                                  //           RouteGenerator.getRoute(
-                                  //             shouldUseMaterialRoute:
-                                  //                 RouteGenerator
-                                  //                     .useMaterialPageRoute,
-                                  //             builder:
-                                  //                 (BuildContext context) {
-                                  //               final coin =
-                                  //                   coinFromTickerCaseInsensitive(
-                                  //                       model.trade!
-                                  //                           .payInCurrency);
-                                  //               return SendFromView(
-                                  //                 coin: coin,
-                                  //                 amount: model.sendAmount
-                                  //                     .toAmount(
-                                  //                   fractionDigits:
-                                  //                       coin.decimals,
-                                  //                 ),
-                                  //                 address: model
-                                  //                     .trade!.payInAddress,
-                                  //                 trade: model.trade!,
-                                  //               );
-                                  //             },
-                                  //             settings: const RouteSettings(
-                                  //               name: SendFromView.routeName,
-                                  //             ),
-                                  //           ),
-                                  //         );
-                                  //       },
-                                  style: Theme.of(context)
-                                      .extension<StackColors>()!
-                                      .getSecondaryEnabledButtonColor(context),
-                                  child: Text(
-                                    buttonTitle,
-                                    style: STextStyles.buttonText(context)
-                                        .copyWith(
-                                      color: Theme.of(context)
-                                          .extension<StackColors>()!
-                                          .buttonTextSecondary,
+                                  return TextButton(
+                                    onPressed: tuple != null &&
+                                            model.from.ticker.toLowerCase() ==
+                                                tuple.item2.ticker.toLowerCase()
+                                        ? () async {
+                                            await _confirmSend(tuple);
+                                          }
+                                        : () {
+                                            Navigator.of(context).push(
+                                              RouteGenerator.getRoute(
+                                                shouldUseMaterialRoute:
+                                                    RouteGenerator
+                                                        .useMaterialPageRoute,
+                                                builder:
+                                                    (BuildContext context) {
+                                                  final coin =
+                                                      coinFromTickerCaseInsensitive(
+                                                          model.trade!
+                                                              .fromCurrency);
+                                                  return SendFromView(
+                                                    coin: coin,
+                                                    amount: model.sendAmount
+                                                        .toAmount(
+                                                      fractionDigits:
+                                                          coin.decimals,
+                                                    ),
+                                                    address: model
+                                                        .trade!.payInAddress,
+                                                    trade: model.trade!,
+                                                  );
+                                                },
+                                                settings: const RouteSettings(
+                                                  name: SendFromView.routeName,
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                    style: Theme.of(context)
+                                        .extension<StackColors>()!
+                                        .getSecondaryEnabledButtonColor(
+                                            context),
+                                    child: Text(
+                                      buttonTitle,
+                                      style: STextStyles.buttonText(context)
+                                          .copyWith(
+                                        color: Theme.of(context)
+                                            .extension<StackColors>()!
+                                            .buttonTextSecondary,
+                                      ),
                                     ),
-                                  ),
-                                );
-                              },
-                            ),
+                                  );
+                                },
+                              ),
                           ],
                         ),
                       ),

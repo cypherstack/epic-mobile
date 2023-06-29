@@ -1,4 +1,5 @@
 // import 'package:epicpay/models/contact_address_entry.dart';
+import 'package:epicpay/models/exchange/incomplete_exchange.dart';
 import 'package:epicpay/models/paymint/transactions_model.dart';
 import 'package:epicpay/pages/add_wallet_views/create_restore_wallet_view.dart';
 import 'package:epicpay/pages/add_wallet_views/restore_wallet_view/restore_options_view/restore_options_view.dart';
@@ -470,56 +471,63 @@ class RouteGenerator {
           ),
         );
 
-      case Step1View.routeName:
-        return getRoute(
-          shouldUseMaterialRoute: useMaterialPageRoute,
-          builder: (_) => const Step1View(),
-          settings: RouteSettings(
-            name: settings.name,
-          ),
-        );
+      // exchange steps
 
-      // case Step1View.routeName:
-      // if (args is IncompleteExchangeModel)
-      // {
-      // return getRoute(
-      //   shouldUseMaterialRoute: useMaterialPageRoute,
-      //   builder: (_) => const Step1View(
-      //       // model: args,
-      //       ),
-      //   settings: RouteSettings(
-      //     name: settings.name,
-      //   ),
-      // );
-      // }
-      // return _routeError("${settings.name} invalid args: ${args.toString()}");
+      case Step1View.routeName:
+        if (args is IncompleteExchangeModel) {
+          return getRoute(
+            shouldUseMaterialRoute: useMaterialPageRoute,
+            builder: (_) => Step1View(
+              model: args,
+            ),
+            settings: RouteSettings(
+              name: settings.name,
+            ),
+          );
+        }
+        return _routeError("${settings.name} invalid args: ${args.toString()}");
 
       case Step2View.routeName:
-        return getRoute(
-          shouldUseMaterialRoute: useMaterialPageRoute,
-          builder: (_) => const Step2View(),
-          settings: RouteSettings(
-            name: settings.name,
-          ),
-        );
+        if (args is IncompleteExchangeModel) {
+          return getRoute(
+            shouldUseMaterialRoute: useMaterialPageRoute,
+            builder: (_) => Step2View(
+              model: args,
+            ),
+            settings: RouteSettings(
+              name: settings.name,
+            ),
+          );
+        }
+        return _routeError("${settings.name} invalid args: ${args.toString()}");
 
       case Step3View.routeName:
-        return getRoute(
-          shouldUseMaterialRoute: useMaterialPageRoute,
-          builder: (_) => const Step3View(),
-          settings: RouteSettings(
-            name: settings.name,
-          ),
-        );
+        if (args is IncompleteExchangeModel) {
+          return getRoute(
+            shouldUseMaterialRoute: useMaterialPageRoute,
+            builder: (_) => Step3View(
+              model: args,
+            ),
+            settings: RouteSettings(
+              name: settings.name,
+            ),
+          );
+        }
+        return _routeError("${settings.name} invalid args: ${args.toString()}");
 
       case Step4View.routeName:
-        return getRoute(
-          shouldUseMaterialRoute: useMaterialPageRoute,
-          builder: (_) => const Step4View(),
-          settings: RouteSettings(
-            name: settings.name,
-          ),
-        );
+        if (args is IncompleteExchangeModel) {
+          return getRoute(
+            shouldUseMaterialRoute: useMaterialPageRoute,
+            builder: (_) => Step4View(
+              model: args,
+            ),
+            settings: RouteSettings(
+              name: settings.name,
+            ),
+          );
+        }
+        return _routeError("${settings.name} invalid args: ${args.toString()}");
 
       case TradeDetailsView.routeName:
         if (args is ({

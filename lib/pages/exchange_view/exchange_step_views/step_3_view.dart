@@ -10,26 +10,33 @@
 
 import 'dart:async';
 
+import 'package:epicpay/db/isar/isar_db.dart';
+import 'package:epicpay/models/exchange/incomplete_exchange.dart';
+import 'package:epicpay/models/isar/models/exchange/pair.dart';
+import 'package:epicpay/models/isar/models/exchange/trade.dart';
 import 'package:epicpay/pages/exchange_view/exchange_step_views/step_4_view.dart';
 import 'package:epicpay/providers/exchange/exchange_form_state_provider.dart';
+import 'package:epicpay/services/swap/exchange_response.dart';
 import 'package:epicpay/utilities/clipboard_interface.dart';
 import 'package:epicpay/utilities/text_styles.dart';
 import 'package:epicpay/utilities/theme/stack_colors.dart';
 import 'package:epicpay/widgets/background.dart';
 import 'package:epicpay/widgets/custom_buttons/app_bar_icon_button.dart';
+import 'package:epicpay/widgets/custom_loading_overlay.dart';
+import 'package:epicpay/widgets/ep_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class Step3View extends ConsumerStatefulWidget {
   const Step3View({
     Key? key,
-    // required this.model,
+    required this.model,
     this.clipboard = const ClipboardWrapper(),
   }) : super(key: key);
 
   static const String routeName = "/exchangeStep3";
 
-  // final IncompleteExchangeModel model;
+  final IncompleteExchangeModel model;
   final ClipboardInterface clipboard;
 
   @override
@@ -37,20 +44,23 @@ class Step3View extends ConsumerStatefulWidget {
 }
 
 class _Step3ViewState extends ConsumerState<Step3View> {
-  // late final IncompleteExchangeModel model;
+  late final IncompleteExchangeModel model;
   late final ClipboardInterface clipboard;
 
   @override
   void initState() {
-    // model = widget.model;
+    model = widget.model;
     clipboard = widget.clipboard;
 
     super.initState();
   }
 
+  static const supportsRefund = true;
+
   @override
   Widget build(BuildContext context) {
-    final supportsRefund = ref.watch(efExchangeProvider).name;
+    // final supportsRefund =
+    //     ref.watch(efExchangeProvider).name != MajesticBankExchange.exchangeName;
 
     return Background(
       child: Scaffold(
@@ -109,8 +119,7 @@ class _Step3ViewState extends ConsumerState<Step3View> {
                               ),
                               const Spacer(),
                               Text(
-                                // "${model.sendAmount.toString()} ${model.sendTicker.toUpperCase()}",
-                                "",
+                                "${model.sendAmount.toString()} ${model.from.ticker.toUpperCase()}",
                                 style: STextStyles.itemSubtitle12(context),
                               )
                             ],
@@ -130,8 +139,7 @@ class _Step3ViewState extends ConsumerState<Step3View> {
                               ),
                               const Spacer(),
                               Text(
-                                // "${model.sendAmount.toString()} ${model.sendTicker.toUpperCase()}",
-                                "",
+                                "${model.sendAmount.toString()} ${model.from.ticker.toUpperCase()}",
                                 style: STextStyles.itemSubtitle12(context),
                               )
                             ],
@@ -151,8 +159,7 @@ class _Step3ViewState extends ConsumerState<Step3View> {
                               ),
                               const Spacer(),
                               Text(
-                                // "${model.receiveAmount.toString()} ${model.receiveTicker.toUpperCase()}",
-                                "",
+                                "${model.receiveAmount.toString()} ${model.to.ticker.toUpperCase()}",
                                 style: STextStyles.itemSubtitle12(context),
                               )
                             ],
@@ -172,8 +179,7 @@ class _Step3ViewState extends ConsumerState<Step3View> {
                               ),
                               const Spacer(),
                               Text(
-                                // model.rateInfo,
-                                "",
+                                model.rateInfo,
                                 style: STextStyles.itemSubtitle12(context),
                               )
                             ],
@@ -189,47 +195,43 @@ class _Step3ViewState extends ConsumerState<Step3View> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                // "Recipient ${model.receiveTicker.toUpperCase()} address",
-                                "RECIPIENT ADDRESS",
+                                "Recipient ${model.to.ticker.toUpperCase()} address",
                                 style: STextStyles.itemSubtitle(context),
                               ),
                               const SizedBox(
                                 height: 4,
                               ),
                               Text(
-                                // model.recipientAddress!,
-                                "",
+                                model.recipientAddress!,
                                 style: STextStyles.itemSubtitle12(context),
                               )
                             ],
                           ),
-                          // if (supportsRefund)
-                          const SizedBox(
-                            height: 10,
-                          ),
+                          if (supportsRefund)
+                            const SizedBox(
+                              height: 10,
+                            ),
                           const Divider(),
                           const SizedBox(
                             height: 10,
                           ),
-                          // if (supportsRefund)
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                // "Refund ${model.sendTicker.toUpperCase()} address",
-                                "REFUND ADDRESS",
-                                style: STextStyles.itemSubtitle(context),
-                              ),
-                              const SizedBox(
-                                height: 4,
-                              ),
-                              Text(
-                                // model.refundAddress!,
-                                "",
-                                style: STextStyles.itemSubtitle12(context),
-                              )
-                            ],
-                          ),
+                          if (supportsRefund)
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "Refund ${model.from.ticker.toUpperCase()} address",
+                                  style: STextStyles.itemSubtitle(context),
+                                ),
+                                const SizedBox(
+                                  height: 4,
+                                ),
+                                Text(
+                                  model.refundAddress!,
+                                  style: STextStyles.itemSubtitle12(context),
+                                )
+                              ],
+                            ),
                           const SizedBox(
                             height: 8,
                           ),
@@ -239,103 +241,111 @@ class _Step3ViewState extends ConsumerState<Step3View> {
                               Expanded(
                                 child: TextButton(
                                   onPressed: () async {
-                                    //   unawaited(
-                                    //     showDialog<void>(
-                                    //       context: context,
-                                    //       barrierDismissible: false,
-                                    //       builder: (_) => WillPopScope(
-                                    //         onWillPop: () async => false,
-                                    //         child: Container(
-                                    //           color: Theme.of(context)
-                                    //               .extension<StackColors>()!
-                                    //               .overlay
-                                    //               .withOpacity(0.6),
-                                    //           child: const CustomLoadingOverlay(
-                                    //             message: "Creating a trade",
-                                    //             eventBus: null,
-                                    //           ),
-                                    //         ),
-                                    //       ),
-                                    //     ),
-                                    //   );
-                                    //
-                                    //   final ExchangeResponse<Trade> response =
-                                    //       await ref
-                                    //           .read(efExchangeProvider)
-                                    //           .createTrade(
-                                    //             from: model.sendTicker,
-                                    //             to: model.receiveTicker,
-                                    //             fixedRate: model.rateType !=
-                                    //                 ExchangeRateType.estimated,
-                                    //             amount: model.reversed
-                                    //                 ? model.receiveAmount
-                                    //                 : model.sendAmount,
-                                    //             addressTo:
-                                    //                 model.recipientAddress!,
-                                    //             extraId: null,
-                                    //             addressRefund: supportsRefund
-                                    //                 ? model.refundAddress!
-                                    //                 : "",
-                                    //             refundExtraId: "",
-                                    //             estimate: model.estimate,
-                                    //             reversed: model.reversed,
-                                    //           );
-                                    //
-                                    //   if (response.value == null) {
-                                    //     if (mounted) {
-                                    //       Navigator.of(context).pop();
-                                    //
-                                    //       unawaited(
-                                    //         showDialog<void>(
-                                    //           context: context,
-                                    //           barrierDismissible: true,
-                                    //           builder: (_) => StackDialog(
-                                    //             title: "Failed to create trade",
-                                    //             message: response.exception
-                                    //                 ?.toString(),
-                                    //           ),
-                                    //         ),
-                                    //       );
-                                    //     }
-                                    //     return;
-                                    //   }
-                                    //
-                                    //   // save trade to hive
-                                    //   await ref.read(tradesServiceProvider).add(
-                                    //         trade: response.value!,
-                                    //         shouldNotifyListeners: true,
-                                    //       );
-                                    //
-                                    //   String status = response.value!.status;
-                                    //
-                                    //   model.trade = response.value!;
-                                    //
-                                    //   // extra info if status is waiting
-                                    //   if (status == "Waiting") {
-                                    //     status += " for deposit";
-                                    //   }
-                                    //
-                                    //   if (mounted) {
-                                    //     Navigator.of(context).pop();
-                                    //   }
-                                    //
-                                    //   unawaited(NotificationApi.showNotification(
-                                    //     changeNowId: model.trade!.tradeId,
-                                    //     title: status,
-                                    //     body: "Trade ID ${model.trade!.tradeId}",
-                                    //     walletId: "",
-                                    //     iconAssetName: Assets.svg.arrowRotate,
-                                    //     date: model.trade!.timestamp,
-                                    //     shouldWatchForUpdates: true,
-                                    //     coinName: "coinName",
-                                    //   ));
-                                    //
-                                    //   if (mounted) {
-                                    unawaited(Navigator.of(context).pushNamed(
-                                      Step4View.routeName,
-                                      // arguments: model,
-                                    ));
-                                    //   }
+                                    unawaited(
+                                      showDialog<void>(
+                                        context: context,
+                                        barrierDismissible: false,
+                                        builder: (_) => WillPopScope(
+                                          onWillPop: () async => false,
+                                          child: Container(
+                                            color: Theme.of(context)
+                                                .extension<StackColors>()!
+                                                .overlay
+                                                .withOpacity(0.6),
+                                            child: const CustomLoadingOverlay(
+                                              message: "Creating a trade",
+                                              eventBus: null,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    );
+
+                                    final ExchangeResponse<Trade> response =
+                                        await ref
+                                            .read(efExchangeProvider)
+                                            .createTrade(
+                                              from: model.from,
+                                              to: model.to,
+                                              fixedRate: model.rateType !=
+                                                  SupportedRateType.estimated,
+                                              amount: model.reversed
+                                                  ? model.receiveAmount
+                                                  : model.sendAmount,
+                                              addressTo:
+                                                  model.recipientAddress!,
+                                              extraId: null,
+                                              addressRefund: supportsRefund
+                                                  ? model.refundAddress!
+                                                  : "",
+                                              refundExtraId: "",
+                                              estimate: model.estimate,
+                                              reversed: model.reversed,
+                                            );
+
+                                    if (response.value == null) {
+                                      if (mounted) {
+                                        Navigator.of(context).pop();
+
+                                        unawaited(
+                                          showDialog<void>(
+                                            context: context,
+                                            barrierDismissible: true,
+                                            builder: (_) => EPDialog(
+                                              title: "Failed to create trade",
+                                              info: response.exception
+                                                  ?.toString(),
+                                            ),
+                                          ),
+                                        );
+                                      }
+                                      return;
+                                    }
+
+                                    // save trade to hive
+                                    await ref
+                                        .read(pIsarDB)
+                                        .isar
+                                        .writeTxn(() async {
+                                      await ref
+                                          .read(pIsarDB)
+                                          .isar
+                                          .trades
+                                          .put(response.value!);
+                                    });
+
+                                    String status = response.value!.status;
+
+                                    model.trade = response.value!;
+
+                                    // extra info if status is waiting
+                                    if (status == "Waiting") {
+                                      status += " for deposit";
+                                    }
+
+                                    if (mounted) {
+                                      Navigator.of(context).pop();
+                                    }
+
+                                    // unawaited(NotificationApi.showNotification(
+                                    //   changeNowId: model.trade!.tradeId,
+                                    //   title: status,
+                                    //   body: "Trade ID ${model.trade!.tradeId}",
+                                    //   walletId: "",
+                                    //   iconAssetName: Assets.svg.arrowRotate,
+                                    //   date: model.trade!.timestamp,
+                                    //   shouldWatchForUpdates: true,
+                                    //   coinName: "coinName",
+                                    // ));
+
+                                    if (mounted) {
+                                      unawaited(
+                                        Navigator.of(context).pushNamed(
+                                          Step4View.routeName,
+                                          arguments: model,
+                                        ),
+                                      );
+                                    }
                                   },
                                   style: Theme.of(context)
                                       .extension<StackColors>()!

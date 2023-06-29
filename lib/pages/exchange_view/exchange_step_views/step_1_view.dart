@@ -1,3 +1,5 @@
+import 'package:epicpay/models/exchange/incomplete_exchange.dart';
+import 'package:epicpay/models/isar/models/exchange/pair.dart';
 import 'package:epicpay/pages/exchange_view/exchange_step_views/step_2_view.dart';
 import 'package:epicpay/utilities/clipboard_interface.dart';
 import 'package:epicpay/utilities/text_styles.dart';
@@ -9,13 +11,13 @@ import 'package:flutter/material.dart';
 class Step1View extends StatefulWidget {
   const Step1View({
     Key? key,
-    // required this.model,
+    required this.model,
     this.clipboard = const ClipboardWrapper(),
   }) : super(key: key);
 
   static const String routeName = "/exchangeStep1";
 
-  // final IncompleteExchangeModel model;
+  final IncompleteExchangeModel model;
   final ClipboardInterface clipboard;
 
   @override
@@ -23,12 +25,12 @@ class Step1View extends StatefulWidget {
 }
 
 class _Step1ViewState extends State<Step1View> {
-  // late final IncompleteExchangeModel model;
+  late final IncompleteExchangeModel model;
   late final ClipboardInterface clipboard;
 
   @override
   void initState() {
-    // model = widget.model;
+    model = widget.model;
     clipboard = widget.clipboard;
 
     super.initState();
@@ -105,8 +107,7 @@ class _Step1ViewState extends State<Step1View> {
                                             .textDark),
                               ),
                               Text(
-                                "",
-                                // "${model.sendAmount.toStringAsFixed(8)} ${model.sendTicker.toUpperCase()}",
+                                "${model.sendAmount.toStringAsFixed(8)} ${model.from.ticker.toUpperCase()}",
                                 style: STextStyles.itemSubtitle12(context)
                                     .copyWith(
                                         color: Theme.of(context)
@@ -134,8 +135,7 @@ class _Step1ViewState extends State<Step1View> {
                                             .textDark),
                               ),
                               Text(
-                                "",
-                                // "~${model.receiveAmount.toStringAsFixed(8)} ${model.receiveTicker.toUpperCase()}",
+                                "~${model.receiveAmount.toStringAsFixed(8)} ${model.to.ticker.toUpperCase()}",
                                 style: STextStyles.itemSubtitle12(context)
                                     .copyWith(
                                         color: Theme.of(context)
@@ -155,10 +155,9 @@ class _Step1ViewState extends State<Step1View> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                "Estimated rate",
-                                // model.rateType == SupportedRateType.estimated
-                                //     ? "Estimated rate"
-                                //     : "Fixed rate",
+                                model.rateType == SupportedRateType.estimated
+                                    ? "Estimated rate"
+                                    : "Fixed rate",
                                 style:
                                     STextStyles.itemSubtitle(context).copyWith(
                                   color: Theme.of(context)
@@ -167,8 +166,7 @@ class _Step1ViewState extends State<Step1View> {
                                 ),
                               ),
                               Text(
-                                "",
-                                // model.rateInfo,
+                                model.rateInfo,
                                 style: STextStyles.itemSubtitle12(context)
                                     .copyWith(
                                         color: Theme.of(context)
@@ -182,7 +180,7 @@ class _Step1ViewState extends State<Step1View> {
                             onPressed: () {
                               Navigator.of(context).pushNamed(
                                 Step2View.routeName,
-                                // arguments: model,
+                                arguments: model,
                               );
                             },
                             style: Theme.of(context)
