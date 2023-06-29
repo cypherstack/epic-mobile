@@ -91,7 +91,6 @@ class _Step3ViewState extends ConsumerState<Step3View> {
         ),
         body: LayoutBuilder(
           builder: (context, constraints) {
-            final width = MediaQuery.of(context).size.width - 32;
             return Padding(
               padding: const EdgeInsets.all(12),
               child: SingleChildScrollView(
@@ -116,26 +115,6 @@ class _Step3ViewState extends ConsumerState<Step3View> {
                           ),
                           const SizedBox(
                             height: 24,
-                          ),
-                          Row(
-                            children: [
-                              Text(
-                                "TRADE ID",
-                                style: STextStyles.itemSubtitle(context),
-                              ),
-                              const Spacer(),
-                              Text(
-                                "${model.sendAmount.toString()} ${model.from.ticker.toUpperCase()}",
-                                style: STextStyles.itemSubtitle12(context),
-                              )
-                            ],
-                          ),
-                          const SizedBox(
-                            height: 10,
-                          ),
-                          const Divider(),
-                          const SizedBox(
-                            height: 10,
                           ),
                           Row(
                             children: [
