@@ -5,6 +5,9 @@ import 'package:epicpay/pages/add_wallet_views/restore_wallet_view/restore_optio
 import 'package:epicpay/pages/add_wallet_views/restore_wallet_view/restore_wallet_view.dart';
 import 'package:epicpay/pages/exchange_view/edit_trade_note_view.dart';
 import 'package:epicpay/pages/exchange_view/exchange_step_views/step_1_view.dart';
+import 'package:epicpay/pages/exchange_view/exchange_step_views/step_2_view.dart';
+import 'package:epicpay/pages/exchange_view/exchange_step_views/step_3_view.dart';
+import 'package:epicpay/pages/exchange_view/exchange_step_views/step_4_view.dart';
 import 'package:epicpay/pages/exchange_view/trade_details_view.dart';
 // import 'package:epicpay/pages/address_book_views/address_book_view.dart';
 // import 'package:epicpay/pages/address_book_views/subviews/add_address_book_entry_view.dart';
@@ -490,6 +493,33 @@ class RouteGenerator {
       // );
       // }
       // return _routeError("${settings.name} invalid args: ${args.toString()}");
+
+      case Step2View.routeName:
+        return getRoute(
+          shouldUseMaterialRoute: useMaterialPageRoute,
+          builder: (_) => const Step2View(),
+          settings: RouteSettings(
+            name: settings.name,
+          ),
+        );
+
+      case Step3View.routeName:
+        return getRoute(
+          shouldUseMaterialRoute: useMaterialPageRoute,
+          builder: (_) => const Step3View(),
+          settings: RouteSettings(
+            name: settings.name,
+          ),
+        );
+
+      case Step4View.routeName:
+        return getRoute(
+          shouldUseMaterialRoute: useMaterialPageRoute,
+          builder: (_) => const Step4View(),
+          settings: RouteSettings(
+            name: settings.name,
+          ),
+        );
 
       case TradeDetailsView.routeName:
         if (args is ({

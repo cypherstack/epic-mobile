@@ -1,3 +1,4 @@
+import 'package:epicpay/pages/exchange_view/exchange_step_views/step_2_view.dart';
 import 'package:epicpay/utilities/clipboard_interface.dart';
 import 'package:epicpay/utilities/text_styles.dart';
 import 'package:epicpay/utilities/theme/stack_colors.dart';
@@ -176,31 +177,13 @@ class _Step1ViewState extends State<Step1View> {
                               ),
                             ],
                           ),
-                          const SizedBox(
-                            height: 40,
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              GestureDetector(
-                                onTap: () {},
-                                child: Text(
-                                  "EDIT AMOUNT",
-                                  style: STextStyles.buttonText(context)
-                                      .copyWith(
-                                          color: Theme.of(context)
-                                              .extension<StackColors>()!
-                                              .textDark),
-                                ),
-                              ),
-                            ],
-                          ),
                           const Spacer(),
                           TextButton(
                             onPressed: () {
-                              // Navigator.of(context).pushNamed(
-                              //     Step2View.routeName,
-                              //     arguments: model);
+                              Navigator.of(context).pushNamed(
+                                Step2View.routeName,
+                                // arguments: model,
+                              );
                             },
                             style: Theme.of(context)
                                 .extension<StackColors>()!
