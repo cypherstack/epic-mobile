@@ -16,7 +16,6 @@ import 'package:epicpay/pages/home_view/home_view.dart';
 import 'package:epicpay/pages/wallet_view/wallet_view.dart';
 import 'package:epicpay/providers/exchange/exchange_form_state_provider.dart';
 import 'package:epicpay/providers/global/wallet_provider.dart';
-import 'package:epicpay/route_generator.dart';
 import 'package:epicpay/utilities/amount/amount.dart';
 import 'package:epicpay/utilities/assets.dart';
 import 'package:epicpay/utilities/clipboard_interface.dart';
@@ -145,21 +144,21 @@ class _Step4ViewState extends ConsumerState<Step4View> {
     try {
       if (!mounted) return;
 
-      unawaited(
-        showDialog<dynamic>(
-          context: context,
-          useSafeArea: false,
-          barrierDismissible: false,
-          builder: (context) {
-            return BuildingTransactionDialog(
-              coin: manager.coin,
-              onCancel: () {
-                wasCancelled = true;
-              },
-            );
-          },
-        ),
-      );
+      // unawaited(
+      //   showDialog<dynamic>(
+      //     context: context,
+      //     useSafeArea: false,
+      //     barrierDismissible: false,
+      //     builder: (context) {
+      //       return BuildingTransactionDialog(
+      //         coin: manager.coin,
+      //         onCancel: () {
+      //           wasCancelled = true;
+      //         },
+      //       );
+      //     },
+      //   ),
+      // );
 
       final time = Future<dynamic>.delayed(
         const Duration(
@@ -191,23 +190,23 @@ class _Step4ViewState extends ConsumerState<Step4View> {
         txData["address"] = address;
 
         if (mounted) {
-          unawaited(
-            Navigator.of(context).push(
-              RouteGenerator.getRoute(
-                shouldUseMaterialRoute: RouteGenerator.useMaterialPageRoute,
-                builder: (_) => ConfirmChangeNowSendView(
-                  transactionInfo: txData,
-                  walletId: tuple.item1,
-                  routeOnSuccessName: HomeView.routeName,
-                  trade: model.trade!,
-                  shouldSendPublicFiroFunds: firoPublicSend,
-                ),
-                settings: const RouteSettings(
-                  name: ConfirmChangeNowSendView.routeName,
-                ),
-              ),
-            ),
-          );
+          // unawaited(
+          //   Navigator.of(context).push(
+          //     RouteGenerator.getRoute(
+          //       shouldUseMaterialRoute: RouteGenerator.useMaterialPageRoute,
+          //       builder: (_) => ConfirmChangeNowSendView(
+          //         transactionInfo: txData,
+          //         walletId: tuple.item1,
+          //         routeOnSuccessName: HomeView.routeName,
+          //         trade: model.trade!,
+          //         shouldSendPublicFiroFunds: firoPublicSend,
+          //       ),
+          //       settings: const RouteSettings(
+          //         name: ConfirmChangeNowSendView.routeName,
+          //       ),
+          //     ),
+          //   ),
+          // );
         }
       }
     } catch (e) {
@@ -365,15 +364,15 @@ class _Step4ViewState extends ConsumerState<Step4View> {
                                           text: model.trade!.payinAddress,
                                         );
                                         await clipboard.setData(data);
-                                        if (mounted) {
-                                          unawaited(
-                                            showFloatingFlushBar(
-                                              type: FlushBarType.info,
-                                              message: "Copied to clipboard",
-                                              context: context,
-                                            ),
-                                          );
-                                        }
+                                        // if (mounted) {
+                                        //   unawaited(
+                                        //     showFloatingFlushBar(
+                                        //       type: FlushBarType.info,
+                                        //       message: "Copied to clipboard",
+                                        //       context: context,
+                                        //     ),
+                                        //   );
+                                        // }
                                       },
                                       child: Row(
                                         children: [
@@ -426,15 +425,15 @@ class _Step4ViewState extends ConsumerState<Step4View> {
                                       text: model.sendAmount.toString(),
                                     );
                                     await clipboard.setData(data);
-                                    if (mounted) {
-                                      unawaited(
-                                        showFloatingFlushBar(
-                                          type: FlushBarType.info,
-                                          message: "Copied to clipboard",
-                                          context: context,
-                                        ),
-                                      );
-                                    }
+                                    // if (mounted) {
+                                    //   unawaited(
+                                    //     showFloatingFlushBar(
+                                    //       type: FlushBarType.info,
+                                    //       message: "Copied to clipboard",
+                                    //       context: context,
+                                    //     ),
+                                    //   );
+                                    // }
                                   },
                                   child: Row(
                                     children: [
@@ -487,15 +486,15 @@ class _Step4ViewState extends ConsumerState<Step4View> {
                                           text: model.trade!.tradeId,
                                         );
                                         await clipboard.setData(data);
-                                        if (mounted) {
-                                          unawaited(
-                                            showFloatingFlushBar(
-                                              type: FlushBarType.info,
-                                              message: "Copied to clipboard",
-                                              context: context,
-                                            ),
-                                          );
-                                        }
+                                        // if (mounted) {
+                                        //   unawaited(
+                                        //     showFloatingFlushBar(
+                                        //       type: FlushBarType.info,
+                                        //       message: "Copied to clipboard",
+                                        //       context: context,
+                                        //     ),
+                                        //   );
+                                        // }
                                       },
                                       child: SvgPicture.asset(
                                         Assets.svg.copy,
@@ -647,34 +646,34 @@ class _Step4ViewState extends ConsumerState<Step4View> {
                                             await _confirmSend(tuple);
                                           }
                                         : () {
-                                            Navigator.of(context).push(
-                                              RouteGenerator.getRoute(
-                                                shouldUseMaterialRoute:
-                                                    RouteGenerator
-                                                        .useMaterialPageRoute,
-                                                builder:
-                                                    (BuildContext context) {
-                                                  final coin =
-                                                      coinFromTickerCaseInsensitive(
-                                                          model.trade!
-                                                              .fromCurrency);
-                                                  return SendFromView(
-                                                    coin: coin,
-                                                    amount: model.sendAmount
-                                                        .toAmount(
-                                                      fractionDigits:
-                                                          coin.decimals,
-                                                    ),
-                                                    address: model
-                                                        .trade!.payInAddress,
-                                                    trade: model.trade!,
-                                                  );
-                                                },
-                                                settings: const RouteSettings(
-                                                  name: SendFromView.routeName,
-                                                ),
-                                              ),
-                                            );
+                                            // Navigator.of(context).push(
+                                            //   RouteGenerator.getRoute(
+                                            //     shouldUseMaterialRoute:
+                                            //         RouteGenerator
+                                            //             .useMaterialPageRoute,
+                                            //     builder:
+                                            //         (BuildContext context) {
+                                            //       final coin =
+                                            //           coinFromTickerCaseInsensitive(
+                                            //               model.trade!
+                                            //                   .fromCurrency);
+                                            //       return SendFromView(
+                                            //         coin: coin,
+                                            //         amount: model.sendAmount
+                                            //             .toAmount(
+                                            //           fractionDigits:
+                                            //               coin.decimals,
+                                            //         ),
+                                            //         address: model
+                                            //             .trade!.payInAddress,
+                                            //         trade: model.trade!,
+                                            //       );
+                                            //     },
+                                            //     settings: const RouteSettings(
+                                            //       name: SendFromView.routeName,
+                                            //     ),
+                                            //   ),
+                                            // );
                                           },
                                     style: Theme.of(context)
                                         .extension<StackColors>()!
