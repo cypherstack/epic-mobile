@@ -29,6 +29,8 @@ class AggregateCurrency {
 
   bool get isStackCoin => _map.values.first!.isStackCoin;
 
+  Currency? getForExchangeName(String exchangeName) => _map[exchangeName];
+
   @override
   String toString() {
     String str = "AggregateCurrency: {";
