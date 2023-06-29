@@ -54,18 +54,15 @@ class _Step1ViewState extends State<Step1View> {
               }
             },
           ),
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              StepRow(
-                count: 4,
-                current: 0,
-                width: 6,
-              ),
-              SizedBox(
-                width: MediaQuery.of(context).size.width / 7,
-              ),
-            ],
+          centerTitle: true,
+          title: const SizedBox(
+            width:
+                66, // 66 is the width of the StepRow based on the current hardcoded values
+            child: StepRow(
+              count: 4,
+              current: 0,
+              width: 6,
+            ),
           ),
         ),
         body: LayoutBuilder(
