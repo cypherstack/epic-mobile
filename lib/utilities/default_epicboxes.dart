@@ -4,15 +4,15 @@ abstract class DefaultEpicBoxes {
   static const String defaultName = "Default";
 
   static List<EpicBoxServerModel> get all => [
-        americas /*, asia, europe*/
-      ]; // Temporarily disable non-americas regions
-  static List<String> get defaultIds => ['americas' /*, 'asia', 'europe'*/];
+        americas , asia, europe
+      ];
+  static List<String> get defaultIds => ['americas', 'asia', 'europe'];
 
   static EpicBoxServerModel get americas => EpicBoxServerModel(
         host: 'epicbox.epic.tech',
         port: 443,
-        // name: 'Americas',
-        name: 'Default',
+        name: 'Americas',
+        // name: 'Default',
         id: 'americas',
         useSSL: true,
         enabled: true,

@@ -41,8 +41,8 @@ import 'package:stack_wallet_backup/generate_password.dart';
 import 'package:tuple/tuple.dart';
 import 'package:websocket_universal/websocket_universal.dart';
 
-import '../../../models/epicbox_server_model.dart';
-import '../../../utilities/format.dart';
+import 'package:epicpay/models/epicbox_server_model.dart';
+import 'package:epicpay/utilities/format.dart';
 
 const int MINIMUM_CONFIRMATIONS = 3;
 
@@ -1162,16 +1162,21 @@ class EpicCashWallet extends CoinServiceAPI {
       _epicBoxConfig = EpicBoxConfigModel.fromString(
           storedConfig); // fromString handles checking old config formats
     }
+
     //Now check if secureStoreConfig is the same as the Hive one
     EpicBoxServerModel? _epicBox = DB.instance.get<EpicBoxServerModel>(
         boxName: DB.boxNamePrimaryEpicBox, key: 'primary');
 
     if (_epicBox != null) {
-      if (_epicBoxConfig.host != _epicBox?.host) {
-        _epicBoxConfig = EpicBoxConfigModel.fromServer(_epicBox!);
+      if (_epicBoxConfig.host != _epicBox.host) {
+        _epicBoxConfig = EpicBoxConfigModel.fromServer(_epicBox);
         await _secureStore.write(
             key: '${_walletId}_epicboxConfig',
             value: _epicBoxConfig.toString());
+        
+        //Remove the receiving address stored in hive
+        await DB.instance.delete(key: "currentReceivingAddress", boxName: walletId);
+        
       }
     }
 
