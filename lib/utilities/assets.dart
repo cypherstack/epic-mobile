@@ -153,9 +153,9 @@ class _SVG {
   // String get questionMessage => "assets/svg/message-question.svg";
   // String get envelope => "assets/svg/envelope.svg";
   String get share => "assets/svg/share-2.svg";
-  String get anonymize => "assets/svg/tx-icon-anonymize.svg";
-  String get anonymizePending => "assets/svg/tx-icon-anonymize-pending.svg";
-  String get anonymizeFailed => "assets/svg/tx-icon-anonymize-failed.svg";
+  // String get anonymize => "assets/svg/tx-icon-anonymize.svg";
+  // String get anonymizePending => "assets/svg/tx-icon-anonymize-pending.svg";
+  // String get anonymizeFailed => "assets/svg/tx-icon-anonymize-failed.svg";
   // String get addressBookDesktop => "assets/svg/address-book-desktop.svg";
   // String get exchangeDesktop => "assets/svg/exchange-desktop.svg";
   // String get aboutDesktop => "assets/svg/about-desktop.svg";
@@ -163,6 +163,9 @@ class _SVG {
   // String get exitDesktop => "assets/svg/exit-desktop.svg";
   // String get keys => "assets/svg/keys.svg";
   String get arrowDown => "assets/svg/arrow-down.svg";
+  String get txSwap => "assets/svg/tx-swap.svg";
+  String get txSwapPending => "assets/svg/tx-swap-pending.svg";
+  String get txSwapFailed => "assets/svg/thin-x-circle.svg";
 
   String get epicCash => "assets/svg/coin_icons/EpicCash.svg";
 

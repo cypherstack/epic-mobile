@@ -185,14 +185,29 @@ class _ExchangeViewState extends ConsumerState<ExchangeView> {
                                   .isar
                                   .trades
                                   .watchObject(internalTradeIds[index]),
-                              builder:
-                                  (context, AsyncSnapshot<Trade?> snapshot) {
-                                final trade = snapshot.data!;
-                                return Padding(
-                                  padding: const EdgeInsets.all(4),
+                              builder: (
+                                context,
+                                AsyncSnapshot<Trade?> snapshot,
+                              ) {
+                                final trade = snapshot.data ??
+                                    ref
+                                        .read(pIsarDB)
+                                        .isar
+                                        .trades
+                                        .where()
+                                        .idEqualTo(internalTradeIds[index])
+                                        .findFirstSync()!;
+
+                                return ConditionalParent(
+                                  condition: index > 0,
+                                  builder: (child) => Padding(
+                                    padding: const EdgeInsets.only(top: 16),
+                                    child: child,
+                                  ),
                                   child: TradeCard(
                                     key: Key(
-                                        "tradeCard_${trade.tradeId + trade.updatedAt.toString()}"),
+                                      "tradeCard_${trade.tradeId + trade.updatedAt.toString()}",
+                                    ),
                                     trade: trade,
                                     onTap: () async {
                                       final String? txid = ref
@@ -247,6 +262,7 @@ class _ExchangeViewState extends ConsumerState<ExchangeView> {
                               },
                             );
                           },
+                          childCount: internalTradeIds.length,
                         ),
                       ),
                     if (!hasHistory)

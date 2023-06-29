@@ -224,9 +224,6 @@ flutter:
     - assets/svg/auto-backup.svg
     - assets/svg/message-question.svg
     - assets/svg/envelope.svg
-    - assets/svg/tx-icon-anonymize.svg
-    - assets/svg/tx-icon-anonymize-pending.svg
-    - assets/svg/tx-icon-anonymize-failed.svg
     - assets/svg/dollar-sign-circle.svg
     - assets/svg/language-circle.svg
     - assets/svg/sun-circle.svg
@@ -246,6 +243,8 @@ flutter:
     - assets/svg/refresh.svg
     - assets/svg/clipboard.svg
     - assets/svg/swap-arrows.svg
+    - assets/svg/tx-swap.svg
+    - assets/svg/tx-swap-pending.svg
     # coin icons
     - assets/svg/coin_icons/EpicCash.svg
     # socials

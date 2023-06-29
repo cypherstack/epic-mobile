@@ -11,15 +11,15 @@ class TxIcon extends StatelessWidget {
 
   String _getAssetName(
       bool isCancelled, bool isReceived, bool isPending, BuildContext context) {
-    if (!isReceived && transaction.subType == "mint") {
-      if (isCancelled) {
-        return Assets.svg.anonymizeFailed;
-      }
-      if (isPending) {
-        return Assets.svg.anonymizePending;
-      }
-      return Assets.svg.anonymize;
-    }
+    // if (!isReceived && transaction.subType == "mint") {
+    //   if (isCancelled) {
+    //     return Assets.svg.anonymizeFailed;
+    //   }
+    //   if (isPending) {
+    //     return Assets.svg.anonymizePending;
+    //   }
+    //   return Assets.svg.anonymize;
+    // }
 
     if (isReceived) {
       if (isCancelled) {
