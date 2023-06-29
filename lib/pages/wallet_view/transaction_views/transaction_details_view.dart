@@ -314,7 +314,7 @@ class _TransactionDetailsViewState
 
   @override
   Widget build(BuildContext context) {
-    final scaleFactor = (MediaQuery.of(context).textScaleFactor ?? 1.0) * 0.85;
+    final scaleFactor = MediaQuery.of(context).textScaleFactor * 0.85;
 
     return Background(
       child: Scaffold(
