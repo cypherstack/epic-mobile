@@ -12,12 +12,12 @@ import 'dart:async';
 
 import 'package:epicpay/models/exchange/incomplete_exchange.dart';
 import 'package:epicpay/pages/exchange_view/exchange_form.dart';
+import 'package:epicpay/pages/exchange_view/sub_widgets/step_row.dart';
 import 'package:epicpay/pages/home_view/home_view.dart';
 import 'package:epicpay/pages/wallet_view/wallet_view.dart';
 import 'package:epicpay/providers/exchange/exchange_form_state_provider.dart';
 import 'package:epicpay/providers/global/wallet_provider.dart';
 import 'package:epicpay/utilities/amount/amount.dart';
-import 'package:epicpay/pages/exchange_view/sub_widgets/step_row.dart';
 import 'package:epicpay/utilities/assets.dart';
 import 'package:epicpay/utilities/clipboard_interface.dart';
 import 'package:epicpay/utilities/enums/coin_enum.dart';
@@ -687,8 +687,7 @@ class _Step4ViewState extends ConsumerState<Step4View> {
                                           },
                                     style: Theme.of(context)
                                         .extension<StackColors>()!
-                                        .getPrimaryEnabledButtonColor(
-                                            context),
+                                        .getPrimaryEnabledButtonColor(context),
                                     child: Text(
                                       buttonTitle,
                                       style: STextStyles.buttonText(context)
