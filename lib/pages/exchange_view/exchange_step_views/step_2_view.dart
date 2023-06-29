@@ -11,6 +11,7 @@
 import 'package:epicpay/models/exchange/incomplete_exchange.dart';
 import 'package:epicpay/pages/exchange_view/exchange_form.dart';
 import 'package:epicpay/pages/exchange_view/exchange_step_views/step_3_view.dart';
+import 'package:epicpay/pages/exchange_view/sub_widgets/step_row.dart';
 import 'package:epicpay/providers/global/wallet_provider.dart';
 import 'package:epicpay/utilities/address_utils.dart';
 import 'package:epicpay/utilities/barcode_scanner_interface.dart';
@@ -153,6 +154,19 @@ class _Step2ViewState extends ConsumerState<Step2View> {
                 Navigator.of(context).pop();
               }
             },
+          ),
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              StepRow(
+                count: 4,
+                current: 1,
+                width: 6,
+              ),
+              SizedBox(
+                width: MediaQuery.of(context).size.width / 7,
+              ),
+            ],
           ),
         ),
         body: LayoutBuilder(

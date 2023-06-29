@@ -1,6 +1,7 @@
 import 'package:epicpay/models/exchange/incomplete_exchange.dart';
 import 'package:epicpay/models/isar/models/exchange/pair.dart';
 import 'package:epicpay/pages/exchange_view/exchange_step_views/step_2_view.dart';
+import 'package:epicpay/pages/exchange_view/sub_widgets/step_row.dart';
 import 'package:epicpay/utilities/clipboard_interface.dart';
 import 'package:epicpay/utilities/text_styles.dart';
 import 'package:epicpay/utilities/theme/stack_colors.dart';
@@ -53,10 +54,23 @@ class _Step1ViewState extends State<Step1View> {
               }
             },
           ),
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              StepRow(
+                count: 4,
+                current: 0,
+                width: 6,
+              ),
+              SizedBox(
+                width: MediaQuery.of(context).size.width / 7,
+              ),
+            ],
+          ),
         ),
         body: LayoutBuilder(
           builder: (context, constraints) {
-            final width = MediaQuery.of(context).size.width - 32;
+            // final width = MediaQuery.of(context).size.width / 3;
             return Padding(
               padding: const EdgeInsets.all(12),
               child: SingleChildScrollView(
@@ -70,11 +84,6 @@ class _Step1ViewState extends State<Step1View> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          // StepRow(
-                          //   count: 4,
-                          //   current: 0,
-                          //   width: width,
-                          // ),
                           const SizedBox(
                             height: 14,
                           ),
