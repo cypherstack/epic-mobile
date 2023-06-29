@@ -1100,4 +1100,42 @@ class STextStyles {
         );
     }
   }
+
+  static TextStyle error(BuildContext context) {
+    switch (_theme(context).themeType) {
+      case ThemeType.light:
+        return GoogleFonts.poppins(
+          color: _theme(context).textError,
+          fontWeight: FontWeight.w400,
+          fontSize: 10,
+          height: 14 / 10,
+        );
+      case ThemeType.dark:
+        return GoogleFonts.poppins(
+          color: _theme(context).textError,
+          fontWeight: FontWeight.w400,
+          fontSize: 10,
+          height: 14 / 10,
+        );
+    }
+  }
+
+  static TextStyle errorBold(BuildContext context) {
+    switch (_theme(context).themeType) {
+      case ThemeType.light:
+        return GoogleFonts.poppins(
+          color: _theme(context).textError,
+          fontWeight: FontWeight.w600,
+          fontSize: 10,
+          height: 14 / 10,
+        );
+      case ThemeType.dark:
+        return GoogleFonts.poppins(
+          color: _theme(context).textError,
+          fontWeight: FontWeight.w600,
+          fontSize: 10,
+          height: 14 / 10,
+        );
+    }
+  }
 }
