@@ -26,6 +26,7 @@ import 'package:epicpay/widgets/custom_buttons/app_bar_icon_button.dart';
 import 'package:epicpay/widgets/custom_loading_overlay.dart';
 import 'package:epicpay/widgets/ep_dialog.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class Step3View extends ConsumerStatefulWidget {
@@ -123,9 +124,18 @@ class _Step3ViewState extends ConsumerState<Step3View> {
                                 style: STextStyles.itemSubtitle(context),
                               ),
                               const Spacer(),
-                              Text(
-                                "${model.sendAmount.toString()} ${model.from.ticker.toUpperCase()}",
-                                style: STextStyles.itemSubtitle12(context),
+                              GestureDetector(
+                                onTap: () {
+                                  clipboard.setData(
+                                    ClipboardData(
+                                        text:
+                                            "${model.sendAmount.toString()} ${model.from.ticker.toUpperCase()}"),
+                                  );
+                                },
+                                child: Text(
+                                  "${model.sendAmount.toString()} ${model.from.ticker.toUpperCase()}",
+                                  style: STextStyles.itemSubtitle12(context),
+                                ),
                               )
                             ],
                           ),
@@ -143,9 +153,17 @@ class _Step3ViewState extends ConsumerState<Step3View> {
                                 style: STextStyles.itemSubtitle(context),
                               ),
                               const Spacer(),
-                              Text(
-                                "${model.receiveAmount.toString()} ${model.to.ticker.toUpperCase()}",
-                                style: STextStyles.itemSubtitle12(context),
+                              GestureDetector(
+                                onTap: () {
+                                  clipboard.setData(ClipboardData(
+                                    text:
+                                        "${model.receiveAmount.toString()} ${model.to.ticker.toUpperCase()}",
+                                  ));
+                                },
+                                child: Text(
+                                  "${model.receiveAmount.toString()} ${model.to.ticker.toUpperCase()}",
+                                  style: STextStyles.itemSubtitle12(context),
+                                ),
                               )
                             ],
                           ),
@@ -163,9 +181,16 @@ class _Step3ViewState extends ConsumerState<Step3View> {
                                 style: STextStyles.itemSubtitle(context),
                               ),
                               const Spacer(),
-                              Text(
-                                model.rateInfo,
-                                style: STextStyles.itemSubtitle12(context),
+                              GestureDetector(
+                                onTap: () {
+                                  clipboard.setData(ClipboardData(
+                                    text: model.rateInfo,
+                                  ));
+                                },
+                                child: Text(
+                                  model.rateInfo,
+                                  style: STextStyles.itemSubtitle12(context),
+                                ),
                               )
                             ],
                           ),
@@ -186,9 +211,16 @@ class _Step3ViewState extends ConsumerState<Step3View> {
                               const SizedBox(
                                 height: 4,
                               ),
-                              Text(
-                                model.recipientAddress!,
-                                style: STextStyles.itemSubtitle12(context),
+                              GestureDetector(
+                                onTap: () {
+                                  clipboard.setData(ClipboardData(
+                                    text: model.recipientAddress!,
+                                  ));
+                                },
+                                child: Text(
+                                  model.recipientAddress!,
+                                  style: STextStyles.itemSubtitle12(context),
+                                ),
                               )
                             ],
                           ),
@@ -211,9 +243,16 @@ class _Step3ViewState extends ConsumerState<Step3View> {
                                 const SizedBox(
                                   height: 4,
                                 ),
-                                Text(
-                                  model.refundAddress!,
-                                  style: STextStyles.itemSubtitle12(context),
+                                GestureDetector(
+                                  onTap: () {
+                                    clipboard.setData(ClipboardData(
+                                      text: model.refundAddress!,
+                                    ));
+                                  },
+                                  child: Text(
+                                    model.refundAddress!,
+                                    style: STextStyles.itemSubtitle12(context),
+                                  ),
                                 )
                               ],
                             ),

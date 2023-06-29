@@ -8,6 +8,7 @@ import 'package:epicpay/utilities/theme/stack_colors.dart';
 import 'package:epicpay/widgets/background.dart';
 import 'package:epicpay/widgets/custom_buttons/app_bar_icon_button.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class Step1View extends StatefulWidget {
   const Step1View({
@@ -112,13 +113,21 @@ class _Step1ViewState extends State<Step1View> {
                                             .extension<StackColors>()!
                                             .textDark),
                               ),
-                              Text(
-                                "${model.sendAmount.toStringAsFixed(8)} ${model.from.ticker.toUpperCase()}",
-                                style: STextStyles.itemSubtitle12(context)
-                                    .copyWith(
-                                        color: Theme.of(context)
-                                            .extension<StackColors>()!
-                                            .infoItemText),
+                              GestureDetector(
+                                onTap: () {
+                                  clipboard.setData(ClipboardData(
+                                    text:
+                                        "${model.sendAmount.toStringAsFixed(8)} ${model.from.ticker.toUpperCase()}",
+                                  ));
+                                },
+                                child: Text(
+                                  "${model.sendAmount.toStringAsFixed(8)} ${model.from.ticker.toUpperCase()}",
+                                  style: STextStyles.itemSubtitle12(context)
+                                      .copyWith(
+                                          color: Theme.of(context)
+                                              .extension<StackColors>()!
+                                              .infoItemText),
+                                ),
                               ),
                             ],
                           ),
@@ -140,13 +149,21 @@ class _Step1ViewState extends State<Step1View> {
                                             .extension<StackColors>()!
                                             .textDark),
                               ),
-                              Text(
-                                "~${model.receiveAmount.toStringAsFixed(8)} ${model.to.ticker.toUpperCase()}",
-                                style: STextStyles.itemSubtitle12(context)
-                                    .copyWith(
-                                        color: Theme.of(context)
-                                            .extension<StackColors>()!
-                                            .infoItemText),
+                              GestureDetector(
+                                onTap: () {
+                                  clipboard.setData(ClipboardData(
+                                    text:
+                                        "~${model.receiveAmount.toStringAsFixed(8)} ${model.to.ticker.toUpperCase()}",
+                                  ));
+                                },
+                                child: Text(
+                                  "~${model.receiveAmount.toStringAsFixed(8)} ${model.to.ticker.toUpperCase()}",
+                                  style: STextStyles.itemSubtitle12(context)
+                                      .copyWith(
+                                          color: Theme.of(context)
+                                              .extension<StackColors>()!
+                                              .infoItemText),
+                                ),
                               ),
                             ],
                           ),
@@ -171,13 +188,20 @@ class _Step1ViewState extends State<Step1View> {
                                       .textDark,
                                 ),
                               ),
-                              Text(
-                                model.rateInfo,
-                                style: STextStyles.itemSubtitle12(context)
-                                    .copyWith(
-                                        color: Theme.of(context)
-                                            .extension<StackColors>()!
-                                            .infoItemText),
+                              GestureDetector(
+                                onTap: () {
+                                  clipboard.setData(ClipboardData(
+                                    text: model.rateInfo,
+                                  ));
+                                },
+                                child: Text(
+                                  model.rateInfo,
+                                  style: STextStyles.itemSubtitle12(context)
+                                      .copyWith(
+                                          color: Theme.of(context)
+                                              .extension<StackColors>()!
+                                              .infoItemText),
+                                ),
                               ),
                             ],
                           ),
