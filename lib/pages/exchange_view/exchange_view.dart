@@ -142,6 +142,7 @@ class _ExchangeViewState extends ConsumerState<ExchangeView> {
                   .isar
                   .trades
                   .where()
+                  .sortByTimestampUTCDesc()
                   .idProperty()
                   .findAllSync();
               final hasHistory = internalTradeIds.isNotEmpty;

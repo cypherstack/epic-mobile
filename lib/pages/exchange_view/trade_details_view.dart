@@ -4,10 +4,8 @@ import 'package:decimal/decimal.dart';
 import 'package:epicpay/db/isar/isar_db.dart';
 import 'package:epicpay/models/isar/models/exchange/trade.dart';
 import 'package:epicpay/models/paymint/transactions_model.dart';
-import 'package:epicpay/pages/exchange_view/edit_trade_note_view.dart';
 import 'package:epicpay/pages/wallet_view/transaction_views/transaction_details_view.dart';
 import 'package:epicpay/services/swap/change_now/change_now_exchange.dart';
-import 'package:epicpay/services/swap/trade_notes_service.dart';
 import 'package:epicpay/utilities/assets.dart';
 import 'package:epicpay/utilities/clipboard_interface.dart';
 import 'package:epicpay/utilities/enums/coin_enum.dart';
@@ -96,9 +94,7 @@ class _TradeDetailsViewState extends ConsumerState<TradeDetailsView> {
 
   late Trade trade;
 
-  String _note = "";
-
-  late final int divCount;
+  late int divCount;
   double divHeight = maxDivHeight;
   double? layoutBuilderHeight;
   Size? size;
@@ -174,15 +170,31 @@ class _TradeDetailsViewState extends ConsumerState<TradeDetailsView> {
       if (mounted) {
         final exchange =
             ChangeNowExchange.instance; //Exchange.fromName(trade.exchangeName);
-        final response = await exchange.updateTrade(trade!);
+        final response = await exchange.updateTrade(trade);
 
         if (mounted && response.value != null) {
           await ref.read(pIsarDB).isar.writeTxn(() async {
             await ref.read(pIsarDB).isar.trades.put(response.value!);
           });
+
+          if (mounted) {
+            setState(() {
+              trade = response.value!;
+            });
+          }
         }
       }
     });
+
+    divCount = 7;
+    if (getSentFromStack) {
+      divCount += 1;
+    }
+    if (!getSentFromStack && !getHasTx) {
+      divCount += 1;
+    }
+
+    _setSize();
 
     super.initState();
   }
@@ -194,61 +206,29 @@ class _TradeDetailsViewState extends ConsumerState<TradeDetailsView> {
     super.dispose();
   }
 
-  String _fetchIconAssetForStatus(String statusString) {
-    ChangeNowTransactionStatus? status;
-    try {
-      if (statusString.toLowerCase().startsWith("waiting")) {
-        statusString = "Waiting";
-      }
-      status = changeNowTransactionStatusFromStringIgnoreCase(statusString);
-    } on ArgumentError catch (_) {
-      switch (statusString.toLowerCase()) {
-        case "funds confirming":
-        case "processing payment":
-          return Assets.svg.txSwapPending;
-
-        case "completed":
-          return Assets.svg.txSwap;
-
-        default:
-          status = ChangeNowTransactionStatus.Failed;
-      }
-    }
-
-    switch (status) {
-      case ChangeNowTransactionStatus.New:
-      case ChangeNowTransactionStatus.Waiting:
-      case ChangeNowTransactionStatus.Confirming:
-      case ChangeNowTransactionStatus.Exchanging:
-      case ChangeNowTransactionStatus.Sending:
-      case ChangeNowTransactionStatus.Refunded:
-      case ChangeNowTransactionStatus.Verifying:
-        return Assets.svg.txSwapPending;
-      case ChangeNowTransactionStatus.Finished:
-        return Assets.svg.txSwap;
-      case ChangeNowTransactionStatus.Failed:
-        return Assets.svg.txSwapFailed;
-    }
-  }
+  bool get getSentFromStack =>
+      transactionIfSentFromStack != null && walletId != null;
+  bool get getHasTx =>
+      getSentFromStack ||
+      !(trade.status == "New" ||
+          trade.status == "new" ||
+          trade.status == "Waiting" ||
+          trade.status == "waiting" ||
+          trade.status == "Refunded" ||
+          trade.status == "refunded" ||
+          trade.status == "Closed" ||
+          trade.status == "closed" ||
+          trade.status == "Expired" ||
+          trade.status == "expired" ||
+          trade.status == "Failed" ||
+          trade.status == "failed");
 
   @override
   Widget build(BuildContext context) {
-    final bool sentFromStack =
-        transactionIfSentFromStack != null && walletId != null;
+    final scaleFactor = MediaQuery.of(context).textScaleFactor * 0.85;
+    final bool sentFromStack = getSentFromStack;
 
-    final bool hasTx = sentFromStack ||
-        !(trade.status == "New" ||
-            trade.status == "new" ||
-            trade.status == "Waiting" ||
-            trade.status == "waiting" ||
-            trade.status == "Refunded" ||
-            trade.status == "refunded" ||
-            trade.status == "Closed" ||
-            trade.status == "closed" ||
-            trade.status == "Expired" ||
-            trade.status == "expired" ||
-            trade.status == "Failed" ||
-            trade.status == "failed");
+    final bool hasTx = getHasTx;
 
     debugPrint("walletId: $walletId");
     debugPrint("transactionIfSentFromStack: $transactionIfSentFromStack");
@@ -286,639 +266,380 @@ class _TradeDetailsViewState extends ConsumerState<TradeDetailsView> {
             ),
           ],
         ),
-        body: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    trade.fromCurrency.toUpperCase(),
-                    style: STextStyles.titleH3(context).copyWith(
-                      color: Theme.of(context)
-                          .extension<StackColors>()!
-                          .textMedium,
-                    ),
-                  ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
-                    child: SvgPicture.asset(
-                      Assets.svg.swapArrows,
-                      width: 24,
-                      height: 24,
-                    ),
-                  ),
-                  Text(
-                    trade.toCurrency.toUpperCase(),
-                    style: STextStyles.titleH3(context).copyWith(
-                      color: Theme.of(context)
-                          .extension<StackColors>()!
-                          .textMedium,
-                    ),
-                  ),
-                ],
-              ),
-              Center(
-                child: SelectableText(
-                  trade.status.capitalize(),
-                  style: STextStyles.body(context).copyWith(
-                    color: Theme.of(context)
-                        .extension<StackColors>()!
-                        .colorForStatus(trade.status),
-                  ),
-                ),
-              ),
-              const SizedBox(
-                height: 12,
-              ),
-              if (!sentFromStack && !hasTx)
-                Padding(
-                  padding: sidePadding,
-                  child: RoundedWhiteContainer(
-                    child: RichText(
-                      text: TextSpan(
-                        text:
-                            "You must send at least ${sendAmount.toStringAsFixed(
-                          trade.fromCurrency.toLowerCase() == "xmr" ? 12 : 8,
-                        )} ${trade.fromCurrency.toUpperCase()}. ",
-                        style: STextStyles.label(context).copyWith(
-                          color: Theme.of(context)
-                              .extension<StackColors>()!
-                              .warningForeground,
-                        ),
-                        children: [
-                          TextSpan(
-                            text:
-                                "If you send less than ${sendAmount.toStringAsFixed(
-                              trade.fromCurrency.toLowerCase() == "xmr"
-                                  ? 12
-                                  : 8,
-                            )} ${trade.fromCurrency.toUpperCase()}, your transaction may not be converted and it may not be refunded.",
-                            style: STextStyles.label(context).copyWith(
-                              color: Theme.of(context)
-                                  .extension<StackColors>()!
-                                  .warningForeground,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-
-              if (!sentFromStack && !hasTx)
-                const SizedBox(
-                  height: 12,
-                ),
-
-              if (!sentFromStack && !hasTx)
-                _DetailsItem(
-                  title: "SEND ${trade.fromCurrency.toUpperCase()} "
-                      "TO THIS ADDRESS (CHANGENOW)",
-                  data: trade.payinAddress,
-                  trailingBelow: true,
-                  isTapCopy: true,
-                  trailing: CustomTextButton(
-                    text: "SHOW QR CODE",
-                    onPressed: () {
-                      showDialog<dynamic>(
-                        context: context,
-                        useSafeArea: false,
-                        barrierDismissible: true,
-                        builder: (_) {
-                          final width = MediaQuery.of(context).size.width / 2;
-                          return EPDialogBase(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
+        body: SafeArea(
+          child: MediaQuery(
+            data: MediaQuery.of(context).copyWith(
+              textScaleFactor: scaleFactor,
+            ),
+            child: Column(
+              children: [
+                Expanded(
+                  child: LayoutBuilder(builder: (context, constraints) {
+                    layoutBuilderHeight = constraints.maxHeight;
+                    return SingleChildScrollView(
+                      child: IntrinsicHeight(
+                        key: _key,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Center(
-                                  child: Text(
-                                    "Send ${trade.fromCurrency.toUpperCase()} to this address",
-                                    style: STextStyles.pageTitleH2(context),
+                                Text(
+                                  trade.fromCurrency.toUpperCase(),
+                                  style: STextStyles.titleH3(context).copyWith(
+                                    color: Theme.of(context)
+                                        .extension<StackColors>()!
+                                        .textMedium,
                                   ),
                                 ),
-                                const SizedBox(
-                                  height: 12,
-                                ),
-                                Center(
-                                  child: RepaintBoundary(
-                                    // key: _qrKey,
-                                    child: SizedBox(
-                                      width: width + 20,
-                                      height: width + 20,
-                                      child: QrImage(
-                                          data: trade.payinAddress,
-                                          size: width,
-                                          backgroundColor: Theme.of(context)
-                                              .extension<StackColors>()!
-                                              .popupBG,
-                                          foregroundColor: Theme.of(context)
-                                              .extension<StackColors>()!
-                                              .accentColorDark),
-                                    ),
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(horizontal: 8),
+                                  child: SvgPicture.asset(
+                                    Assets.svg.swapArrows,
+                                    width: 24,
+                                    height: 24,
                                   ),
-                                ),
-                                const SizedBox(
-                                  height: 12,
-                                ),
-                                Center(
-                                  child: SizedBox(
-                                    width: width,
-                                    child: SecondaryButton(
-                                      label: "Cancel",
-                                      onPressed: () async {
-                                        // await _capturePng(true);
-                                        Navigator.of(context).pop();
-                                      },
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      );
-                    },
-                  ),
-                ),
-
-              if (!sentFromStack && !hasTx) _Divider(height: divHeight),
-
-              _DetailsItem(
-                title: "AMOUNT TO SEND",
-                data:
-                    "${sendAmount.toString()} ${trade.fromCurrency.toUpperCase()}",
-              ),
-
-              if (sentFromStack) _Divider(height: divHeight),
-              if (sentFromStack)
-                //////////////////////////////////////////////////////////
-
-                if (sentFromStack)
-                  RoundedWhiteContainer(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Sent from",
-                          style: STextStyles.itemSubtitle(context),
-                        ),
-                        const SizedBox(
-                          height: 4,
-                        ),
-                        SelectableText(
-                          widget.walletName!,
-                          style: STextStyles.itemSubtitle12(context),
-                        ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        CustomTextButton(
-                          text: "View transaction",
-                          onPressed: () {
-                            final Coin coin = coinFromTickerCaseInsensitive(
-                                trade.fromCurrency);
-
-                            Navigator.of(context).pushNamed(
-                              TransactionDetailsView.routeName,
-                              arguments: Tuple3(
-                                transactionIfSentFromStack!,
-                                coin,
-                                walletId!,
-                              ),
-                            );
-                          },
-                        ),
-                      ],
-                    ),
-                  ),
-              if (sentFromStack)
-                _Divider(
-                  height: divHeight,
-                ),
-              if (sentFromStack)
-                RoundedWhiteContainer(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "${trade.exchangeName} address",
-                            style: STextStyles.itemSubtitle(context),
-                          ),
-                          const SizedBox(
-                            height: 4,
-                          ),
-                          SelectableText(
-                            trade.payinAddress,
-                            style: STextStyles.itemSubtitle12(context),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              if (!sentFromStack && !hasTx)
-                _Divider(
-                  height: divHeight,
-                ),
-              if (!sentFromStack && !hasTx)
-                RoundedWhiteContainer(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            "Send ${trade.fromCurrency.toUpperCase()} to this address",
-                            style: STextStyles.itemSubtitle(context),
-                          ),
-                          GestureDetector(
-                            onTap: () async {
-                              final address = trade.payinAddress;
-                              await Clipboard.setData(
-                                ClipboardData(
-                                  text: address,
-                                ),
-                              );
-                              // if (mounted) {
-                              //   unawaited(
-                              //     showFloatingFlushBar(
-                              //       type: FlushBarType.info,
-                              //       message: "Copied to clipboard",
-                              //       context: context,
-                              //     ),
-                              //   );
-                              // }
-                            },
-                            child: Row(
-                              children: [
-                                SvgPicture.asset(
-                                  Assets.svg.copy,
-                                  width: 12,
-                                  height: 12,
-                                  color: Theme.of(context)
-                                      .extension<StackColors>()!
-                                      .infoItemIcons,
-                                ),
-                                const SizedBox(
-                                  width: 4,
                                 ),
                                 Text(
-                                  "Copy",
-                                  style: STextStyles.link2(context),
+                                  trade.toCurrency.toUpperCase(),
+                                  style: STextStyles.titleH3(context).copyWith(
+                                    color: Theme.of(context)
+                                        .extension<StackColors>()!
+                                        .textMedium,
+                                  ),
                                 ),
                               ],
                             ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(
-                        height: 4,
-                      ),
-                      SelectableText(
-                        trade.payinAddress,
-                        style: STextStyles.itemSubtitle12(context),
-                      ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      GestureDetector(
-                        // onTap: () {
-
-                        child: Row(
-                          children: [
-                            SvgPicture.asset(
-                              Assets.svg.qrcode,
-                              width: 12,
-                              height: 12,
-                              color: Theme.of(context)
-                                  .extension<StackColors>()!
-                                  .infoItemIcons,
+                            Center(
+                              child: SelectableText(
+                                trade.status.capitalize(),
+                                style: STextStyles.body(context).copyWith(
+                                  color: Theme.of(context)
+                                      .extension<StackColors>()!
+                                      .colorForStatus(trade.status),
+                                ),
+                              ),
                             ),
                             const SizedBox(
-                              width: 4,
+                              height: 12,
                             ),
-                            Text(
-                              "Show QR code",
-                              style: STextStyles.link2(context),
+                            if (!sentFromStack && !hasTx)
+                              Padding(
+                                padding: sidePadding,
+                                child: RoundedWhiteContainer(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 10,
+                                    horizontal: 16,
+                                  ),
+                                  child: RichText(
+                                    text: TextSpan(
+                                      text: "You must send at least "
+                                          "${sendAmount.toString()} "
+                                          "${trade.fromCurrency.toUpperCase()}. ",
+                                      style: STextStyles.errorBold(context),
+                                      children: [
+                                        TextSpan(
+                                          text: "If you send less than "
+                                              "${sendAmount.toString()} "
+                                              "${trade.fromCurrency.toUpperCase()}"
+                                              ", your transaction may not be "
+                                              "converted and it may not be refunded.",
+                                          style: STextStyles.error(context),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+
+                            if (!sentFromStack && !hasTx)
+                              const SizedBox(
+                                height: 20,
+                              ),
+
+                            if (!sentFromStack && !hasTx)
+                              _DetailsItem(
+                                title:
+                                    "SEND ${trade.fromCurrency.toUpperCase()} "
+                                    "TO THIS ADDRESS (CHANGENOW)",
+                                data: trade.payinAddress,
+                                trailingBelow: true,
+                                isTapCopy: true,
+                                trailing: CustomTextButton(
+                                  text: "  SHOW QR CODE  ",
+                                  onPressed: () {
+                                    showDialog<dynamic>(
+                                      context: context,
+                                      useSafeArea: false,
+                                      barrierDismissible: true,
+                                      builder: (_) {
+                                        final width =
+                                            MediaQuery.of(context).size.width /
+                                                2;
+                                        return EPDialogBase(
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(24),
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.stretch,
+                                              children: [
+                                                Center(
+                                                  child: Text(
+                                                    "Send ${trade.fromCurrency.toUpperCase()} to this address",
+                                                    style:
+                                                        STextStyles.pageTitleH2(
+                                                            context),
+                                                  ),
+                                                ),
+                                                const SizedBox(
+                                                  height: 12,
+                                                ),
+                                                Center(
+                                                  child: RepaintBoundary(
+                                                    // key: _qrKey,
+                                                    child: SizedBox(
+                                                      width: width + 20,
+                                                      height: width + 20,
+                                                      child: QrImage(
+                                                          data: trade
+                                                              .payinAddress,
+                                                          size: width,
+                                                          backgroundColor: Theme
+                                                                  .of(context)
+                                                              .extension<
+                                                                  StackColors>()!
+                                                              .popupBG,
+                                                          foregroundColor: Theme
+                                                                  .of(context)
+                                                              .extension<
+                                                                  StackColors>()!
+                                                              .accentColorDark),
+                                                    ),
+                                                  ),
+                                                ),
+                                                const SizedBox(
+                                                  height: 12,
+                                                ),
+                                                Center(
+                                                  child: SizedBox(
+                                                    width: width,
+                                                    child: SecondaryButton(
+                                                      label: "Cancel",
+                                                      onPressed: () async {
+                                                        // await _capturePng(true);
+                                                        Navigator.of(context)
+                                                            .pop();
+                                                      },
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    );
+                                  },
+                                ),
+                              ),
+
+                            if (!sentFromStack && !hasTx)
+                              _Divider(height: divHeight),
+
+                            _DetailsItem(
+                              title: "AMOUNT TO SEND",
+                              data:
+                                  "${sendAmount.toString()} ${trade.fromCurrency.toUpperCase()}",
+                              isTapCopy: true,
+                            ),
+
+                            _Divider(height: divHeight),
+                            _DetailsItem(
+                              title: "AMOUNT TO RECEIVE",
+                              data:
+                                  "${trade.toAmount} ${trade.toCurrency.toUpperCase()}",
+                              isTapCopy: true,
+                              trailing: Text(
+                                "(estimated)",
+                                style: STextStyles.body(context).copyWith(
+                                  color: Theme.of(context)
+                                      .extension<StackColors>()!
+                                      .textDark,
+                                ),
+                              ),
+                            ),
+
+                            _Divider(height: divHeight),
+                            _DetailsItem(
+                              title: "EXCHANGE RATE",
+                              data:
+                                  "~${(Decimal.parse(trade.toAmount) / Decimal.parse(trade.fromAmount)).toDecimal(
+                                scaleOnInfinitePrecision: 8,
+                              )} ${trade.toCurrency.toUpperCase()}",
+                              isTapCopy: true,
+                            ),
+
+                            if (sentFromStack) _Divider(height: divHeight),
+                            if (sentFromStack)
+                              _DetailsItem(
+                                title: "TRANSACTION ID",
+                                data:
+                                    transactionIfSentFromStack?.txid ?? "error",
+                                trailingBelow: true,
+                                isTapCopy: true,
+                                trailing: CustomTextButton(
+                                  text: "VIEW TRANSACTION",
+                                  onPressed: () {
+                                    final Coin coin =
+                                        coinFromTickerCaseInsensitive(
+                                            trade.fromCurrency);
+
+                                    Navigator.of(context).pushNamed(
+                                      TransactionDetailsView.routeName,
+                                      arguments: Tuple3(
+                                        transactionIfSentFromStack!,
+                                        coin,
+                                        walletId!,
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
+
+                            _Divider(
+                              height: divHeight,
+                            ),
+                            _DetailsItem(
+                              title: "CHANGENOW ADDRESS",
+                              data: trade.payinAddress,
+                              isTapCopy: true,
+                            ),
+
+                            _Divider(
+                              height: divHeight,
+                            ),
+                            _DetailsItem(
+                              title: "RECEIVING ADDRESS",
+                              data: trade.payoutAddress,
+                              isTapCopy: true,
+                            ),
+
+                            _Divider(
+                              height: divHeight,
+                            ),
+                            _DetailsItem(
+                              title: "DATE",
+                              data: Format.extractDateFrom(DateTime.parse(
+                                    trade.createdAt!,
+                                  ).millisecondsSinceEpoch ~/
+                                  1000),
+                              isTapCopy: true,
+                            ),
+
+                            _Divider(
+                              height: divHeight,
+                            ),
+                            _DetailsItem(
+                              title: "TRADE ID",
+                              data: trade.tradeId,
+                              isTapCopy: true,
+                            ),
+
+                            _Divider(
+                              height: divHeight,
+                            ),
+                            Padding(
+                              padding: sidePadding,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    "TRACKING",
+                                    style: STextStyles.overLineBold(context),
+                                  ),
+                                  Builder(
+                                    builder: (context) {
+                                      late final String url;
+                                      switch (trade.exchangeName) {
+                                        case ChangeNowExchange.exchangeName:
+                                          url =
+                                              "https://changenow.io/exchange/txs/${trade.tradeId}";
+                                          break;
+                                        // case SimpleSwapExchange.exchangeName:
+                                        //   url =
+                                        //       "https://simpleswap.io/exchange?id=${trade.tradeId}";
+                                        //   break;
+                                        // case MajesticBankExchange.exchangeName:
+                                        //   url =
+                                        //       "https://majesticbank.sc/track?trx=${trade.tradeId}";
+                                        //   break;
+                                        //
+                                        // default:
+                                        //   if (trade.exchangeName.startsWith(
+                                        //       TrocadorExchange.exchangeName)) {
+                                        //     url =
+                                        //         "https://trocador.app/en/checkout/${trade.tradeId}";
+                                        //   }
+                                      }
+                                      return CustomTextButton(
+                                        text: "  $url  ",
+                                        onPressed: () {
+                                          launchUrl(
+                                            Uri.parse(url),
+                                            mode:
+                                                LaunchMode.externalApplication,
+                                          );
+                                        },
+                                      );
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                            //   const SizedBox(
+                            //     height: 12,
+                            //   ),
+                            // if (
+                            //     !hasTx &&
+                            //     isStackCoin(trade.payInCurrency) &&
+                            //     (trade.status == "New" ||
+                            //         trade.status == "new" ||
+                            //         trade.status == "waiting" ||
+                            //         trade.status == "Waiting"))
+                            //   SecondaryButton(
+                            //     label: "Send from Stack",
+                            //     onPressed: () {
+                            //       final amount = sendAmount;
+                            //       final address = trade.payInAddress;
+                            //
+                            //       final coin =
+                            //           coinFromTickerCaseInsensitive(trade.payInCurrency);
+                            //
+                            //       Navigator.of(context).pushNamed(
+                            //         SendFromView.routeName,
+                            //         arguments: Tuple4(
+                            //           coin,
+                            //           amount,
+                            //           address,
+                            //           trade,
+                            //         ),
+                            //       );
+                            //     },
+                            //   ),
+                            const SizedBox(
+                              height: 16,
                             ),
                           ],
                         ),
                       ),
-                    ],
-                  ),
+                    );
+                  }),
                 ),
-              _Divider(
-                height: divHeight,
-              ),
-              RoundedWhiteContainer(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          "Trade note",
-                          style: STextStyles.itemSubtitle(context),
-                        ),
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.of(context).pushNamed(
-                              EditTradeNoteView.routeName,
-                              arguments: (
-                                tradeId: tradeId,
-                                note: ref
-                                    .read(tradeNoteServiceProvider)
-                                    .getNote(tradeId: tradeId),
-                              ),
-                            );
-                          },
-                          child: Row(
-                            children: [
-                              // SvgPicture.asset(
-                              //   Assets.svg.pencil,
-                              //   width: 10,
-                              //   height: 10,
-                              //   color: Theme.of(context)
-                              //       .extension<StackColors>()!
-                              //       .infoItemIcons,
-                              // ),
-                              // const SizedBox(
-                              //   width: 4,
-                              // ),
-                              Text(
-                                "Edit",
-                                style: STextStyles.link2(context),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(
-                      height: 4,
-                    ),
-                    SelectableText(
-                      ref.watch(tradeNoteServiceProvider
-                          .select((value) => value.getNote(tradeId: tradeId))),
-                      style: STextStyles.itemSubtitle12(context),
-                    ),
-                  ],
-                ),
-              ),
-              // if (sentFromStack) const _Divider(),
-              // if (sentFromStack)
-              //   RoundedWhiteContainer(
-              //     child: Column(
-              //       crossAxisAlignment: CrossAxisAlignment.start,
-              //       children: [
-              //         Row(
-              //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              //           children: [
-              //             Text(
-              //               "Transaction note",
-              //               style: STextStyles.itemSubtitle(context),
-              //             ),
-              //             GestureDetector(
-              //               onTap: () {
-              //                 Navigator.of(context).pushNamed(
-              //                   EditNoteView.routeName,
-              //                   arguments: Tuple3(
-              //                     transactionIfSentFromStack!.txid,
-              //                     walletId!,
-              //                     _note,
-              //                   ),
-              //                 );
-              //               },
-              //               child: Row(
-              //                 children: [
-              //                   SvgPicture.asset(
-              //                     Assets.svg.pencil,
-              //                     width: 10,
-              //                     height: 10,
-              //                     color: Theme.of(context)
-              //                         .extension<StackColors>()!
-              //                         .infoItemIcons,
-              //                   ),
-              //                   const SizedBox(
-              //                     width: 4,
-              //                   ),
-              //                   Text(
-              //                     "Edit",
-              //                     style: STextStyles.link2(context),
-              //                   ),
-              //                 ],
-              //               ),
-              //             ),
-              //           ],
-              //         ),
-              //         const SizedBox(
-              //           height: 4,
-              //         ),
-              //         FutureBuilder(
-              //           future: ref.watch(
-              //               notesServiceChangeNotifierProvider(walletId!)
-              //                   .select((value) => value.getNoteFor(
-              //                       txid: transactionIfSentFromStack!
-              //                           .txid))),
-              //           builder: (builderContext,
-              //               AsyncSnapshot<String> snapshot) {
-              //             if (snapshot.connectionState ==
-              //                     ConnectionState.done &&
-              //                 snapshot.hasData) {
-              //               _note = snapshot.data ?? "";
-              //             }
-              //             return SelectableText(
-              //               _note,
-              //               style: STextStyles.itemSubtitle12(context),
-              //             );
-              //           },
-              //         ),
-              //       ],
-              //     ),
-              //   ),
-              _Divider(
-                height: divHeight,
-              ),
-
-              RoundedWhiteContainer(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Date",
-                      style: STextStyles.itemSubtitle(context),
-                    ),
-                    SelectableText(
-                      Format.extractDateFrom(DateTime.parse(trade.createdAt!)
-                              .millisecondsSinceEpoch ~/
-                          1000),
-                      style: STextStyles.itemSubtitle12(context),
-                    ),
-                  ],
-                ),
-              ),
-              _Divider(
-                height: divHeight,
-              ),
-              RoundedWhiteContainer(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Swap service",
-                      style: STextStyles.itemSubtitle(context),
-                    ),
-                    SelectableText(
-                      trade.exchangeName,
-                      style: STextStyles.itemSubtitle12(context),
-                    ),
-                  ],
-                ),
-              ),
-              _Divider(
-                height: divHeight,
-              ),
-              RoundedWhiteContainer(
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Trade ID",
-                      style: STextStyles.itemSubtitle(context),
-                    ),
-                    Row(
-                      children: [
-                        Text(
-                          trade.tradeId,
-                          style: STextStyles.itemSubtitle12(context),
-                        ),
-                        const SizedBox(
-                          width: 10,
-                        ),
-                        GestureDetector(
-                          onTap: () async {
-                            final data = ClipboardData(text: trade.tradeId);
-                            await clipboard.setData(data);
-                            // if (mounted) {
-                            //   unawaited(
-                            //     showFloatingFlushBar(
-                            //       type: FlushBarType.info,
-                            //       message: "Copied to clipboard",
-                            //       context: context,
-                            //     ),
-                            //   );
-                            // }
-                          },
-                          child: SvgPicture.asset(
-                            Assets.svg.copy,
-                            color: Theme.of(context)
-                                .extension<StackColors>()!
-                                .infoItemIcons,
-                            width: 12,
-                          ),
-                        )
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-              _Divider(
-                height: divHeight,
-              ),
-              RoundedWhiteContainer(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "Tracking",
-                      style: STextStyles.itemSubtitle(context),
-                    ),
-                    const SizedBox(
-                      height: 4,
-                    ),
-                    Builder(
-                      builder: (context) {
-                        late final String url;
-                        switch (trade.exchangeName) {
-                          case ChangeNowExchange.exchangeName:
-                            url =
-                                "https://changenow.io/exchange/txs/${trade.tradeId}";
-                            break;
-                          // case SimpleSwapExchange.exchangeName:
-                          //   url =
-                          //       "https://simpleswap.io/exchange?id=${trade.tradeId}";
-                          //   break;
-                          // case MajesticBankExchange.exchangeName:
-                          //   url =
-                          //       "https://majesticbank.sc/track?trx=${trade.tradeId}";
-                          //   break;
-                          //
-                          // default:
-                          //   if (trade.exchangeName.startsWith(
-                          //       TrocadorExchange.exchangeName)) {
-                          //     url =
-                          //         "https://trocador.app/en/checkout/${trade.tradeId}";
-                          //   }
-                        }
-                        return GestureDetector(
-                          onTap: () {
-                            launchUrl(
-                              Uri.parse(url),
-                              mode: LaunchMode.externalApplication,
-                            );
-                          },
-                          child: Text(
-                            url,
-                            style: STextStyles.link2(context),
-                          ),
-                        );
-                      },
-                    ),
-                  ],
-                ),
-              ),
-              //   const SizedBox(
-              //     height: 12,
-              //   ),
-              // if (
-              //     !hasTx &&
-              //     isStackCoin(trade.payInCurrency) &&
-              //     (trade.status == "New" ||
-              //         trade.status == "new" ||
-              //         trade.status == "waiting" ||
-              //         trade.status == "Waiting"))
-              //   SecondaryButton(
-              //     label: "Send from Stack",
-              //     onPressed: () {
-              //       final amount = sendAmount;
-              //       final address = trade.payInAddress;
-              //
-              //       final coin =
-              //           coinFromTickerCaseInsensitive(trade.payInCurrency);
-              //
-              //       Navigator.of(context).pushNamed(
-              //         SendFromView.routeName,
-              //         arguments: Tuple4(
-              //           coin,
-              //           amount,
-              //           address,
-              //           trade,
-              //         ),
-              //       );
-              //     },
-              //   ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -976,10 +697,11 @@ class _DetailsItem extends StatelessWidget {
                 condition: trailing != null && !trailingBelow,
                 builder: (child) => Row(
                   children: [
-                    trailing!,
+                    child,
                     const SizedBox(
                       width: 10,
                     ),
+                    trailing!,
                   ],
                 ),
                 child: Text(
@@ -1007,7 +729,10 @@ class _Divider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: (height - 1) / 2),
+      padding: EdgeInsets.symmetric(
+        vertical: (height - 1) / 2,
+        horizontal: _TradeDetailsViewState.sidePadding.left,
+      ),
       child: Container(
         height: 1,
         color: Theme.of(context).extension<StackColors>()!.popupBG,

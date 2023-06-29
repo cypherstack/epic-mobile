@@ -213,8 +213,6 @@ class _MaterialAppWithThemeState extends ConsumerState<MaterialAppWithTheme>
       await swapDataLoadingFuture;
 
       loadingCompleter.complete();
-      // TODO: this should probably run unawaited. Keep commented out for now as proper community nodes ui hasn't been implemented yet
-      //  unawaited(_nodeService.updateCommunityNodes());
     } catch (e, s) {
       Logger.print("$e $s", normalLength: false);
     }

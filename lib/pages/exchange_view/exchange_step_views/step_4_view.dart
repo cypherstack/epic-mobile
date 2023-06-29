@@ -112,7 +112,7 @@ class _Step4ViewState extends ConsumerState<Step4View> {
       await Future<void>.delayed(const Duration(milliseconds: 75));
     }
     if (mounted) {
-      ref.read(homeViewPageIndexStateProvider.notifier).state = 0;
+      // ref.read(homeViewPageIndexStateProvider.notifier).state = 0;
       Navigator.of(context).popUntil(
         ModalRoute.withName(
           HomeView.routeName,

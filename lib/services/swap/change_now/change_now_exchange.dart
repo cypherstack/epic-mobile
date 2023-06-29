@@ -180,6 +180,7 @@ class ChangeNowExchange extends Exchange {
         payoutHash: t.payoutHash,
         createdAt: t.createdAt,
         updatedAt: t.updatedAt,
+        status: t.status,
       );
     }
 
