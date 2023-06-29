@@ -14,9 +14,8 @@ import 'package:epicpay/models/exchange/incomplete_exchange.dart';
 import 'package:epicpay/pages/exchange_view/exchange_form.dart';
 import 'package:epicpay/pages/exchange_view/sub_widgets/step_row.dart';
 import 'package:epicpay/pages/home_view/home_view.dart';
-import 'package:epicpay/pages/wallet_view/wallet_view.dart';
 import 'package:epicpay/providers/exchange/exchange_form_state_provider.dart';
-import 'package:epicpay/providers/global/wallet_provider.dart';
+import 'package:epicpay/providers/providers.dart';
 import 'package:epicpay/utilities/amount/amount.dart';
 import 'package:epicpay/utilities/assets.dart';
 import 'package:epicpay/utilities/clipboard_interface.dart';
@@ -113,9 +112,10 @@ class _Step4ViewState extends ConsumerState<Step4View> {
       await Future<void>.delayed(const Duration(milliseconds: 75));
     }
     if (mounted) {
+      ref.read(homeViewPageIndexStateProvider.notifier).state = 0;
       Navigator.of(context).popUntil(
         ModalRoute.withName(
-          model.walletInitiated ? WalletView.routeName : HomeView.routeName,
+          HomeView.routeName,
         ),
       );
     }
@@ -299,11 +299,6 @@ class _Step4ViewState extends ConsumerState<Step4View> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            // StepRow(
-                            //   count: 4,
-                            //   current: 3,
-                            //   width: width,
-                            // ),
                             const SizedBox(
                               height: 12,
                             ),
@@ -323,13 +318,17 @@ class _Step4ViewState extends ConsumerState<Step4View> {
                               child: Column(
                                 children: [
                                   UnorderedListItem(
-                                    "Send [coin] to the address below",
+                                    "Send ${model.from.ticker.toUpperCase()} "
+                                    "to the address below",
                                   ),
                                   Padding(
                                     padding: const EdgeInsets.only(left: 8.0),
                                     child: Text(
-                                      // "If you send less than ${model.sendAmount.toString()} ${model.sendTicker}, your transaction may not be converted and it may not be refunded.",
-                                      "You must send at least []. If you send less than [], your transaction may not be converted and it may not be refunded.",
+                                      "If you send less than "
+                                      "${model.sendAmount.toString()} "
+                                      "${model.from.ticker.toUpperCase()}, "
+                                      "your transaction may not be converted "
+                                      "and it may not be refunded.",
                                       style:
                                           STextStyles.label(context).copyWith(
                                         color: Theme.of(context)
@@ -339,10 +338,14 @@ class _Step4ViewState extends ConsumerState<Step4View> {
                                     ),
                                   ),
                                   UnorderedListItem(
-                                    "Once it is received, ChangeNOW will send the [] to the recipient address you provided.",
+                                    "Once it is received, ChangeNOW will send "
+                                    "the ${model.to.ticker.toUpperCase()} to "
+                                    "the recipient address you provided.",
                                   ),
                                   UnorderedListItem(
-                                      "Find this trade details and check its status in the list of trades.")
+                                    "Find this trade details and check its "
+                                    "status in the list of trades.",
+                                  )
                                 ],
                               ),
                             ),
