@@ -5,6 +5,7 @@ import 'package:epicpay/pages/add_wallet_views/create_restore_wallet_view.dart';
 import 'package:epicpay/pages/add_wallet_views/restore_wallet_view/restore_options_view/restore_options_view.dart';
 import 'package:epicpay/pages/add_wallet_views/restore_wallet_view/restore_wallet_view.dart';
 import 'package:epicpay/pages/exchange_view/edit_trade_note_view.dart';
+import 'package:epicpay/pages/exchange_view/exchange_step_views/confirm_send_details_view.dart';
 import 'package:epicpay/pages/exchange_view/exchange_step_views/step_1_view.dart';
 import 'package:epicpay/pages/exchange_view/exchange_step_views/step_2_view.dart';
 import 'package:epicpay/pages/exchange_view/exchange_step_views/step_3_view.dart';
@@ -520,6 +521,20 @@ class RouteGenerator {
           return getRoute(
             shouldUseMaterialRoute: useMaterialPageRoute,
             builder: (_) => Step4View(
+              model: args,
+            ),
+            settings: RouteSettings(
+              name: settings.name,
+            ),
+          );
+        }
+        return _routeError("${settings.name} invalid args: ${args.toString()}");
+
+      case ConfirmSendDetails.routeName:
+        if (args is IncompleteExchangeModel) {
+          return getRoute(
+            shouldUseMaterialRoute: useMaterialPageRoute,
+            builder: (_) => ConfirmSendDetails(
               model: args,
             ),
             settings: RouteSettings(

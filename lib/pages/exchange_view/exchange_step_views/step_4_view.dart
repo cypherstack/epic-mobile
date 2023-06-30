@@ -572,42 +572,48 @@ class _Step4ViewState extends ConsumerState<Step4View> {
                                   }
 
                                   return TextButton(
-                                    onPressed: tuple != null &&
-                                            model.from.ticker.toLowerCase() ==
-                                                tuple.item2.ticker.toLowerCase()
-                                        ? () async {
-                                            await _confirmSend(tuple);
-                                          }
-                                        : () {
-                                            // Navigator.of(context).push(
-                                            //   RouteGenerator.getRoute(
-                                            //     shouldUseMaterialRoute:
-                                            //         RouteGenerator
-                                            //             .useMaterialPageRoute,
-                                            //     builder:
-                                            //         (BuildContext context) {
-                                            //       final coin =
-                                            //           coinFromTickerCaseInsensitive(
-                                            //               model.trade!
-                                            //                   .fromCurrency);
-                                            //       return SendFromView(
-                                            //         coin: coin,
-                                            //         amount: model.sendAmount
-                                            //             .toAmount(
-                                            //           fractionDigits:
-                                            //               coin.decimals,
-                                            //         ),
-                                            //         address: model
-                                            //             .trade!.payInAddress,
-                                            //         trade: model.trade!,
-                                            //       );
-                                            //     },
-                                            //     settings: const RouteSettings(
-                                            //       name: SendFromView.routeName,
-                                            //     ),
-                                            //   ),
-                                            // );
-                                          },
+                                    onPressed: () {
+                                      // Navigator.of(context).pushNamed(
+                                      //   ConfirmSendDetails.routeName,
+                                      //   arguments: model,
+                                      // );
+                                    },
+                                    // tuple != null &&
+                                    //         model.from.ticker.toLowerCase() ==
+                                    //             tuple.item2.ticker.toLowerCase()
+                                    //     ? () async {
+                                    //         await _confirmSend(tuple);
+                                    //       }
+                                    //     : () {
+                                    // Navigator.of(context).push(
+                                    //   RouteGenerator.getRoute(
+                                    //     shouldUseMaterialRoute:
+                                    //         RouteGenerator
+                                    //             .useMaterialPageRoute,
+                                    //     builder:
+                                    //         (BuildContext context) {
+                                    //       final coin =
+                                    //           coinFromTickerCaseInsensitive(
+                                    //               model.trade!
+                                    //                   .fromCurrency);
+                                    //       return SendFromView(
+                                    //         coin: coin,
+                                    //         amount: model.sendAmount
+                                    //             .toAmount(
+                                    //           fractionDigits:
+                                    //               coin.decimals,
+                                    //         ),
+                                    //         address: model
+                                    //             .trade!.payInAddress,
+                                    //         trade: model.trade!,
+                                    //       );
+                                    //     },
+                                    //     settings: const RouteSettings(
+                                    //       name: SendFromView.routeName,
+                                    //     ),
+                                    //   ),
+                                    // );
+                                    // },
                                     style: Theme.of(context)
                                         .extension<StackColors>()!
                                         .getPrimaryEnabledButtonColor(context),
