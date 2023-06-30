@@ -11,8 +11,8 @@ class TradeSentFromStackService extends ChangeNotifier {
   List<TradeWalletLookup> get all =>
       DB.instance.values<TradeWalletLookup>(boxName: DB.boxNameTradeLookup);
 
-  String? getTradeIdForTxid(String txid) {
-    final matches = all.where((e) => e.txid == txid);
+  String? getTradeIdForTxid(String slateId) {
+    final matches = all.where((e) => e.slateId == slateId);
 
     if (matches.length == 1) {
       return matches.first.tradeId;
@@ -24,7 +24,7 @@ class TradeSentFromStackService extends ChangeNotifier {
     final matches = all.where((e) => e.tradeId == tradeId);
 
     if (matches.length == 1) {
-      return matches.first.txid;
+      return matches.first.slateId;
     }
     return null;
   }
@@ -38,8 +38,8 @@ class TradeSentFromStackService extends ChangeNotifier {
     return null;
   }
 
-  List<String>? getWalletIdForTxid(String txid) {
-    final matches = all.where((e) => e.txid == txid);
+  List<String>? getWalletIdForTxid(String slateId) {
+    final matches = all.where((e) => e.slateId == slateId);
 
     if (matches.length == 1) {
       return matches.first.walletIds;

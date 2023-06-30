@@ -66,6 +66,19 @@ class TransactionData {
     return null;
   }
 
+  Transaction? findTransactionWithSlateId(String slateId) {
+    for (var i = 0; i < txChunks.length; i++) {
+      var txChunk = txChunks[i].transactions;
+      for (var j = 0; j < txChunk.length; j++) {
+        var tx = txChunk[j];
+        if (tx.slateId == slateId) {
+          return tx;
+        }
+      }
+    }
+    return null;
+  }
+
   Map<String, Transaction> getAllTransactions() {
     Map<String, Transaction> transactions = {};
     for (var i = 0; i < txChunks.length; i++) {

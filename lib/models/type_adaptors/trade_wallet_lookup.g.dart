@@ -18,7 +18,7 @@ class TradeWalletLookupAdapter extends TypeAdapter<TradeWalletLookup> {
     };
     return TradeWalletLookup(
       uuid: fields[0] as String,
-      txid: fields[1] as String,
+      slateId: fields[1] as String,
       tradeId: fields[2] as String,
       walletIds: fields[3] as List<String>,
     );
@@ -31,7 +31,7 @@ class TradeWalletLookupAdapter extends TypeAdapter<TradeWalletLookup> {
       ..writeByte(0)
       ..write(obj.uuid)
       ..writeByte(1)
-      ..write(obj.txid)
+      ..write(obj.slateId)
       ..writeByte(2)
       ..write(obj.tradeId)
       ..writeByte(3)

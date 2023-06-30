@@ -211,17 +211,18 @@ class _ExchangeViewState extends ConsumerState<ExchangeView> {
                                     ),
                                     trade: trade,
                                     onTap: () async {
-                                      final String? txid = ref
+                                      final String? slateId = ref
                                           .read(
                                               tradeSentFromStackLookupProvider)
                                           .getTxidForTradeId(trade.tradeId);
+
                                       final List<String>? walletIds = ref
                                           .read(
                                               tradeSentFromStackLookupProvider)
                                           .getWalletIdsForTradeId(
                                               trade.tradeId);
 
-                                      if (txid != null &&
+                                      if (slateId != null &&
                                           walletIds != null &&
                                           walletIds.isNotEmpty) {
                                         final manager =
@@ -229,7 +230,8 @@ class _ExchangeViewState extends ConsumerState<ExchangeView> {
 
                                         final tx =
                                             (await manager.transactionData)
-                                                .findTransaction(txid);
+                                                .findTransactionWithSlateId(
+                                                    slateId);
 
                                         if (mounted) {
                                           unawaited(

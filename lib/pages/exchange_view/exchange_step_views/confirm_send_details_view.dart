@@ -288,7 +288,8 @@ class _ConfirmSendDetailsState extends ConsumerState<ConfirmSendDetails> {
       txData["note"] = noteString;
       txData["address"] = model.trade!.payinAddress;
 
-      final txid = await ref.read(walletProvider)!.confirmSend(txData: txData);
+      final slateId =
+          await ref.read(walletProvider)!.confirmSend(txData: txData);
 
       unawaited(
         ref.read(walletProvider)!.refresh(),
@@ -299,7 +300,7 @@ class _ConfirmSendDetailsState extends ConsumerState<ConfirmSendDetails> {
           .read(notesServiceChangeNotifierProvider(
               ref.read(walletProvider)!.walletId))
           .editOrAddNote(
-            txid: txid,
+            txid: slateId,
             note: noteString,
           );
 
@@ -307,7 +308,7 @@ class _ConfirmSendDetailsState extends ConsumerState<ConfirmSendDetails> {
       await ref.read(tradeSentFromStackLookupProvider).save(
             tradeWalletLookup: TradeWalletLookup(
               uuid: const Uuid().v1(),
-              txid: txid,
+              slateId: slateId,
               tradeId: model.trade!.tradeId,
               walletIds: [
                 ref.read(walletProvider)!.walletId,
