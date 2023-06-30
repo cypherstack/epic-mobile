@@ -17,7 +17,6 @@ import 'package:epicpay/pages/home_view/home_view.dart';
 import 'package:epicpay/providers/exchange/exchange_form_state_provider.dart';
 import 'package:epicpay/providers/providers.dart';
 import 'package:epicpay/utilities/amount/amount.dart';
-import 'package:epicpay/utilities/assets.dart';
 import 'package:epicpay/utilities/clipboard_interface.dart';
 import 'package:epicpay/utilities/enums/coin_enum.dart';
 import 'package:epicpay/utilities/text_styles.dart';
@@ -30,7 +29,6 @@ import 'package:epicpay/widgets/stack_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_svg/svg.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:tuple/tuple.dart';
 
@@ -250,27 +248,16 @@ class _Step4ViewState extends ConsumerState<Step4View> {
           backgroundColor:
               Theme.of(context).extension<StackColors>()!.background,
           appBar: AppBar(
-            leading: Row(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(10),
-                  child: AppBarIconButton(
-                    size: 32,
-                    color:
-                        Theme.of(context).extension<StackColors>()!.background,
-                    shadows: const [],
-                    icon: SvgPicture.asset(
-                      Assets.svg.x,
-                      width: 24,
-                      height: 24,
-                      color: Theme.of(context)
-                          .extension<StackColors>()!
-                          .topNavIconPrimary,
-                    ),
-                    onPressed: _close,
-                  ),
-                ),
-              ],
+            leading: AppBarBackButton(
+              onPressed: () async {
+                if (FocusScope.of(context).hasFocus) {
+                  FocusScope.of(context).unfocus();
+                  await Future<void>.delayed(const Duration(milliseconds: 75));
+                }
+                if (mounted) {
+                  Navigator.of(context).pop();
+                }
+              },
             ),
             centerTitle: true,
             title: const SizedBox(
@@ -318,8 +305,8 @@ class _Step4ViewState extends ConsumerState<Step4View> {
                               child: Column(
                                 children: [
                                   UnorderedListItem(
-                                    "Send ${model.from.ticker.toUpperCase()} "
-                                    "to the address below",
+                                    "SEND ${model.from.ticker.toUpperCase()} "
+                                    "TO THE ADDRESS BELOW",
                                   ),
                                   Padding(
                                     padding: const EdgeInsets.only(left: 8.0),
@@ -364,50 +351,21 @@ class _Step4ViewState extends ConsumerState<Step4View> {
                                       "to this address",
                                       style: STextStyles.itemSubtitle(context),
                                     ),
-                                    GestureDetector(
-                                      onTap: () async {
-                                        final data = ClipboardData(
-                                          text: model.trade!.payinAddress,
-                                        );
-                                        await clipboard.setData(data);
-                                        // if (mounted) {
-                                        //   unawaited(
-                                        //     showFloatingFlushBar(
-                                        //       type: FlushBarType.info,
-                                        //       message: "Copied to clipboard",
-                                        //       context: context,
-                                        //     ),
-                                        //   );
-                                        // }
-                                      },
-                                      child: Row(
-                                        children: [
-                                          SvgPicture.asset(
-                                            Assets.svg.copy,
-                                            color: Theme.of(context)
-                                                .extension<StackColors>()!
-                                                .infoItemIcons,
-                                            width: 10,
-                                          ),
-                                          // const SizedBox(
-                                          //   width: 4,
-                                          // ),
-                                          // Text(
-                                          //   "Copy",
-                                          //   style: STextStyles.link2(context),
-                                          // ),
-                                        ],
-                                      ),
-                                    ),
                                   ],
                                 ),
                                 const SizedBox(
                                   height: 4,
                                 ),
-                                Text(
-                                  // model.trade!.payInAddress,
-                                  "",
-                                  style: STextStyles.itemSubtitle12(context),
+                                GestureDetector(
+                                  onTap: () {
+                                    clipboard.setData(ClipboardData(
+                                      text: model.trade!.payinAddress,
+                                    ));
+                                  },
+                                  child: Text(
+                                    model.trade!.payinAddress,
+                                    style: STextStyles.itemSubtitle12(context),
+                                  ),
                                 ),
                               ],
                             ),
@@ -441,23 +399,9 @@ class _Step4ViewState extends ConsumerState<Step4View> {
                                     //   );
                                     // }
                                   },
-                                  child: Row(
-                                    children: [
-                                      SvgPicture.asset(
-                                        Assets.svg.copy,
-                                        color: Theme.of(context)
-                                            .extension<StackColors>()!
-                                            .infoItemIcons,
-                                        width: 10,
-                                      ),
-                                      // const SizedBox(
-                                      //   width: 4,
-                                      // ),
-                                      // Text(
-                                      //   "Copy",
-                                      //   style: STextStyles.link2(context),
-                                      // ),
-                                    ],
+                                  child: Text(
+                                    model.sendAmount.toString(),
+                                    style: STextStyles.itemSubtitle12(context),
                                   ),
                                 ),
                               ],
@@ -478,38 +422,18 @@ class _Step4ViewState extends ConsumerState<Step4View> {
                                 const Spacer(),
                                 Row(
                                   children: [
-                                    Text(
-                                      model.trade!.tradeId,
-                                      style:
-                                          STextStyles.itemSubtitle12(context),
-                                    ),
-                                    const SizedBox(
-                                      width: 10,
-                                    ),
                                     GestureDetector(
-                                      onTap: () async {
-                                        final data = ClipboardData(
+                                      onTap: () {
+                                        clipboard.setData(ClipboardData(
                                           text: model.trade!.tradeId,
-                                        );
-                                        await clipboard.setData(data);
-                                        // if (mounted) {
-                                        //   unawaited(
-                                        //     showFloatingFlushBar(
-                                        //       type: FlushBarType.info,
-                                        //       message: "Copied to clipboard",
-                                        //       context: context,
-                                        //     ),
-                                        //   );
-                                        // }
+                                        ));
                                       },
-                                      child: SvgPicture.asset(
-                                        Assets.svg.copy,
-                                        color: Theme.of(context)
-                                            .extension<StackColors>()!
-                                            .infoItemIcons,
-                                        width: 12,
+                                      child: Text(
+                                        model.trade!.tradeId,
+                                        style:
+                                            STextStyles.itemSubtitle12(context),
                                       ),
-                                    )
+                                    ),
                                   ],
                                 )
                               ],
@@ -557,8 +481,7 @@ class _Step4ViewState extends ConsumerState<Step4View> {
                                           ),
                                           Center(
                                             child: Text(
-                                              // "Send ${model.sendTicker} to this address",
-                                              "Send [] to this address",
+                                              "Send ${model.from.ticker} to this address",
                                               style: STextStyles.pageTitleH2(
                                                   context),
                                             ),
@@ -645,7 +568,7 @@ class _Step4ViewState extends ConsumerState<Step4View> {
                                       model.from.ticker.toLowerCase() ==
                                           tuple.item2.ticker.toLowerCase()) {
                                     buttonTitle =
-                                        "Send from ${ref.watch(walletProvider)!.walletName}";
+                                        "SEND FROM ${ref.watch(walletProvider)!.walletName.toUpperCase()}";
                                   }
 
                                   return TextButton(
