@@ -7,6 +7,7 @@ import 'dart:isolate';
 import 'package:decimal/decimal.dart';
 import 'package:epicpay/db/hive/db.dart';
 import 'package:epicpay/models/epicbox_config_model.dart';
+import 'package:epicpay/models/epicbox_server_model.dart';
 import 'package:epicpay/models/node_model.dart';
 import 'package:epicpay/models/paymint/fee_object_model.dart';
 import 'package:epicpay/models/paymint/transactions_model.dart';
@@ -27,6 +28,7 @@ import 'package:epicpay/utilities/default_epicboxes.dart';
 import 'package:epicpay/utilities/default_nodes.dart';
 import 'package:epicpay/utilities/enums/coin_enum.dart';
 import 'package:epicpay/utilities/flutter_secure_storage_interface.dart';
+import 'package:epicpay/utilities/format.dart';
 import 'package:epicpay/utilities/logger.dart';
 import 'package:epicpay/utilities/prefs.dart';
 import 'package:epicpay/utilities/test_epic_node_connection.dart';
@@ -40,9 +42,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:stack_wallet_backup/generate_password.dart';
 import 'package:tuple/tuple.dart';
 import 'package:websocket_universal/websocket_universal.dart';
-
-import '../../../models/epicbox_server_model.dart';
-import '../../../utilities/format.dart';
 
 const int MINIMUM_CONFIRMATIONS = 3;
 
