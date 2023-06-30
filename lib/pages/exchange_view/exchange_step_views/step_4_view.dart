@@ -12,6 +12,7 @@ import 'dart:async';
 
 import 'package:epicpay/models/exchange/incomplete_exchange.dart';
 import 'package:epicpay/pages/exchange_view/exchange_form.dart';
+import 'package:epicpay/pages/exchange_view/exchange_step_views/confirm_send_details_view.dart';
 import 'package:epicpay/pages/exchange_view/sub_widgets/step_row.dart';
 import 'package:epicpay/pages/home_view/home_view.dart';
 import 'package:epicpay/providers/exchange/exchange_form_state_provider.dart';
@@ -343,7 +344,7 @@ class _Step4ViewState extends ConsumerState<Step4View> {
                             const SizedBox(
                               height: 24,
                             ),
-                            _Item(
+                            StepListItem(
                               vertical: true,
                               title: "SEND ${model.from.ticker.toUpperCase()} "
                                   "TO THIS ADDRESS",
@@ -356,7 +357,7 @@ class _Step4ViewState extends ConsumerState<Step4View> {
                             const SizedBox(
                               height: 10,
                             ),
-                            _Item(
+                            StepListItem(
                               title: "AMOUNT TO SEND",
                               info: model.sendAmount.toString(),
                             ),
@@ -367,7 +368,7 @@ class _Step4ViewState extends ConsumerState<Step4View> {
                             const SizedBox(
                               height: 10,
                             ),
-                            _Item(
+                            StepListItem(
                               title: "TRADE ID",
                               info: model.trade!.tradeId,
                             ),
@@ -378,7 +379,7 @@ class _Step4ViewState extends ConsumerState<Step4View> {
                             const SizedBox(
                               height: 10,
                             ),
-                            _Item(
+                            StepListItem(
                               title: "STATUS",
                               info: _statusString.capitalize(),
                               overrideInfoColor: Theme.of(context)
@@ -497,47 +498,11 @@ class _Step4ViewState extends ConsumerState<Step4View> {
 
                                   return TextButton(
                                     onPressed: () {
-                                      // Navigator.of(context).pushNamed(
-                                      //   ConfirmSendDetails.routeName,
-                                      //   arguments: model,
-                                      // );
+                                      Navigator.of(context).pushNamed(
+                                        ConfirmSendDetails.routeName,
+                                        arguments: model,
+                                      );
                                     },
-                                    // tuple != null &&
-                                    //         model.from.ticker.toLowerCase() ==
-                                    //             tuple.item2.ticker.toLowerCase()
-                                    //     ? () async {
-                                    //         await _confirmSend(tuple);
-                                    //       }
-                                    //     : () {
-                                    // Navigator.of(context).push(
-                                    //   RouteGenerator.getRoute(
-                                    //     shouldUseMaterialRoute:
-                                    //         RouteGenerator
-                                    //             .useMaterialPageRoute,
-                                    //     builder:
-                                    //         (BuildContext context) {
-                                    //       final coin =
-                                    //           coinFromTickerCaseInsensitive(
-                                    //               model.trade!
-                                    //                   .fromCurrency);
-                                    //       return SendFromView(
-                                    //         coin: coin,
-                                    //         amount: model.sendAmount
-                                    //             .toAmount(
-                                    //           fractionDigits:
-                                    //               coin.decimals,
-                                    //         ),
-                                    //         address: model
-                                    //             .trade!.payInAddress,
-                                    //         trade: model.trade!,
-                                    //       );
-                                    //     },
-                                    //     settings: const RouteSettings(
-                                    //       name: SendFromView.routeName,
-                                    //     ),
-                                    //   ),
-                                    // );
-                                    // },
                                     style: Theme.of(context)
                                         .extension<StackColors>()!
                                         .getPrimaryEnabledButtonColor(context),
@@ -568,8 +533,8 @@ class _Step4ViewState extends ConsumerState<Step4View> {
   }
 }
 
-class _Item extends StatelessWidget {
-  const _Item({
+class StepListItem extends StatelessWidget {
+  const StepListItem({
     super.key,
     this.vertical = false,
     required this.title,

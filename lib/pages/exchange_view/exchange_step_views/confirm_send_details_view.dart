@@ -12,24 +12,29 @@ import 'dart:async';
 
 import 'package:decimal/decimal.dart';
 import 'package:epicpay/models/exchange/incomplete_exchange.dart';
+import 'package:epicpay/models/trade_wallet_lookup.dart';
+import 'package:epicpay/pages/exchange_view/exchange_step_views/step_4_view.dart';
 import 'package:epicpay/pages/home_view/home_view.dart';
+import 'package:epicpay/pages/pinpad_views/lock_screen_view.dart';
+import 'package:epicpay/pages/send_view/send_amount_view.dart';
+import 'package:epicpay/pages/wallet_view/sub_widgets/wallet_summary_info.dart';
 import 'package:epicpay/providers/providers.dart';
 import 'package:epicpay/providers/ui/preview_tx_button_state_provider.dart';
-import 'package:epicpay/utilities/amount/amount.dart';
+import 'package:epicpay/route_generator.dart';
+import 'package:epicpay/services/swap/trade_sent_from_stack_service.dart';
 import 'package:epicpay/utilities/clipboard_interface.dart';
 import 'package:epicpay/utilities/constants.dart';
-import 'package:epicpay/utilities/enums/coin_enum.dart';
 import 'package:epicpay/utilities/format.dart';
 import 'package:epicpay/utilities/text_styles.dart';
 import 'package:epicpay/utilities/theme/stack_colors.dart';
 import 'package:epicpay/widgets/animated_text.dart';
 import 'package:epicpay/widgets/background.dart';
 import 'package:epicpay/widgets/custom_buttons/app_bar_icon_button.dart';
+import 'package:epicpay/widgets/desktop/custom_text_button.dart';
 import 'package:epicpay/widgets/ep_dialog.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:tuple/tuple.dart';
+import 'package:uuid/uuid.dart';
 
 class ConfirmSendDetails extends ConsumerStatefulWidget {
   const ConfirmSendDetails({
@@ -48,26 +53,82 @@ class ConfirmSendDetails extends ConsumerStatefulWidget {
 }
 
 class _ConfirmSendDetailsState extends ConsumerState<ConfirmSendDetails> {
+  static const double maxDivHeight = 45;
+  static const double minDivHeight = 3;
+  final _key = GlobalKey();
+
   late final IncompleteExchangeModel model;
   late final ClipboardInterface clipboard;
-  late final String address;
-
-  final _cryptoFocus = FocusNode();
-  final _baseFocus = FocusNode();
 
   Decimal? _amountToSend;
   String? feeErr;
-  late Future<Decimal> _calculateFeesFuture;
   Map<int, Decimal> cachedFees = {};
 
-  Timer? _statusTimer;
+  SendingState sendingState = SendingState.waiting;
 
-  bool _isWalletCoinAndHasWallet(String ticker, WidgetRef ref) {
-    try {
-      final coin = coinFromTickerCaseInsensitive(ticker);
-      return coin == Coin.epicCash;
-    } catch (_) {
-      return false;
+  late final int divCount;
+  double divHeight = minDivHeight;
+  double? layoutBuilderHeight;
+  double? screenDiff;
+  Size? size;
+
+  String get noteString => "${model.trade!.fromCurrency.toUpperCase()}"
+      "/${model.trade!.toCurrency.toUpperCase()} exchange";
+
+  double _getInRange(double value) {
+    if (value < minDivHeight) {
+      return minDivHeight;
+    } else if (value > maxDivHeight) {
+      return maxDivHeight;
+    } else {
+      return value;
+    }
+  }
+
+  Widget getButtonChild(
+    BuildContext context,
+    bool enabled,
+    SendingState state,
+  ) {
+    final style = STextStyles.buttonText(context).copyWith(
+      color: enabled
+          ? Theme.of(context).extension<StackColors>()!.buttonTextPrimary
+          : Theme.of(context)
+              .extension<StackColors>()!
+              .buttonTextPrimaryDisabled,
+    );
+
+    switch (state) {
+      case SendingState.waiting:
+        return Text(
+          "SEND",
+          style: style,
+        );
+      case SendingState.generating:
+        return AnimatedText(
+          stringsToLoopThrough: const [
+            "GENERATING",
+            "GENERATING.",
+            "GENERATING..",
+            "GENERATING...",
+          ],
+          style: style,
+        );
+      case SendingState.sending:
+        return AnimatedText(
+          stringsToLoopThrough: const [
+            "SENDING",
+            "SENDING.",
+            "SENDING..",
+            "SENDING...",
+          ],
+          style: style,
+        );
+      case SendingState.sent:
+        return Text(
+          "SENT",
+          style: style,
+        );
     }
   }
 
@@ -99,56 +160,6 @@ class _ConfirmSendDetailsState extends ConsumerState<ConfirmSendDetails> {
     return cachedFees[amount]!;
   }
 
-  @override
-  void initState() {
-    model = widget.model;
-    clipboard = widget.clipboard;
-    _calculateFeesFuture = calculateFees(0);
-
-    _cryptoFocus.addListener(() {
-      if (!_cryptoFocus.hasFocus && !_baseFocus.hasFocus) {
-        if (_amountToSend == null) {
-          setState(() {
-            _calculateFeesFuture = calculateFees(0);
-            // _displayFees = calculateFees(0);
-          });
-        } else {
-          setState(() {
-            _calculateFeesFuture =
-                calculateFees(Format.decimalAmountToSatoshis(_amountToSend!));
-            // _displayFees = calculateNetworkFees(
-            //     Format.decimalAmountToSatoshis(_amountToSend!));
-          });
-        }
-      }
-    });
-
-    _baseFocus.addListener(() {
-      if (!_cryptoFocus.hasFocus && !_baseFocus.hasFocus) {
-        if (_amountToSend == null) {
-          setState(() {
-            _calculateFeesFuture = calculateFees(0);
-            // _displayFees = calculateFees(0);
-          });
-        } else {
-          setState(() {
-            _calculateFeesFuture =
-                calculateFees(Format.decimalAmountToSatoshis(_amountToSend!));
-            // _displayFees = calculateNetworkFees(
-            //     Format.decimalAmountToSatoshis(_amountToSend!));
-          });
-        }
-      }
-    });
-
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
-
   Future<void> availableBalance() async {
     unawaited(
       showDialog(
@@ -171,9 +182,9 @@ class _ConfirmSendDetailsState extends ConsumerState<ConfirmSendDetails> {
                   padding: const EdgeInsets.symmetric(vertical: 10),
                   child: Column(
                     children: [
-                      Row(
+                      const Row(
                         mainAxisAlignment: MainAxisAlignment.start,
-                        children: const [
+                        children: [
                           AppBarBackButton(),
                         ],
                       ),
@@ -200,10 +211,10 @@ class _ConfirmSendDetailsState extends ConsumerState<ConfirmSendDetails> {
                       const SizedBox(
                         height: 6,
                       ),
-                      // WalletSummaryInfo(
-                      //   walletId: walletId,
-                      //   isSendView: true,
-                      // ),
+                      WalletSummaryInfo(
+                        walletId: ref.read(walletProvider)!.walletId,
+                        isSendView: true,
+                      ),
                     ],
                   ),
                 ),
@@ -228,100 +239,101 @@ class _ConfirmSendDetailsState extends ConsumerState<ConfirmSendDetails> {
     }
   }
 
-  Future<void> _confirmSend(Tuple2<String, Coin> tuple) async {
-    final bool firoPublicSend;
-    // if (tuple.item2 == Coin.firo) {
-    //   final result = await _showSendFromFiroBalanceSelectSheet(tuple.item1);
-    //   if (result == null) {
-    //     return;
-    //   } else {
-    //     firoPublicSend = result;
-    //   }
-    // } else {
-    firoPublicSend = false;
-    // }
+  void send() async {
+    // ignore if currently sending
+    if (sendingState != SendingState.waiting) {
+      return;
+    }
 
-    final manager = ref.read(walletProvider)!;
-
-    final Amount amount = model.sendAmount.toAmount(
-      fractionDigits: manager.coin.decimals,
-    );
-    final address = model.trade!.payinAddress;
-
-    bool wasCancelled = false;
-    try {
-      if (!mounted) return;
-
-      // unawaited(
-      //   showDialog<dynamic>(
-      //     context: context,
-      //     useSafeArea: false,
-      //     barrierDismissible: false,
-      //     builder: (context) {
-      //       return BuildingTransactionDialog(
-      //         coin: manager.coin,
-      //         onCancel: () {
-      //           wasCancelled = true;
-      //         },
-      //       );
-      //     },
-      //   ),
-      // );
-
-      final time = Future<dynamic>.delayed(
-        const Duration(
-          milliseconds: 2500,
+    // unlock
+    final unlocked = await Navigator.push(
+      context,
+      RouteGenerator.getRoute(
+        shouldUseMaterialRoute: RouteGenerator.useMaterialPageRoute,
+        builder: (_) => const LockscreenView(
+          showBackButton: true,
+          popOnSuccess: true,
+          routeOnSuccessArguments: true,
+          routeOnSuccess: "",
+          biometricsCancelButtonString: "CANCEL",
+          biometricsLocalizedReason: "Authenticate to send transaction",
+          biometricsAuthenticationTitle: "Confirm Transaction",
         ),
+        settings: const RouteSettings(name: "/confirmsendlockscreen"),
+      ),
+    );
+
+    // failed to authenticate
+    if (!(unlocked is bool && unlocked && mounted)) {
+      return;
+    }
+
+    setState(() {
+      sendingState = SendingState.generating;
+    });
+
+    final amount = Format.decimalAmountToSatoshis(_amountToSend!);
+
+    try {
+      Map<String, dynamic> txData = await ref.read(walletProvider)!.prepareSend(
+        address: model.trade!.payinAddress,
+        satoshiAmount: amount,
+        args: {"feeRate": 1},
       );
 
-      Future<Map<String, dynamic>> txDataFuture = manager.prepareSend(
-        address: address,
-        satoshiAmount: amount.raw.toInt(),
+      setState(() {
+        sendingState = SendingState.sending;
+      });
+
+      txData["note"] = noteString;
+      txData["address"] = model.trade!.payinAddress;
+
+      final txid = await ref.read(walletProvider)!.confirmSend(txData: txData);
+
+      unawaited(
+        ref.read(walletProvider)!.refresh(),
       );
 
-      final results = await Future.wait([
-        txDataFuture,
-        time,
-      ]);
+      // save note
+      await ref
+          .read(notesServiceChangeNotifierProvider(
+              ref.read(walletProvider)!.walletId))
+          .editOrAddNote(
+            txid: txid,
+            note: noteString,
+          );
 
-      final txData = results.first as Map<String, dynamic>;
+      // set trade sent from wallet status
+      await ref.read(tradeSentFromStackLookupProvider).save(
+            tradeWalletLookup: TradeWalletLookup(
+              uuid: const Uuid().v1(),
+              txid: txid,
+              tradeId: model.trade!.tradeId,
+              walletIds: [
+                ref.read(walletProvider)!.walletId,
+              ],
+            ),
+          );
 
-      if (!wasCancelled) {
-        // pop building dialog
+      setState(() {
+        sendingState = SendingState.sent;
+      });
 
-        if (mounted) {
-          Navigator.of(context).pop();
-        }
+      await Future<void>.delayed(const Duration(seconds: 2));
 
-        txData["note"] =
-            "${model.trade!.fromCurrency.toUpperCase()}/${model.trade!.toCurrency.toUpperCase()} exchange";
-        txData["address"] = address;
-
-        if (mounted) {
-          // unawaited(
-          //   Navigator.of(context).push(
-          //     RouteGenerator.getRoute(
-          //       shouldUseMaterialRoute: RouteGenerator.useMaterialPageRoute,
-          //       builder: (_) => ConfirmChangeNowSendView(
-          //         transactionInfo: txData,
-          //         walletId: tuple.item1,
-          //         routeOnSuccessName: HomeView.routeName,
-          //         trade: model.trade!,
-          //         shouldSendPublicFiroFunds: firoPublicSend,
-          //       ),
-          //       settings: const RouteSettings(
-          //         name: ConfirmChangeNowSendView.routeName,
-          //       ),
-          //     ),
-          //   ),
-          // );
-        }
+      if (mounted) {
+        Navigator.of(context).popUntil(
+          ModalRoute.withName(
+            HomeView.routeName,
+          ),
+        );
       }
+      sendingState = SendingState.waiting;
     } catch (e) {
-      if (mounted && !wasCancelled) {
-        // pop building dialog
-        Navigator.of(context).pop();
-
+      if (mounted) {
+        setState(() {
+          sendingState = SendingState.waiting;
+        });
         unawaited(
           showDialog<dynamic>(
             context: context,
@@ -343,10 +355,58 @@ class _ConfirmSendDetailsState extends ConsumerState<ConfirmSendDetails> {
     }
   }
 
+  void _setSize() {
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+      size = _key.currentContext?.size;
+
+      if (layoutBuilderHeight != null && size != null) {
+        if (layoutBuilderHeight! < size!.height) {
+          final diff = size!.height - layoutBuilderHeight!;
+          final dDiff = diff / divCount;
+          divHeight = _getInRange(divHeight - dDiff);
+        } else {
+          final diff = layoutBuilderHeight! - size!.height;
+          final dDiff = diff / divCount;
+          final clampInput = divHeight + dDiff;
+          divHeight = _getInRange(clampInput);
+          screenDiff = clampInput - divHeight;
+          screenDiff = screenDiff! * divCount;
+        }
+      }
+
+      setState(() {});
+    });
+  }
+
+  @override
+  void initState() {
+    model = widget.model;
+    clipboard = widget.clipboard;
+    _amountToSend = model.sendAmount;
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      _updatePreviewButtonState(
+        model.trade!.payinAddress,
+        _amountToSend,
+        feeErr,
+      );
+    });
+
+    divCount = 7;
+
+    _setSize();
+
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final bool isWalletCoin =
-        _isWalletCoinAndHasWallet(model.trade!.fromCurrency, ref);
+    final scaleFactor = (MediaQuery.of(context).textScaleFactor) * 0.85;
+
     return WillPopScope(
       onWillPop: () async {
         await _close();
@@ -368,363 +428,340 @@ class _ConfirmSendDetailsState extends ConsumerState<ConfirmSendDetails> {
                 }
               },
             ),
+            centerTitle: true,
+            title: Text(
+              "Confirm send details",
+              style: STextStyles.pageTitleH1(context),
+            ),
           ),
-          body: LayoutBuilder(
-            builder: (context, constraints) {
-              final width = MediaQuery.of(context).size.width - 32;
-              return Padding(
-                padding: const EdgeInsets.all(12),
-                child: SingleChildScrollView(
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(
-                      minHeight: constraints.maxHeight - 24,
-                    ),
-                    child: IntrinsicHeight(
-                      child: Padding(
-                        padding: const EdgeInsets.all(4),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            const SizedBox(
-                              height: 12,
-                            ),
-                            Center(
-                              child: Text(
-                                "Confirm send details",
-                                style: STextStyles.pageTitleH1(context),
+          body: SafeArea(
+            child: MediaQuery(
+              data: MediaQuery.of(context).copyWith(
+                textScaleFactor: scaleFactor,
+              ),
+              child: Column(
+                children: [
+                  Expanded(
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        layoutBuilderHeight = constraints.maxHeight;
+                        return SingleChildScrollView(
+                          child: IntrinsicHeight(
+                            key: _key,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
                               ),
-                            ),
-                            const SizedBox(
-                              height: 20,
-                            ),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      "CHANGENOW ADDRESS",
-                                      style: STextStyles.itemSubtitle(context),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(
-                                  height: 4,
-                                ),
-                                GestureDetector(
-                                  onTap: () {
-                                    clipboard.setData(ClipboardData(
-                                      text: model.trade!.payinAddress,
-                                    ));
-                                  },
-                                  child: Text(
-                                    model.trade!.payinAddress,
-                                    style: STextStyles.itemSubtitle12(context),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  const SizedBox(
+                                    height: 12,
                                   ),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(
-                              height: 10,
-                            ),
-                            const Divider(),
-                            const SizedBox(
-                              height: 10,
-                            ),
-                            Row(
-                              children: [
-                                Text(
-                                  "TRADE ID",
-                                  style: STextStyles.itemSubtitle(context),
-                                ),
-                                const Spacer(),
-                                Row(
-                                  children: [
-                                    GestureDetector(
-                                      onTap: () {
-                                        clipboard.setData(ClipboardData(
-                                          text: model.trade!.tradeId,
-                                        ));
-                                      },
-                                      child: Text(
-                                        model.trade!.tradeId,
-                                        style:
-                                            STextStyles.itemSubtitle12(context),
-                                      ),
-                                    ),
-                                  ],
-                                )
-                              ],
-                            ),
-                            const SizedBox(
-                              height: 10,
-                            ),
-                            const Divider(),
-                            const SizedBox(
-                              height: 10,
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  "NOTE",
-                                  style: STextStyles.itemSubtitle(context),
-                                ),
-                              ],
-                            ),
-                            const SizedBox(
-                              height: 10,
-                            ),
-                            const Divider(),
-                            const SizedBox(
-                              height: 10,
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  "AMOUNT TO SEND",
-                                  style: STextStyles.itemSubtitle(context),
-                                ),
-                                GestureDetector(
-                                  onTap: () async {
-                                    final data = ClipboardData(
-                                      text: model.sendAmount.toString(),
-                                    );
-                                    await clipboard.setData(data);
-                                    // if (mounted) {
-                                    //   unawaited(
-                                    //     showFloatingFlushBar(
-                                    //       type: FlushBarType.info,
-                                    //       message: "Copied to clipboard",
-                                    //       context: context,
-                                    //     ),
-                                    //   );
-                                    // }
-                                  },
-                                  child: Text(
-                                    model.sendAmount.toString(),
-                                    style: STextStyles.itemSubtitle12(context),
+                                  StepListItem(
+                                    vertical: true,
+                                    title: "CHANGENOW ADDRESS",
+                                    info: model.trade!.payinAddress,
                                   ),
-                                ),
-                              ],
-                            ),
-                            SizedBox(
-                              height: 32,
-                            ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                TextButton(
-                                  onPressed: availableBalance,
-                                  style: Theme.of(context)
-                                      .extension<StackColors>()!
-                                      .getPrimaryDisabledButtonColor(context),
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 16),
-                                    child: Text(
-                                      "VIEW AVAILABLE BALANCE",
-                                      textAlign: TextAlign.center,
-                                      style: STextStyles.overLineBold(context)
-                                          .copyWith(
-                                        color: Theme.of(context)
+                                  _Divider(
+                                    height: divHeight,
+                                  ),
+                                  StepListItem(
+                                    title: "TRADE ID",
+                                    info: model.trade!.tradeId,
+                                  ),
+                                  _Divider(
+                                    height: divHeight,
+                                  ),
+                                  StepListItem(
+                                    title: "NOTE",
+                                    info: noteString,
+                                  ),
+                                  _Divider(
+                                    height: divHeight,
+                                  ),
+                                  StepListItem(
+                                    title: "AMOUNT TO SEND",
+                                    info: "${model.sendAmount} EPIC",
+                                  ),
+                                  SizedBox(
+                                    height: divHeight,
+                                  ),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      TextButton(
+                                        onPressed: availableBalance,
+                                        style: Theme.of(context)
                                             .extension<StackColors>()!
-                                            .buttonBackPrimary,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            SizedBox(
-                              height: 18,
-                            ),
-                            Column(
-                              children: [
-                                Center(
-                                  child: Text(
-                                    "NETWORK FEE",
-                                    style: STextStyles.overLineBold(context),
-                                    textAlign: TextAlign.center,
-                                  ),
-                                ),
-                                FutureBuilder(
-                                  future: _calculateFeesFuture,
-                                  builder: (context,
-                                      AsyncSnapshot<Decimal> snapshot) {
-                                    if (snapshot.connectionState ==
-                                            ConnectionState.done &&
-                                        snapshot.hasData) {
-                                      final feeAmount = snapshot.data!;
-
-                                      if (_amountToSend ==
-                                          ref
-                                              .read(walletProvider)!
-                                              .cachedAvailableBalance) {
-                                        _amountToSend = ref
-                                                .read(walletProvider)!
-                                                .cachedAvailableBalance -
-                                            feeAmount;
-                                      }
-
-                                      final total = feeAmount +
-                                          (_amountToSend ?? Decimal.zero);
-
-                                      if (total >
-                                          ref
-                                              .read(walletProvider)!
-                                              .cachedAvailableBalance) {
-                                        feeErr = "Not enough balance";
-                                        WidgetsBinding.instance
-                                            .addPostFrameCallback((_) {
-                                          _updatePreviewButtonState(
-                                              address, _amountToSend, feeErr);
-                                        });
-                                      } else {
-                                        feeErr = null;
-                                        WidgetsBinding.instance
-                                            .addPostFrameCallback((_) {
-                                          _updatePreviewButtonState(
-                                              address, _amountToSend, feeErr);
-                                        });
-                                      }
-
-                                      return Column(
-                                        children: [
-                                          Text(
-                                            // feeErr ??
-                                            //     "~$feeAmount ${model.estimate}",
-                                            "",
+                                            .getPrimaryDisabledButtonColor(
+                                                context),
+                                        child: Padding(
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 16),
+                                          child: Text(
+                                            "VIEW AVAILABLE BALANCE",
                                             textAlign: TextAlign.center,
-                                            style: STextStyles.body(context),
-                                          ),
-                                          // SizedBox(
-                                          //     height:
-                                          //         (layoutBuilderHeight! < 700)
-                                          //             ? 10
-                                          //             : 36),
-                                          SizedBox(
-                                            height: 10,
-                                          ),
-                                          Center(
-                                            child: Text(
-                                              "TOTAL AMOUNT TO SEND (INCLUDING FEE)",
-                                              style: STextStyles.overLineBold(
-                                                      context)
-                                                  .copyWith(
-                                                color: Theme.of(context)
-                                                    .extension<StackColors>()!
-                                                    .textMedium,
-                                              ),
-                                            ),
-                                          ),
-                                          const SizedBox(
-                                            height: 6,
-                                          ),
-                                          Text(
-                                            // feeErr ?? "~$total ${coin.ticker}",
-                                            "",
-                                            textAlign: TextAlign.center,
-                                            style: STextStyles.titleH2(context)
+                                            style: STextStyles.overLineBold(
+                                                    context)
                                                 .copyWith(
                                               color: Theme.of(context)
                                                   .extension<StackColors>()!
                                                   .buttonBackPrimary,
                                             ),
-                                          )
-                                        ],
-                                      );
-                                    } else {
-                                      return Column(
-                                        children: [
-                                          Center(
-                                            child: AnimatedText(
-                                              stringsToLoopThrough: const [
-                                                "Calculating",
-                                                "Calculating.",
-                                                "Calculating..",
-                                                "Calculating...",
-                                              ],
-                                              style: STextStyles.body(context),
-                                            ),
                                           ),
-                                          SizedBox(
-                                            height: 10,
-                                          ),
-                                          Center(
-                                            child: Text(
-                                              "TOTAL AMOUNT TO SEND (INCLUDING FEE)",
-                                              style: STextStyles.overLineBold(
-                                                      context)
-                                                  .copyWith(
-                                                color: Theme.of(context)
-                                                    .extension<StackColors>()!
-                                                    .textMedium,
-                                              ),
-                                            ),
-                                          ),
-                                          const SizedBox(
-                                            height: 6,
-                                          ),
-                                          Center(
-                                            child: AnimatedText(
-                                              stringsToLoopThrough: const [
-                                                "Calculating",
-                                                "Calculating.",
-                                                "Calculating..",
-                                                "Calculating...",
-                                              ],
-                                              style:
-                                                  STextStyles.titleH2(context)
-                                                      .copyWith(
-                                                color: Theme.of(context)
-                                                    .extension<StackColors>()!
-                                                    .buttonBackPrimary,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      );
-                                    }
-                                  },
-                                ),
-                              ],
-                            ),
-
-                            const Spacer(),
-                            // if (isWalletCoin)
-                            const SizedBox(
-                              height: 12,
-                            ),
-                            if (isWalletCoin)
-                              TextButton(
-                                onPressed: () {},
-                                style: Theme.of(context)
-                                    .extension<StackColors>()!
-                                    .getPrimaryEnabledButtonColor(context),
-                                child: Text(
-                                  "SEND",
-                                  style:
-                                      STextStyles.buttonText(context).copyWith(
-                                    color: Theme.of(context)
-                                        .extension<StackColors>()!
-                                        .overlay,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                ),
+                                  SizedBox(
+                                    height: divHeight,
+                                  ),
+                                  Column(
+                                    children: [
+                                      Center(
+                                        child: Text(
+                                          "NETWORK FEE",
+                                          style:
+                                              STextStyles.overLineBold(context),
+                                          textAlign: TextAlign.center,
+                                        ),
+                                      ),
+                                      FutureBuilder(
+                                        future: calculateFees(
+                                            Format.decimalAmountToSatoshis(
+                                                _amountToSend!)),
+                                        builder: (context,
+                                            AsyncSnapshot<Decimal> snapshot) {
+                                          if (snapshot.connectionState ==
+                                                  ConnectionState.done &&
+                                              snapshot.hasData) {
+                                            final feeAmount = snapshot.data!;
+
+                                            if (_amountToSend ==
+                                                ref
+                                                    .read(walletProvider)!
+                                                    .cachedAvailableBalance) {
+                                              _amountToSend = ref
+                                                      .read(walletProvider)!
+                                                      .cachedAvailableBalance -
+                                                  feeAmount;
+                                            }
+
+                                            final total = feeAmount +
+                                                (_amountToSend ?? Decimal.zero);
+
+                                            if (total >
+                                                ref
+                                                    .read(walletProvider)!
+                                                    .cachedAvailableBalance) {
+                                              feeErr = "Not enough balance";
+                                              WidgetsBinding.instance
+                                                  .addPostFrameCallback((_) {
+                                                _updatePreviewButtonState(
+                                                  model.trade!.payinAddress,
+                                                  _amountToSend,
+                                                  feeErr,
+                                                );
+                                              });
+                                            } else {
+                                              feeErr = null;
+                                              WidgetsBinding.instance
+                                                  .addPostFrameCallback((_) {
+                                                _updatePreviewButtonState(
+                                                  model.trade!.payinAddress,
+                                                  _amountToSend,
+                                                  feeErr,
+                                                );
+                                              });
+                                            }
+
+                                            return Column(
+                                              children: [
+                                                Text(
+                                                  feeErr ?? "~$feeAmount EPIC",
+                                                  textAlign: TextAlign.center,
+                                                  style:
+                                                      STextStyles.body(context),
+                                                ),
+                                                SizedBox(
+                                                  height: divHeight,
+                                                ),
+                                                Center(
+                                                  child: Text(
+                                                    "TOTAL AMOUNT TO SEND (INCLUDING FEE)",
+                                                    style: STextStyles
+                                                            .overLineBold(
+                                                                context)
+                                                        .copyWith(
+                                                      color: Theme.of(context)
+                                                          .extension<
+                                                              StackColors>()!
+                                                          .textMedium,
+                                                    ),
+                                                  ),
+                                                ),
+                                                const SizedBox(
+                                                  height: 6,
+                                                ),
+                                                Text(
+                                                  feeErr ?? "~$total EPIC",
+                                                  textAlign: TextAlign.center,
+                                                  style: STextStyles.titleH2(
+                                                          context)
+                                                      .copyWith(
+                                                    color: Theme.of(context)
+                                                        .extension<
+                                                            StackColors>()!
+                                                        .buttonBackPrimary,
+                                                  ),
+                                                )
+                                              ],
+                                            );
+                                          } else {
+                                            return Column(
+                                              children: [
+                                                Center(
+                                                  child: AnimatedText(
+                                                    stringsToLoopThrough: const [
+                                                      "Calculating",
+                                                      "Calculating.",
+                                                      "Calculating..",
+                                                      "Calculating...",
+                                                    ],
+                                                    style: STextStyles.body(
+                                                        context),
+                                                  ),
+                                                ),
+                                                SizedBox(
+                                                  height: divHeight,
+                                                ),
+                                                Center(
+                                                  child: Text(
+                                                    "TOTAL AMOUNT TO SEND (INCLUDING FEE)",
+                                                    style: STextStyles
+                                                            .overLineBold(
+                                                                context)
+                                                        .copyWith(
+                                                      color: Theme.of(context)
+                                                          .extension<
+                                                              StackColors>()!
+                                                          .textMedium,
+                                                    ),
+                                                  ),
+                                                ),
+                                                const SizedBox(
+                                                  height: 6,
+                                                ),
+                                                Center(
+                                                  child: AnimatedText(
+                                                    stringsToLoopThrough: const [
+                                                      "Calculating",
+                                                      "Calculating.",
+                                                      "Calculating..",
+                                                      "Calculating...",
+                                                    ],
+                                                    style: STextStyles.titleH2(
+                                                            context)
+                                                        .copyWith(
+                                                      color: Theme.of(context)
+                                                          .extension<
+                                                              StackColors>()!
+                                                          .buttonBackPrimary,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ],
+                                            );
+                                          }
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(
+                                    height:
+                                        screenDiff != null && screenDiff! > 0
+                                            ? screenDiff! + divHeight
+                                            : divHeight,
+                                  ),
+                                  CustomTextButtonBase(
+                                    height: 56,
+                                    textButton: TextButton(
+                                      onPressed: ref
+                                              .watch(
+                                                  previewTxButtonStateProvider
+                                                      .state)
+                                              .state
+                                          ? send
+                                          : null,
+                                      style: ref
+                                              .watch(
+                                                  previewTxButtonStateProvider
+                                                      .state)
+                                              .state
+                                          ? Theme.of(context)
+                                              .extension<StackColors>()!
+                                              .getPrimaryEnabledButtonColor(
+                                                  context)
+                                          : Theme.of(context)
+                                              .extension<StackColors>()!
+                                              .getPrimaryDisabledButtonColor(
+                                                  context),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          getButtonChild(
+                                            context,
+                                            ref
+                                                .watch(
+                                                    previewTxButtonStateProvider
+                                                        .state)
+                                                .state,
+                                            sendingState,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(
+                                    height: 16,
+                                  ),
+                                ],
                               ),
-                          ],
-                        ),
-                      ),
+                            ),
+                          ),
+                        );
+                      },
                     ),
                   ),
-                ),
-              );
-            },
+                ],
+              ),
+            ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _Divider extends StatelessWidget {
+  const _Divider({
+    Key? key,
+    required this.height,
+  }) : super(key: key);
+
+  final double height;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: (height - 1) / 2),
+      child: Container(
+        height: 1,
+        color: Theme.of(context)
+            .extension<StackColors>()!
+            .buttonBackPrimaryDisabled,
       ),
     );
   }
