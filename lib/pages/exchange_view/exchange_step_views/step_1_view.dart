@@ -88,7 +88,7 @@ class _Step1ViewState extends State<Step1View> {
                           Center(
                             child: Text(
                               "Confirm amount",
-                              style: STextStyles.pageTitleH1(context),
+                              style: STextStyles.titleH3(context),
                             ),
                           ),
                           const SizedBox(
@@ -96,7 +96,7 @@ class _Step1ViewState extends State<Step1View> {
                           ),
                           Text(
                             "Network fees and other exchange charges are included in the rate.",
-                            style: STextStyles.itemSubtitle(context),
+                            style: STextStyles.bodySmallMed(context),
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(
@@ -106,8 +106,8 @@ class _Step1ViewState extends State<Step1View> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                "You send",
-                                style: STextStyles.itemSubtitle(context)
+                                "YOU SEND",
+                                style: STextStyles.overLineBold(context)
                                     .copyWith(
                                         color: Theme.of(context)
                                             .extension<StackColors>()!
@@ -122,11 +122,7 @@ class _Step1ViewState extends State<Step1View> {
                                 },
                                 child: Text(
                                   "${model.sendAmount.toStringAsFixed(8)} ${model.from.ticker.toUpperCase()}",
-                                  style: STextStyles.itemSubtitle12(context)
-                                      .copyWith(
-                                          color: Theme.of(context)
-                                              .extension<StackColors>()!
-                                              .infoItemText),
+                                  style: STextStyles.body(context),
                                 ),
                               ),
                             ],
@@ -142,8 +138,8 @@ class _Step1ViewState extends State<Step1View> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                "You receive",
-                                style: STextStyles.itemSubtitle(context)
+                                "YOU RECEIVE",
+                                style: STextStyles.overLineBold(context)
                                     .copyWith(
                                         color: Theme.of(context)
                                             .extension<StackColors>()!
@@ -158,11 +154,7 @@ class _Step1ViewState extends State<Step1View> {
                                 },
                                 child: Text(
                                   "~${model.receiveAmount.toStringAsFixed(8)} ${model.to.ticker.toUpperCase()}",
-                                  style: STextStyles.itemSubtitle12(context)
-                                      .copyWith(
-                                          color: Theme.of(context)
-                                              .extension<StackColors>()!
-                                              .infoItemText),
+                                  style: STextStyles.body(context),
                                 ),
                               ),
                             ],
@@ -179,10 +171,10 @@ class _Step1ViewState extends State<Step1View> {
                             children: [
                               Text(
                                 model.rateType == SupportedRateType.estimated
-                                    ? "Estimated rate"
-                                    : "Fixed rate",
+                                    ? "ESTIMATED RATE"
+                                    : "FIXED RATE",
                                 style:
-                                    STextStyles.itemSubtitle(context).copyWith(
+                                    STextStyles.overLineBold(context).copyWith(
                                   color: Theme.of(context)
                                       .extension<StackColors>()!
                                       .textDark,
@@ -196,11 +188,7 @@ class _Step1ViewState extends State<Step1View> {
                                 },
                                 child: Text(
                                   model.rateInfo,
-                                  style: STextStyles.itemSubtitle12(context)
-                                      .copyWith(
-                                          color: Theme.of(context)
-                                              .extension<StackColors>()!
-                                              .infoItemText),
+                                  style: STextStyles.body(context),
                                 ),
                               ),
                             ],

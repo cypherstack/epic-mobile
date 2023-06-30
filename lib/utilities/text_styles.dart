@@ -539,6 +539,25 @@ class STextStyles {
     }
   }
 
+  static TextStyle bodySmallMed(BuildContext context) {
+    switch (_theme(context).themeType) {
+      case ThemeType.light:
+        return GoogleFonts.poppins(
+          color: _theme(context).textMedium,
+          fontWeight: FontWeight.w400,
+          fontSize: 14,
+          height: 21 / 14,
+        );
+      case ThemeType.dark:
+        return GoogleFonts.poppins(
+          color: _theme(context).textMedium,
+          fontWeight: FontWeight.w400,
+          fontSize: 14,
+          height: 21 / 14,
+        );
+    }
+  }
+
   static TextStyle bodySmallBold(BuildContext context) {
     switch (_theme(context).themeType) {
       case ThemeType.light:

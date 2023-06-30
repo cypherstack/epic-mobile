@@ -27,7 +27,6 @@ import 'package:epicpay/widgets/desktop/primary_button.dart';
 import 'package:epicpay/widgets/icon_widgets/clipboard_icon.dart';
 import 'package:epicpay/widgets/icon_widgets/qrcode_icon.dart';
 import 'package:epicpay/widgets/icon_widgets/x_icon.dart';
-import 'package:epicpay/widgets/rounded_white_container.dart';
 import 'package:epicpay/widgets/stack_text_field.dart';
 import 'package:epicpay/widgets/textfield_icon_button.dart';
 import 'package:flutter/material.dart';
@@ -168,7 +167,6 @@ class _Step2ViewState extends ConsumerState<Step2View> {
         ),
         body: LayoutBuilder(
           builder: (context, constraints) {
-            final width = MediaQuery.of(context).size.width - 32;
             return Padding(
               padding: const EdgeInsets.all(12),
               child: SingleChildScrollView(
@@ -188,7 +186,7 @@ class _Step2ViewState extends ConsumerState<Step2View> {
                           Center(
                             child: Text(
                               "Exchange details",
-                              style: STextStyles.pageTitleH1(context),
+                              style: STextStyles.titleH3(context),
                             ),
                           ),
                           const SizedBox(
@@ -196,11 +194,7 @@ class _Step2ViewState extends ConsumerState<Step2View> {
                           ),
                           Text(
                             "Enter your recipient and refund addresses",
-                            style: STextStyles.itemSubtitle(context).copyWith(
-                              color: Theme.of(context)
-                                  .extension<StackColors>()!
-                                  .textMedium,
-                            ),
+                            style: STextStyles.bodySmallMed(context),
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(
@@ -210,14 +204,13 @@ class _Step2ViewState extends ConsumerState<Step2View> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                "Recipient Wallet",
-                                style: STextStyles.smallMed12(context),
+                                "RECIPIENT WALLET",
+                                style: STextStyles.overLineBold(context),
                               ),
-                              // if (isStackCoin(model.receiveTicker))
                             ],
                           ),
                           const SizedBox(
-                            height: 4,
+                            height: 12,
                           ),
                           ClipRRect(
                             borderRadius: BorderRadius.circular(
@@ -381,116 +374,182 @@ class _Step2ViewState extends ConsumerState<Step2View> {
                             ),
                           ),
                           const SizedBox(
-                            height: 6,
+                            height: 8,
                           ),
-                          RoundedWhiteContainer(
-                            child: Text(
-                              "Your ${model.to.ticker.toUpperCase()} will be sent to this wallet.",
-                              style: STextStyles.label(context),
+                          Text(
+                            "Your ${model.to.ticker.toUpperCase()} will be sent to this wallet.",
+                            style: STextStyles.overLine(context).copyWith(
+                              color: Theme.of(context)
+                                  .extension<StackColors>()!
+                                  .textDark,
                             ),
                           ),
                           const SizedBox(
                             height: 24,
                           ),
-                          // IF EPIC TO BTC
-                          // if (supportsRefund)
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                "Refund Wallet (REQUIRED)",
-                                style: STextStyles.smallMed12(context),
-                              ),
-                            ],
-                          ),
-                          // if (supportsRefund)
-                          const SizedBox(
-                            height: 4,
-                          ),
-                          // if (supportsRefund)
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(
-                              Constants.size.circularBorderRadius,
-                            ),
-                            child: TextField(
-                              key: const Key(
-                                  "refundExchangeStep2ViewAddressFieldKey"),
-                              controller: _refundController,
-                              readOnly: false,
-                              autocorrect: false,
-                              enableSuggestions: false,
-                              // inputFormatters: <TextInputFormatter>[
-                              //   FilteringTextInputFormatter.allow(RegExp("[a-zA-Z0-9]{34}")),
-                              // ],
-                              toolbarOptions: const ToolbarOptions(
-                                copy: false,
-                                cut: false,
-                                paste: true,
-                                selectAll: false,
-                              ),
-                              focusNode: _refundFocusNode,
-                              style: STextStyles.field(context),
-                              onChanged: (value) {
-                                model.refundAddress = _refundController.text;
-                                setState(() {
-                                  enableNext = _toController.text.isNotEmpty &&
-                                      _refundController.text.isNotEmpty;
-                                });
-                              },
-                              decoration: standardInputDecoration(
-                                "Enter ${model.from.ticker.toUpperCase()} refund address",
-                                _refundFocusNode,
-                                context,
-                              ).copyWith(
-                                contentPadding: const EdgeInsets.only(
-                                  left: 16,
-                                  top: 6,
-                                  bottom: 8,
-                                  right: 5,
+                          if (supportsRefund &&
+                              !(model.from.ticker.toLowerCase() == "epic" &&
+                                  model.from.network.toLowerCase() == "epic"))
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  "REFUND WALLET (REQUIRED)",
+                                  style: STextStyles.overLineBold(context)
+                                      .copyWith(
+                                    color: Theme.of(context)
+                                        .extension<StackColors>()!
+                                        .textDark,
+                                  ),
                                 ),
-                                suffixIcon: Padding(
-                                  padding: _refundController.text.isEmpty
-                                      ? const EdgeInsets.only(right: 16)
-                                      : const EdgeInsets.only(right: 0),
-                                  child: UnconstrainedBox(
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceAround,
-                                      children: [
-                                        _refundController.text.isNotEmpty
-                                            ? TextFieldIconButton(
-                                                key: const Key(
-                                                  "sendViewClearAddressFieldButtonKey",
-                                                ),
-                                                onTap: () {
-                                                  _refundController.text = "";
-                                                  model.refundAddress =
-                                                      _refundController.text;
+                              ],
+                            ),
+                          if (supportsRefund &&
+                              !(model.from.ticker.toLowerCase() == "epic" &&
+                                  model.from.network.toLowerCase() == "epic"))
+                            const SizedBox(
+                              height: 12,
+                            ),
+                          if (supportsRefund &&
+                              !(model.from.ticker.toLowerCase() == "epic" &&
+                                  model.from.network.toLowerCase() == "epic"))
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(
+                                Constants.size.circularBorderRadius,
+                              ),
+                              child: TextField(
+                                key: const Key(
+                                    "refundExchangeStep2ViewAddressFieldKey"),
+                                controller: _refundController,
+                                readOnly: false,
+                                autocorrect: false,
+                                enableSuggestions: false,
+                                // inputFormatters: <TextInputFormatter>[
+                                //   FilteringTextInputFormatter.allow(RegExp("[a-zA-Z0-9]{34}")),
+                                // ],
+                                toolbarOptions: const ToolbarOptions(
+                                  copy: false,
+                                  cut: false,
+                                  paste: true,
+                                  selectAll: false,
+                                ),
+                                focusNode: _refundFocusNode,
+                                style: STextStyles.field(context),
+                                onChanged: (value) {
+                                  model.refundAddress = _refundController.text;
+                                  setState(() {
+                                    enableNext =
+                                        _toController.text.isNotEmpty &&
+                                            _refundController.text.isNotEmpty;
+                                  });
+                                },
+                                decoration: standardInputDecoration(
+                                  "Enter ${model.from.ticker.toUpperCase()} refund address",
+                                  _refundFocusNode,
+                                  context,
+                                ).copyWith(
+                                  contentPadding: const EdgeInsets.only(
+                                    left: 16,
+                                    top: 6,
+                                    bottom: 8,
+                                    right: 5,
+                                  ),
+                                  suffixIcon: Padding(
+                                    padding: _refundController.text.isEmpty
+                                        ? const EdgeInsets.only(right: 16)
+                                        : const EdgeInsets.only(right: 0),
+                                    child: UnconstrainedBox(
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceAround,
+                                        children: [
+                                          _refundController.text.isNotEmpty
+                                              ? TextFieldIconButton(
+                                                  key: const Key(
+                                                    "sendViewClearAddressFieldButtonKey",
+                                                  ),
+                                                  onTap: () {
+                                                    _refundController.text = "";
+                                                    model.refundAddress =
+                                                        _refundController.text;
 
-                                                  setState(() {
-                                                    enableNext = _toController
-                                                            .text.isNotEmpty &&
-                                                        _refundController
-                                                            .text.isNotEmpty;
-                                                  });
-                                                },
-                                                child: const XIcon(),
-                                              )
-                                            : TextFieldIconButton(
-                                                key: const Key(
-                                                  "sendViewPasteAddressFieldButtonKey",
-                                                ),
-                                                onTap: () async {
-                                                  final ClipboardData? data =
-                                                      await clipboard.getData(
-                                                          Clipboard.kTextPlain);
-                                                  if (data?.text != null &&
-                                                      data!.text!.isNotEmpty) {
-                                                    final content =
-                                                        data.text!.trim();
+                                                    setState(() {
+                                                      enableNext = _toController
+                                                              .text
+                                                              .isNotEmpty &&
+                                                          _refundController
+                                                              .text.isNotEmpty;
+                                                    });
+                                                  },
+                                                  child: const XIcon(),
+                                                )
+                                              : TextFieldIconButton(
+                                                  key: const Key(
+                                                    "sendViewPasteAddressFieldButtonKey",
+                                                  ),
+                                                  onTap: () async {
+                                                    final ClipboardData? data =
+                                                        await clipboard.getData(
+                                                            Clipboard
+                                                                .kTextPlain);
+                                                    if (data?.text != null &&
+                                                        data!
+                                                            .text!.isNotEmpty) {
+                                                      final content =
+                                                          data.text!.trim();
 
+                                                      _refundController.text =
+                                                          content;
+                                                      model.refundAddress =
+                                                          _refundController
+                                                              .text;
+
+                                                      setState(() {
+                                                        enableNext = _toController
+                                                                .text
+                                                                .isNotEmpty &&
+                                                            _refundController
+                                                                .text
+                                                                .isNotEmpty;
+                                                      });
+                                                    }
+                                                  },
+                                                  child: _refundController
+                                                          .text.isEmpty
+                                                      ? const ClipboardIcon()
+                                                      : const XIcon(),
+                                                ),
+                                          if (_refundController.text.isEmpty)
+                                            TextFieldIconButton(
+                                              key: const Key(
+                                                "sendViewScanQrButtonKey",
+                                              ),
+                                              onTap: () async {
+                                                try {
+                                                  final qrResult =
+                                                      await scanner.scan();
+
+                                                  final results =
+                                                      AddressUtils.parseUri(
+                                                          qrResult.rawContent);
+                                                  if (results.isNotEmpty) {
+                                                    // auto fill address
                                                     _refundController.text =
-                                                        content;
+                                                        results["address"] ??
+                                                            "";
+                                                    model.refundAddress =
+                                                        _refundController.text;
+
+                                                    setState(() {
+                                                      enableNext = _toController
+                                                              .text
+                                                              .isNotEmpty &&
+                                                          _refundController
+                                                              .text.isNotEmpty;
+                                                    });
+                                                  } else {
+                                                    _refundController.text =
+                                                        qrResult.rawContent;
                                                     model.refundAddress =
                                                         _refundController.text;
 
@@ -502,76 +561,43 @@ class _Step2ViewState extends ConsumerState<Step2View> {
                                                               .text.isNotEmpty;
                                                     });
                                                   }
-                                                },
-                                                child: _refundController
-                                                        .text.isEmpty
-                                                    ? const ClipboardIcon()
-                                                    : const XIcon(),
-                                              ),
-                                        if (_refundController.text.isEmpty)
-                                          TextFieldIconButton(
-                                            key: const Key(
-                                              "sendViewScanQrButtonKey",
-                                            ),
-                                            onTap: () async {
-                                              try {
-                                                final qrResult =
-                                                    await scanner.scan();
-
-                                                final results =
-                                                    AddressUtils.parseUri(
-                                                        qrResult.rawContent);
-                                                if (results.isNotEmpty) {
-                                                  // auto fill address
-                                                  _refundController.text =
-                                                      results["address"] ?? "";
-                                                  model.refundAddress =
-                                                      _refundController.text;
-
-                                                  setState(() {
-                                                    enableNext = _toController
-                                                            .text.isNotEmpty &&
-                                                        _refundController
-                                                            .text.isNotEmpty;
-                                                  });
-                                                } else {
-                                                  _refundController.text =
-                                                      qrResult.rawContent;
-                                                  model.refundAddress =
-                                                      _refundController.text;
-
-                                                  setState(() {
-                                                    enableNext = _toController
-                                                            .text.isNotEmpty &&
-                                                        _refundController
-                                                            .text.isNotEmpty;
-                                                  });
+                                                } on PlatformException catch (e, s) {
+                                                  Logging.instance.log(
+                                                    "Failed to get camera permissions "
+                                                    "while trying to scan qr "
+                                                    "code in SendView: $e\n$s",
+                                                    level: LogLevel.Warning,
+                                                  );
                                                 }
-                                              } on PlatformException catch (e, s) {
-                                                Logging.instance.log(
-                                                  "Failed to get camera permissions while trying to scan qr code in SendView: $e\n$s",
-                                                  level: LogLevel.Warning,
-                                                );
-                                              }
-                                            },
-                                            child: const QrCodeIcon(),
-                                          ),
-                                      ],
+                                              },
+                                              child: const QrCodeIcon(),
+                                            ),
+                                        ],
+                                      ),
                                     ),
                                   ),
                                 ),
                               ),
                             ),
-                          ),
-                          // if (supportsRefund)
-                          const SizedBox(
-                            height: 6,
-                          ),
-                          // if (supportsRefund)
-                          Text(
-                            "In case something goes wrong during the exchange, we might need a refund address so we can return your coins back to you.",
-                            style: STextStyles.label(context),
-                          ),
+                          if (supportsRefund &&
+                              !(model.from.ticker.toLowerCase() == "epic" &&
+                                  model.from.network.toLowerCase() == "epic"))
+                            const SizedBox(
+                              height: 8,
+                            ),
+                          if (supportsRefund &&
+                              !(model.from.ticker.toLowerCase() == "epic" &&
+                                  model.from.network.toLowerCase() == "epic"))
+                            Text(
+                              "In case something goes wrong during the exchange, "
+                              "we might need a refund address so we can "
+                              "return your coins back to you.",
+                              style: STextStyles.overLine(context).copyWith(
+                                color: Theme.of(context)
+                                    .extension<StackColors>()!
+                                    .textDark,
+                              ),
+                            ),
                           const SizedBox(
                             height: 16,
                           ),

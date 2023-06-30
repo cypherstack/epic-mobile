@@ -22,12 +22,14 @@ import 'package:epicpay/utilities/enums/coin_enum.dart';
 import 'package:epicpay/utilities/text_styles.dart';
 import 'package:epicpay/utilities/theme/stack_colors.dart';
 import 'package:epicpay/widgets/background.dart';
+import 'package:epicpay/widgets/conditional_parent.dart';
 import 'package:epicpay/widgets/custom_buttons/app_bar_icon_button.dart';
 import 'package:epicpay/widgets/ep_dialog.dart';
 import 'package:epicpay/widgets/rounded_container.dart';
 import 'package:epicpay/widgets/stack_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_native_splash/cli_commands.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:tuple/tuple.dart';
@@ -292,7 +294,7 @@ class _Step4ViewState extends ConsumerState<Step4View> {
                             Center(
                               child: Text(
                                 "Send deposit",
-                                style: STextStyles.pageTitleH1(context),
+                                style: STextStyles.titleH3(context),
                               ),
                             ),
                             const SizedBox(
@@ -305,11 +307,11 @@ class _Step4ViewState extends ConsumerState<Step4View> {
                               child: Column(
                                 children: [
                                   UnorderedListItem(
-                                    "SEND ${model.from.ticker.toUpperCase()} "
-                                    "TO THE ADDRESS BELOW",
+                                    "Send ${model.from.ticker.toUpperCase()} "
+                                    "Tto the address below",
                                   ),
                                   Padding(
-                                    padding: const EdgeInsets.only(left: 8.0),
+                                    padding: const EdgeInsets.only(left: 14.0),
                                     child: Text(
                                       "If you send less than "
                                       "${model.sendAmount.toString()} "
@@ -317,10 +319,12 @@ class _Step4ViewState extends ConsumerState<Step4View> {
                                       "your transaction may not be converted "
                                       "and it may not be refunded.",
                                       style:
-                                          STextStyles.label(context).copyWith(
+                                          STextStyles.baseXS(context).copyWith(
                                         color: Theme.of(context)
                                             .extension<StackColors>()!
                                             .warningForeground,
+                                        fontSize: 12,
+                                        height: 18 / 12,
                                       ),
                                     ),
                                   ),
@@ -329,7 +333,7 @@ class _Step4ViewState extends ConsumerState<Step4View> {
                                     "the ${model.to.ticker.toUpperCase()} to "
                                     "the recipient address you provided.",
                                   ),
-                                  UnorderedListItem(
+                                  const UnorderedListItem(
                                     "Find this trade details and check its "
                                     "status in the list of trades.",
                                   )
@@ -337,37 +341,13 @@ class _Step4ViewState extends ConsumerState<Step4View> {
                               ),
                             ),
                             const SizedBox(
-                              height: 8,
+                              height: 24,
                             ),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      "Send ${model.from.ticker.toUpperCase()} "
-                                      "to this address",
-                                      style: STextStyles.itemSubtitle(context),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(
-                                  height: 4,
-                                ),
-                                GestureDetector(
-                                  onTap: () {
-                                    clipboard.setData(ClipboardData(
-                                      text: model.trade!.payinAddress,
-                                    ));
-                                  },
-                                  child: Text(
-                                    model.trade!.payinAddress,
-                                    style: STextStyles.itemSubtitle12(context),
-                                  ),
-                                ),
-                              ],
+                            _Item(
+                              vertical: true,
+                              title: "SEND ${model.from.ticker.toUpperCase()} "
+                                  "TO THIS ADDRESS",
+                              info: model.trade!.payinAddress,
                             ),
                             const SizedBox(
                               height: 10,
@@ -376,35 +356,9 @@ class _Step4ViewState extends ConsumerState<Step4View> {
                             const SizedBox(
                               height: 10,
                             ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  "AMOUNT TO SEND",
-                                  style: STextStyles.itemSubtitle(context),
-                                ),
-                                GestureDetector(
-                                  onTap: () async {
-                                    final data = ClipboardData(
-                                      text: model.sendAmount.toString(),
-                                    );
-                                    await clipboard.setData(data);
-                                    // if (mounted) {
-                                    //   unawaited(
-                                    //     showFloatingFlushBar(
-                                    //       type: FlushBarType.info,
-                                    //       message: "Copied to clipboard",
-                                    //       context: context,
-                                    //     ),
-                                    //   );
-                                    // }
-                                  },
-                                  child: Text(
-                                    model.sendAmount.toString(),
-                                    style: STextStyles.itemSubtitle12(context),
-                                  ),
-                                ),
-                              ],
+                            _Item(
+                              title: "AMOUNT TO SEND",
+                              info: model.sendAmount.toString(),
                             ),
                             const SizedBox(
                               height: 10,
@@ -413,30 +367,9 @@ class _Step4ViewState extends ConsumerState<Step4View> {
                             const SizedBox(
                               height: 10,
                             ),
-                            Row(
-                              children: [
-                                Text(
-                                  "TRADE ID",
-                                  style: STextStyles.itemSubtitle(context),
-                                ),
-                                const Spacer(),
-                                Row(
-                                  children: [
-                                    GestureDetector(
-                                      onTap: () {
-                                        clipboard.setData(ClipboardData(
-                                          text: model.trade!.tradeId,
-                                        ));
-                                      },
-                                      child: Text(
-                                        model.trade!.tradeId,
-                                        style:
-                                            STextStyles.itemSubtitle12(context),
-                                      ),
-                                    ),
-                                  ],
-                                )
-                              ],
+                            _Item(
+                              title: "TRADE ID",
+                              info: model.trade!.tradeId,
                             ),
                             const SizedBox(
                               height: 10,
@@ -445,23 +378,14 @@ class _Step4ViewState extends ConsumerState<Step4View> {
                             const SizedBox(
                               height: 10,
                             ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  "STATUS",
-                                  style: STextStyles.itemSubtitle(context),
-                                ),
-                                Text(
-                                  _statusString,
-                                  style: STextStyles.itemSubtitle(context)
-                                      .copyWith(
-                                    color: Theme.of(context)
-                                        .extension<StackColors>()!
-                                        .colorForStatus(_statusString),
+                            _Item(
+                              title: "STATUS",
+                              info: _statusString.capitalize(),
+                              overrideInfoColor: Theme.of(context)
+                                  .extension<StackColors>()!
+                                  .colorForStatus(
+                                    _statusString,
                                   ),
-                                ),
-                              ],
                             ),
                             const Spacer(),
                             const SizedBox(
@@ -644,8 +568,72 @@ class _Step4ViewState extends ConsumerState<Step4View> {
   }
 }
 
+class _Item extends StatelessWidget {
+  const _Item({
+    super.key,
+    this.vertical = false,
+    required this.title,
+    required this.info,
+    this.overrideInfoColor,
+  });
+
+  final bool vertical;
+  final String title;
+  final String info;
+  final Color? overrideInfoColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        Clipboard.setData(
+          ClipboardData(
+            text: info,
+          ),
+        );
+      },
+      child: ConditionalParent(
+        condition: vertical,
+        builder: (child) => Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            child,
+            const SizedBox(
+              height: 4,
+            ),
+            Text(
+              info,
+              style: STextStyles.body(context),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              title,
+              style: STextStyles.overLineBold(context).copyWith(
+                color: Theme.of(context).extension<StackColors>()!.textDark,
+              ),
+            ),
+            if (!vertical)
+              Text(
+                info,
+                style: overrideInfoColor == null
+                    ? STextStyles.body(context)
+                    : STextStyles.body(context).copyWith(
+                        color: overrideInfoColor!,
+                      ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class UnorderedListItem extends StatelessWidget {
-  UnorderedListItem(this.text);
+  const UnorderedListItem(this.text, {super.key});
   final String text;
 
   @override
@@ -653,9 +641,26 @@ class UnorderedListItem extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        const Text("• "),
+        SizedBox(
+          width: 14,
+          child: Text(
+            "•",
+            style: STextStyles.baseXS(context).copyWith(
+              color: Theme.of(context).extension<StackColors>()!.textMedium,
+              fontSize: 12,
+              height: 18 / 12,
+            ),
+          ),
+        ),
         Expanded(
-          child: Text(text),
+          child: Text(
+            text,
+            style: STextStyles.baseXS(context).copyWith(
+              color: Theme.of(context).extension<StackColors>()!.textMedium,
+              fontSize: 12,
+              height: 18 / 12,
+            ),
+          ),
         ),
       ],
     );
