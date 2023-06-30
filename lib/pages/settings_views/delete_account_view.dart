@@ -1,4 +1,4 @@
-import 'package:epicpay/hive/db.dart';
+import 'package:epicpay/db/hive/db.dart';
 import 'package:epicpay/pages/intro_view.dart';
 import 'package:epicpay/providers/global/prefs_provider.dart';
 import 'package:epicpay/providers/global/wallet_provider.dart';

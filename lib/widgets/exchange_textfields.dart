@@ -1,0 +1,299 @@
+import 'package:epicpay/models/exchange/aggregate_currency.dart';
+import 'package:epicpay/providers/global/locale_provider.dart';
+import 'package:epicpay/utilities/amount/amount_input_formatter.dart';
+import 'package:epicpay/utilities/assets.dart';
+import 'package:epicpay/utilities/enums/coin_enum.dart';
+import 'package:epicpay/utilities/text_styles.dart';
+import 'package:epicpay/utilities/theme/stack_colors.dart';
+import 'package:epicpay/utilities/util.dart';
+import 'package:epicpay/widgets/conditional_parent.dart';
+import 'package:epicpay/widgets/loading_indicator.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_svg/svg.dart';
+
+class ExchangeTextField extends ConsumerStatefulWidget {
+  const ExchangeTextField({
+    Key? key,
+    this.borderRadius = 0,
+    this.background,
+    required this.controller,
+    this.buttonColor,
+    required this.focusNode,
+    this.buttonContent,
+    required this.textStyle,
+    this.onButtonTap,
+    this.onChanged,
+    this.onSubmitted,
+    this.onTap,
+    required this.isWalletCoin,
+    this.currency,
+    this.readOnly = false,
+  }) : super(key: key);
+
+  final double borderRadius;
+  final Color? background;
+  final Color? buttonColor;
+  final Widget? buttonContent;
+  final TextEditingController controller;
+  final FocusNode focusNode;
+  final TextStyle textStyle;
+  final VoidCallback? onTap;
+  final VoidCallback? onButtonTap;
+  final void Function(String)? onChanged;
+  final void Function(String)? onSubmitted;
+
+  final bool isWalletCoin;
+  final bool readOnly;
+  final AggregateCurrency? currency;
+
+  @override
+  ConsumerState<ExchangeTextField> createState() => _ExchangeTextFieldState();
+}
+
+class _ExchangeTextFieldState extends ConsumerState<ExchangeTextField> {
+  late final TextEditingController controller;
+  late final FocusNode focusNode;
+  late final TextStyle textStyle;
+
+  late final double borderRadius;
+
+  late final Color? background;
+  late final Color? buttonColor;
+  late final Widget? buttonContent;
+  late final VoidCallback? onButtonTap;
+  late final VoidCallback? onTap;
+  late final void Function(String)? onChanged;
+  late final void Function(String)? onSubmitted;
+
+  final isDesktop = Util.isDesktop;
+
+  bool isStackCoin(String? ticker) {
+    if (ticker == null) return false;
+
+    try {
+      coinFromTickerCaseInsensitive(ticker);
+      return true;
+    } on ArgumentError catch (_) {
+      return false;
+    }
+  }
+
+  @override
+  void initState() {
+    borderRadius = widget.borderRadius;
+    background = widget.background;
+    buttonColor = widget.buttonColor;
+    controller = widget.controller;
+    focusNode = widget.focusNode;
+    buttonContent = widget.buttonContent;
+    textStyle = widget.textStyle;
+    onButtonTap = widget.onButtonTap;
+    onChanged = widget.onChanged;
+    onSubmitted = widget.onSubmitted;
+    onTap = widget.onTap;
+
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: background,
+        borderRadius: BorderRadius.circular(borderRadius),
+      ),
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Expanded(
+              child: TextField(
+                style: textStyle,
+                controller: controller,
+                focusNode: focusNode,
+                onChanged: onChanged,
+                onTap: onTap,
+                enableSuggestions: false,
+                autocorrect: false,
+                readOnly: widget.readOnly,
+                keyboardType: isDesktop
+                    ? null
+                    : const TextInputType.numberWithOptions(
+                        signed: false,
+                        decimal: true,
+                      ),
+                decoration: InputDecoration(
+                  contentPadding: const EdgeInsets.only(
+                    top: 12,
+                    left: 12,
+                  ),
+                  // hintText: widget.currency == null ? "select currency" : "0",
+                  hintText: "0",
+                  hintStyle: STextStyles.fieldLabel(context).copyWith(
+                    fontSize: 14,
+                  ),
+                ),
+                inputFormatters: [
+                  AmountInputFormatter(
+                    decimals: 8, // todo change this?
+                    locale: ref.watch(localeServiceChangeNotifierProvider
+                        .select((value) => value.locale)),
+                  ),
+                ],
+              ),
+            ),
+            MouseRegion(
+              cursor: SystemMouseCursors.click,
+              child: GestureDetector(
+                onTap: () => onButtonTap?.call(),
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: buttonColor,
+                    borderRadius: BorderRadius.horizontal(
+                      right: Radius.circular(
+                        borderRadius,
+                      ),
+                    ),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 18,
+                          height: 18,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(18),
+                          ),
+                          child: Builder(
+                            builder: (context) {
+                              if (isStackCoin(widget.currency?.ticker)) {
+                                return Center(
+                                  child: getIconForTicker(
+                                    widget.currency!.ticker,
+                                  ),
+                                  // child: CoinIconForTicker(
+                                  //   size: 18,
+                                  //   ticker: widget.currency!.ticker,
+                                  // ),
+                                );
+                              } else if (widget.currency != null &&
+                                  widget.currency!.image.isNotEmpty) {
+                                return Center(
+                                  child: SvgPicture.network(
+                                    widget.currency!.image,
+                                    height: 18,
+                                    placeholderBuilder: (_) => Container(
+                                      width: 18,
+                                      height: 18,
+                                      decoration: BoxDecoration(
+                                        color: Theme.of(context)
+                                            .extension<StackColors>()!
+                                            .textFieldDefaultBG,
+                                        borderRadius: BorderRadius.circular(
+                                          18,
+                                        ),
+                                      ),
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(
+                                          18,
+                                        ),
+                                        child: const LoadingIndicator(),
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              } else {
+                                return Container(
+                                  width: 18,
+                                  height: 18,
+                                  decoration: BoxDecoration(
+                                    // color: Theme.of(context).extension<StackColors>()!.accentColorDark
+                                    borderRadius: BorderRadius.circular(18),
+                                  ),
+                                  child: SvgPicture.asset(
+                                    Assets.svg.circleQuestion,
+                                    width: 18,
+                                    height: 18,
+                                    color: Theme.of(context)
+                                        .extension<StackColors>()!
+                                        .textFieldDefaultBG,
+                                  ),
+                                );
+                              }
+                            },
+                          ),
+                        ),
+                        const SizedBox(
+                          width: 6,
+                        ),
+                        if (widget.currency == null)
+                          Text(
+                            "n/a",
+                            style: STextStyles.body(context),
+                          ),
+                        if (widget.currency != null)
+                          ConditionalParent(
+                            condition: widget.currency!.ticker != "epic",
+                            builder: (child) => Row(
+                              children: [
+                                child,
+                                const SizedBox(
+                                  width: 4,
+                                ),
+                                SvgPicture.asset(
+                                  Assets.svg.chevronDown,
+                                  width: 9,
+                                  color: Theme.of(context)
+                                      .extension<StackColors>()!
+                                      .textLight,
+                                ),
+                              ],
+                            ),
+                            child: Text(
+                              widget.currency!.ticker.toUpperCase(),
+                              style: STextStyles.body(context),
+                            ),
+                          ),
+                        // if (!widget.isWalletCoin)
+                        //   const SizedBox(
+                        //     width: 6,
+                        //   ),
+                        // if (!widget.isWalletCoin)
+                        //   SvgPicture.asset(
+                        //     Assets.svg.chevronDown,
+                        //     width: 5,
+                        //     height: 2.5,
+                        //     color: Theme.of(context)
+                        //         .extension<StackColors>()!
+                        //         .textDark,
+                        //   ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+Widget? getIconForTicker(
+  String ticker, {
+  double size = 20,
+}) {
+  try {
+    return SvgPicture.asset(
+        Assets.svg.iconFor(coin: coinFromTickerCaseInsensitive(ticker)),
+        height: size,
+        width: size);
+  } catch (_) {
+    return null;
+  }
+}

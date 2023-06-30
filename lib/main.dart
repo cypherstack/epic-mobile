@@ -1,9 +1,13 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:epicpay/hive/db.dart';
+import 'package:epicpay/db/hive/db.dart';
+import 'package:epicpay/db/isar/isar_db.dart';
 import 'package:epicpay/models/epicbox_config_model.dart';
 import 'package:epicpay/models/epicbox_server_model.dart';
+import 'package:epicpay/models/isar/models/exchange/currency.dart';
+import 'package:epicpay/models/isar/models/exchange/pair.dart';
+import 'package:epicpay/models/isar/models/exchange/trade.dart';
 import 'package:epicpay/models/isar/models/log.dart';
 import 'package:epicpay/models/models.dart';
 import 'package:epicpay/models/node_model.dart';
@@ -22,6 +26,7 @@ import 'package:epicpay/services/coins/manager.dart';
 import 'package:epicpay/services/debug_service.dart';
 import 'package:epicpay/services/locale_service.dart';
 import 'package:epicpay/services/node_service.dart';
+import 'package:epicpay/services/swap/swap_data_service.dart';
 import 'package:epicpay/utilities/constants.dart';
 import 'package:epicpay/utilities/db_version_migration.dart';
 import 'package:epicpay/utilities/logger.dart';
@@ -31,7 +36,6 @@ import 'package:epicpay/utilities/theme/dark_colors.dart';
 import 'package:epicpay/utilities/theme/stack_colors.dart';
 import 'package:epicpay/utilities/util.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -60,12 +64,18 @@ void main() async {
   // FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   if (!(Logging.isArmLinux || Logging.isTestEnv)) {
     final isar = await Isar.open(
-      [LogSchema],
+      [
+        LogSchema,
+        TradeSchema,
+        PairSchema,
+        CurrencySchema,
+      ],
       directory: appDirectory.path,
       inspector: false,
     );
     await Logging.instance.init(isar);
     await DebugService.instance.init(isar);
+    IsarDB.instance.init(isar);
 
     // clear out all info logs on startup. No need to await and block
     unawaited(DebugService.instance.deleteLogsOlderThan());
@@ -145,7 +155,7 @@ class MaterialAppWithTheme extends ConsumerStatefulWidget {
 
 class _MaterialAppWithThemeState extends ConsumerState<MaterialAppWithTheme>
     with WidgetsBindingObserver {
-  static const platform = MethodChannel("STACK_WALLET_RESTORE");
+  // static const platform = MethodChannel("STACK_WALLET_RESTORE");
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
   late final Prefs _prefs;
@@ -162,8 +172,14 @@ class _MaterialAppWithThemeState extends ConsumerState<MaterialAppWithTheme>
       }
       didLoad = true;
 
+      final swapDataLoadingFuture = ref.read(pSwapDataService).updateAll();
+
       await DB.instance.init();
       await _prefs.init();
+
+      final familiarity = ref.read(prefsChangeNotifierProvider).familiarity + 1;
+      ref.read(prefsChangeNotifierProvider).familiarity = familiarity;
+      Constants.exchangeForExperiencedUsers(familiarity);
 
       _nodeService = ref.read(nodeServiceChangeNotifierProvider);
 
@@ -197,9 +213,9 @@ class _MaterialAppWithThemeState extends ConsumerState<MaterialAppWithTheme>
             ref.read(walletProvider)!.txCount;
       }
 
+      await swapDataLoadingFuture;
+
       loadingCompleter.complete();
-      // TODO: this should probably run unawaited. Keep commented out for now as proper community nodes ui hasn't been implemented yet
-      //  unawaited(_nodeService.updateCommunityNodes());
     } catch (e, s) {
       Logger.print("$e $s", normalLength: false);
     }
@@ -269,7 +285,10 @@ class _MaterialAppWithThemeState extends ConsumerState<MaterialAppWithTheme>
         title: 'Epic Pay',
         onGenerateRoute: RouteGenerator.generateRoute,
         theme: ThemeData(
-          accentColor: colorScheme.textGold,
+          colorScheme: Theme.of(context).colorScheme.copyWith(
+                secondary: colorScheme.textGold,
+                brightness: Brightness.dark,
+              ),
           extensions: [colorScheme],
           highlightColor: colorScheme.highlight,
           brightness: Brightness.dark,

@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:decimal/decimal.dart';
-import 'package:epicpay/hive/db.dart';
+import 'package:epicpay/db/hive/db.dart';
 import 'package:epicpay/utilities/enums/coin_enum.dart';
 import 'package:epicpay/utilities/logger.dart';
 import 'package:flutter/foundation.dart';
@@ -69,7 +69,7 @@ class PriceAPI {
       {required String baseCurrency}) async {
     final now = DateTime.now();
     if (_lastUsedBaseCurrency != baseCurrency ||
-        now.difference(_lastCalled).inSeconds > 0) {
+        now.difference(_lastCalled) > refreshIntervalDuration) {
       _lastCalled = now;
       _lastUsedBaseCurrency = baseCurrency;
     } else {

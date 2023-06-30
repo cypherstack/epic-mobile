@@ -7,7 +7,7 @@ class TradeWalletLookup {
   // @HiveField(0)
   final String uuid;
   // @HiveField(1)
-  final String txid;
+  final String slateId;
   // @HiveField(2)
   final String tradeId;
   // @HiveField(3)
@@ -15,19 +15,19 @@ class TradeWalletLookup {
 
   TradeWalletLookup({
     required this.uuid,
-    required this.txid,
+    required this.slateId,
     required this.tradeId,
     required this.walletIds,
   });
 
   TradeWalletLookup copyWith({
-    String? txid,
+    String? slateId,
     String? tradeId,
     List<String>? walletIds,
   }) {
     return TradeWalletLookup(
       uuid: uuid,
-      txid: txid ?? this.txid,
+      slateId: slateId ?? this.slateId,
       tradeId: tradeId ?? this.tradeId,
       walletIds: walletIds ?? this.walletIds,
     );
@@ -36,7 +36,7 @@ class TradeWalletLookup {
   factory TradeWalletLookup.fromJson(Map<String, dynamic> json) {
     return TradeWalletLookup(
       uuid: json["uuid"] as String,
-      txid: json["txid"] as String,
+      slateId: json["slateId"] as String,
       tradeId: json["tradeId"] as String,
       walletIds: List<String>.from(json["walletIds"] as List),
     );
@@ -45,7 +45,7 @@ class TradeWalletLookup {
   Map<String, dynamic> toMap() {
     return {
       "uuid": uuid,
-      "txid": txid,
+      "slateId": slateId,
       "tradeId": tradeId,
       "walletIds": walletIds,
     };

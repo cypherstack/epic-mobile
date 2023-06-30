@@ -1,10 +1,8 @@
 import 'dart:async';
 
-import 'package:epicpay/models/contact.dart';
 import 'package:epicpay/models/paymint/transactions_model.dart';
 import 'package:epicpay/models/transaction_filter.dart';
 import 'package:epicpay/pages/wallet_view/sub_widgets/no_transactions_found.dart';
-import 'package:epicpay/providers/global/address_book_service_provider.dart';
 import 'package:epicpay/providers/global/wallet_provider.dart';
 import 'package:epicpay/providers/ui/transaction_filter_provider.dart';
 import 'package:epicpay/providers/wallet/notes_service_provider.dart';
@@ -30,8 +28,12 @@ class _TransactionsListState extends ConsumerState<TransactionsList> {
   bool _hasLoaded = false;
   Map<String, Transaction> _transactions = {};
 
-  bool _matchesFilter(Transaction tx, List<Contact> contacts,
-      Map<String, String> notes, TransactionFilter? filter) {
+  bool _matchesFilter(
+    Transaction tx,
+    // List<Contact> contacts,
+    Map<String, String> notes,
+    TransactionFilter? filter,
+  ) {
     if (filter == null) {
       return true;
     }
@@ -61,23 +63,32 @@ class _TransactionsListState extends ConsumerState<TransactionsList> {
       return false;
     }
 
-    return _isKeywordMatch(tx, filter.keyword.toLowerCase(), contacts, notes);
+    return _isKeywordMatch(
+      tx,
+      filter.keyword.toLowerCase(),
+      // contacts,
+      notes,
+    );
   }
 
-  bool _isKeywordMatch(Transaction tx, String keyword, List<Contact> contacts,
-      Map<String, String> notes) {
+  bool _isKeywordMatch(
+    Transaction tx,
+    String keyword,
+    // List<Contact> contacts,
+    Map<String, String> notes,
+  ) {
     if (keyword.isEmpty) {
       return true;
     }
 
     bool contains = false;
 
-    // check if address book name contains
-    contains |= contacts
-        .where((e) =>
-            e.addresses.where((a) => a.address == tx.address).isNotEmpty &&
-            e.name.toLowerCase().contains(keyword))
-        .isNotEmpty;
+    // // check if address book name contains
+    // contains |= contacts
+    //     .where((e) =>
+    //         e.addresses.where((a) => a.address == tx.address).isNotEmpty &&
+    //         e.name.toLowerCase().contains(keyword))
+    //     .isNotEmpty;
 
     // check if address contains
     contains |= tx.address.toLowerCase().contains(keyword);
@@ -110,12 +121,17 @@ class _TransactionsListState extends ConsumerState<TransactionsList> {
     final newTransactions =
         newData.txChunks.expand((element) => element.transactions);
 
-    final contacts = ref.read(addressBookServiceProvider).contacts;
+    // final contacts = ref.read(addressBookServiceProvider).contacts;
     final notes =
         ref.read(notesServiceChangeNotifierProvider(widget.walletId)).notesSync;
 
     for (final tx in newTransactions) {
-      if (_matchesFilter(tx, contacts, notes, filter)) {
+      if (_matchesFilter(
+        tx,
+        // contacts,
+        notes,
+        filter,
+      )) {
         _transactions[tx.txid] = tx;
       }
     }
@@ -140,8 +156,8 @@ class _TransactionsListState extends ConsumerState<TransactionsList> {
           _hasLoaded = true;
         }
         if (!_hasLoaded) {
-          return Column(
-            children: const [
+          return const Column(
+            children: [
               Spacer(),
               Center(
                 child: LoadingIndicator(

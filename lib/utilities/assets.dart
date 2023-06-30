@@ -1,3 +1,4 @@
+import 'package:epicpay/services/swap/change_now/change_now_exchange.dart';
 import 'package:epicpay/utilities/enums/coin_enum.dart';
 import 'package:epicpay/utilities/theme/color_theme.dart';
 import 'package:epicpay/utilities/theme/stack_colors.dart';
@@ -23,8 +24,18 @@ class _SOCIALS {
 class _EXCHANGE {
   const _EXCHANGE();
 
-  String get changeNow => "assets/svg/exchange_icons/change_now_logo_1.svg";
-  String get simpleSwap => "assets/svg/exchange_icons/simpleswap-icon.svg";
+  String get changeNow => "assets/svg/change-now-logo.svg";
+  // String get simpleSwap => "assets/svg/exchange_icons/simpleswap-icon.svg";
+
+  String getIconFor({required String exchangeName}) {
+    switch (exchangeName) {
+      case ChangeNowExchange.exchangeName:
+        return changeNow;
+      default:
+        throw ArgumentError("Invalid exchange name passed to "
+            "Assets.exchange.getIconFor()");
+    }
+  }
 }
 
 class _SVG {
@@ -40,14 +51,14 @@ class _SVG {
   String receive(BuildContext context) =>
       "assets/svg/${Theme.of(context).extension<StackColors>()!.themeType.name}/tx-icon-receive.svg";
   String receivePending(BuildContext context) =>
-      "assets/svg/${Theme.of(context).extension<StackColors>()!.themeType.name}/tx-icon-receive-pending.svg";
+      "assets/svg/${Theme.of(context).extension<StackColors>()!.themeType.name}/arrow-down-circle-pending.svg";
   String receiveCancelled(BuildContext context) =>
       "assets/svg/${Theme.of(context).extension<StackColors>()!.themeType.name}/tx-icon-receive-failed.svg";
 
   String send(BuildContext context) =>
       "assets/svg/${Theme.of(context).extension<StackColors>()!.themeType.name}/tx-icon-send.svg";
   String sendPending(BuildContext context) =>
-      "assets/svg/${Theme.of(context).extension<StackColors>()!.themeType.name}/tx-icon-send-pending.svg";
+      "assets/svg/${Theme.of(context).extension<StackColors>()!.themeType.name}/arrow-up-circle-pending.svg";
   String sendCancelled(BuildContext context) =>
       "assets/svg/${Theme.of(context).extension<StackColors>()!.themeType.name}/tx-icon-send-failed.svg";
 
@@ -55,6 +66,7 @@ class _SVG {
   // String get themeLight => "assets/svg/light-mode.svg";
   // String get themeDark => "assets/svg/dark-theme.svg";
 
+  String get swapArrows => "assets/svg/swap-arrows.svg";
   String get clipboard => "assets/svg/clipboard.svg";
   String get eyeOff => "assets/svg/eye-off.svg";
   String get edit => "assets/svg/edit.svg";
@@ -96,9 +108,10 @@ class _SVG {
   String get ellipsis => "assets/svg/gear-3.svg";
   String get chevronDown => "assets/svg/chevron-down.svg";
   String get chevronUp => "assets/svg/chevron-up.svg";
-  // String get swap => "assets/svg/swap.svg";
+  String get swap => "assets/svg/swap.svg";
   // String get downloadFolder => "assets/svg/folder-down.svg";
   String get lockFilled => "assets/svg/lock-filled.svg";
+  String get lockOpen => "assets/svg/unlocked.svg";
   String get lock => "assets/svg/lock.svg";
   String get wifi => "assets/svg/wifi.svg";
   String get network => "assets/svg/network-wired.svg";
@@ -112,7 +125,7 @@ class _SVG {
   String get dollarSign => "assets/svg/dollar-sign.svg";
   String get language => "assets/svg/language2.svg";
   // String get sun => "assets/svg/sun-bright2.svg";
-  String get pencil => "assets/svg/pen-solid-fa.svg";
+  // String get pencil => "assets/svg/pen-solid-fa.svg";
   String get search => "assets/svg/magnifying-glass.svg";
   String get thickX => "assets/svg/x-fat.svg";
   String get x => "assets/svg/x.svg";
@@ -140,9 +153,9 @@ class _SVG {
   // String get questionMessage => "assets/svg/message-question.svg";
   // String get envelope => "assets/svg/envelope.svg";
   String get share => "assets/svg/share-2.svg";
-  String get anonymize => "assets/svg/tx-icon-anonymize.svg";
-  String get anonymizePending => "assets/svg/tx-icon-anonymize-pending.svg";
-  String get anonymizeFailed => "assets/svg/tx-icon-anonymize-failed.svg";
+  // String get anonymize => "assets/svg/tx-icon-anonymize.svg";
+  // String get anonymizePending => "assets/svg/tx-icon-anonymize-pending.svg";
+  // String get anonymizeFailed => "assets/svg/tx-icon-anonymize-failed.svg";
   // String get addressBookDesktop => "assets/svg/address-book-desktop.svg";
   // String get exchangeDesktop => "assets/svg/exchange-desktop.svg";
   // String get aboutDesktop => "assets/svg/about-desktop.svg";
@@ -150,6 +163,9 @@ class _SVG {
   // String get exitDesktop => "assets/svg/exit-desktop.svg";
   // String get keys => "assets/svg/keys.svg";
   String get arrowDown => "assets/svg/arrow-down.svg";
+  String get txSwap => "assets/svg/tx-swap.svg";
+  String get txSwapPending => "assets/svg/tx-swap-pending.svg";
+  String get txSwapFailed => "assets/svg/thin-x-circle.svg";
 
   String get epicCash => "assets/svg/coin_icons/EpicCash.svg";
 

@@ -1,13 +1,15 @@
-import 'dart:async';
 import 'dart:core' as core;
 import 'dart:core';
 import 'dart:io';
 
-import 'package:flutter/foundation.dart';
-import 'package:isar/isar.dart';
+import 'package:epicpay/models/isar/models/exchange/currency.dart';
+import 'package:epicpay/models/isar/models/exchange/pair.dart';
+import 'package:epicpay/models/isar/models/exchange/trade.dart';
 import 'package:epicpay/models/isar/models/log.dart';
 import 'package:epicpay/utilities/constants.dart';
 import 'package:epicpay/utilities/enums/log_level_enum.dart';
+import 'package:flutter/foundation.dart';
+import 'package:isar/isar.dart';
 
 export 'enums/log_level_enum.dart';
 
@@ -33,7 +35,12 @@ class Logging {
       return;
     }
     isar = await Isar.open(
-      [LogSchema],
+      [
+        LogSchema,
+        TradeSchema,
+        PairSchema,
+        CurrencySchema,
+      ],
       inspector: false,
     );
   }

@@ -1,9 +1,6 @@
 import 'dart:io';
 
-import 'package:epicpay/models/send_view_auto_fill_data.dart';
-import 'package:epicpay/pages/address_book_views/address_book_view.dart';
 import 'package:epicpay/pages/pinpad_views/lock_screen_view.dart';
-import 'package:epicpay/pages/send_view/send_view.dart';
 import 'package:epicpay/pages/settings_views/advanced_views/debug_view.dart';
 import 'package:epicpay/pages/settings_views/currency_view.dart';
 import 'package:epicpay/pages/settings_views/delete_account_view.dart';
@@ -25,9 +22,6 @@ import 'package:epicpay/widgets/custom_buttons/app_bar_icon_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:tuple/tuple.dart';
-
-import '../../providers/ui/home_view_index_provider.dart';
-import '../home_view/home_view.dart';
 
 class SettingsView extends StatelessWidget {
   const SettingsView({
@@ -85,33 +79,33 @@ class SettingsView extends StatelessWidget {
                             },
                           ),
                           const _Div(),
-                          Consumer(builder: (context, ref, __) {
-                            return SettingsListButton(
-                              iconAssetName: Assets.svg.addressBook,
-                              iconSize: 16,
-                              title: "Address Book",
-                              onPressed: () {
-                                Navigator.of(context).pushNamed(
-                                    AddressBookView.routeName,
-                                    arguments: (String name, String address) {
-                                  Navigator.of(context).popUntil(
-                                      ModalRoute.withName(HomeView.routeName));
-                                  ref
-                                      .read(
-                                          homeViewPageIndexStateProvider.state)
-                                      .state = 0;
-
-                                  ref
-                                      .read(sendViewFillDataProvider.state)
-                                      .state = SendViewAutoFillData(
-                                    address: address,
-                                    contactLabel: name,
-                                  );
-                                });
-                              },
-                            );
-                          }),
-                          const _Div(),
+                          // Consumer(builder: (context, ref, __) {
+                          //   return SettingsListButton(
+                          //     iconAssetName: Assets.svg.addressBook,
+                          //     iconSize: 16,
+                          //     title: "Address Book",
+                          //     onPressed: () {
+                          //       Navigator.of(context).pushNamed(
+                          //           AddressBookView.routeName,
+                          //           arguments: (String name, String address) {
+                          //         Navigator.of(context).popUntil(
+                          //             ModalRoute.withName(HomeView.routeName));
+                          //         ref
+                          //             .read(
+                          //                 homeViewPageIndexStateProvider.state)
+                          //             .state = 0;
+                          //
+                          //         ref
+                          //             .read(sendViewFillDataProvider.state)
+                          //             .state = SendViewAutoFillData(
+                          //           address: address,
+                          //           contactLabel: name,
+                          //         );
+                          //       });
+                          //     },
+                          //   );
+                          // }),
+                          // const _Div(),
                           SettingsListButton(
                             iconAssetName: Assets.svg.lock,
                             iconSize: 16,

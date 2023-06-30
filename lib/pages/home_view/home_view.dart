@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:epicpay/pages/exchange_view/exchange_view.dart';
 import 'package:epicpay/pages/help/help_view.dart';
 import 'package:epicpay/pages/home_view/sub_widgets/connection_status_bar.dart';
 import 'package:epicpay/pages/receive_view/receive_view.dart';
@@ -15,6 +16,7 @@ import 'package:epicpay/services/event_bus/events/global/refresh_percent_changed
 import 'package:epicpay/services/event_bus/events/global/wallet_sync_status_changed_event.dart';
 import 'package:epicpay/services/event_bus/global_event_bus.dart';
 import 'package:epicpay/utilities/assets.dart';
+import 'package:epicpay/utilities/constants.dart';
 import 'package:epicpay/utilities/text_styles.dart';
 import 'package:epicpay/utilities/theme/stack_colors.dart';
 import 'package:epicpay/widgets/background.dart';
@@ -62,19 +64,12 @@ class _HomeViewState extends ConsumerState<HomeView> {
   // late StreamSubscription<dynamic> _nodeStatusSubscription;
   late StreamSubscription<dynamic> _refreshSubscription;
 
-  int currentIndex = 1;
-
-  void _onTappedBar(int value) {
-    setState(() {
-      currentIndex = value;
-    });
-    _pageController.jumpToPage(value);
-  }
+  bool _pageLock = false;
 
   Future<bool> _onWillPop() async {
     // go to home view when tapping back on the main exchange view
-    if (ref.read(homeViewPageIndexStateProvider.state).state != 1) {
-      ref.read(homeViewPageIndexStateProvider.state).state = 1;
+    if (ref.read(homeViewPageIndexStateProvider.state).state != 0) {
+      ref.read(homeViewPageIndexStateProvider.state).state = 0;
       return false;
     }
 
@@ -109,19 +104,20 @@ class _HomeViewState extends ConsumerState<HomeView> {
 
   @override
   void initState() {
-    _pageController = PageController(initialPage: 1);
+    _pageController = PageController(initialPage: 0);
     _children = [
+      WalletView(
+        walletId: ref.read(walletProvider)!.walletId,
+      ),
       SendView(
         walletId: ref.read(walletProvider)!.walletId,
         coin: ref.read(walletProvider)!.coin,
-      ),
-      WalletView(
-        walletId: ref.read(walletProvider)!.walletId,
       ),
       ReceiveView(
         walletId: ref.read(walletProvider)!.walletId,
         coin: ref.read(walletProvider)!.coin,
       ),
+      if (Constants.enableExchange) const ExchangeView(),
     ];
 
     if (ref.read(walletProvider)!.isRefreshing) {
@@ -218,13 +214,16 @@ class _HomeViewState extends ConsumerState<HomeView> {
   Widget build(BuildContext context) {
     debugPrint("BUILD: $runtimeType");
     ref.listen(homeViewPageIndexStateProvider, (previous, next) {
-      if (next is int) {
-        if (next >= 0 && next <= 1) {
+      if (!_pageLock) {
+        if ((previous != null && (previous - next).abs() <= 1) ||
+            previous == null) {
           _pageController.animateToPage(
             next,
             duration: const Duration(milliseconds: 300),
             curve: Curves.decelerate,
           );
+        } else {
+          _pageController.jumpToPage(next);
         }
       }
     });
@@ -331,6 +330,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                 height: 75,
                 child: BottomNavigationBar(
                   elevation: 0,
+                  type: BottomNavigationBarType.fixed,
                   unselectedFontSize: 14.0,
                   unselectedLabelStyle: STextStyles.smallMed12(context)
                       .copyWith(
@@ -340,6 +340,22 @@ class _HomeViewState extends ConsumerState<HomeView> {
                   backgroundColor:
                       Theme.of(context).extension<StackColors>()!.popupBG,
                   items: [
+                    BottomNavigationBarItem(
+                      icon: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: SvgPicture.asset(Assets.svg.walletHome),
+                      ),
+                      activeIcon: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: SvgPicture.asset(
+                          Assets.svg.walletHome,
+                          color: Theme.of(context)
+                              .extension<StackColors>()!
+                              .buttonBackPrimary,
+                        ),
+                      ),
+                      label: 'WALLET',
+                    ),
                     BottomNavigationBarItem(
                       icon: Padding(
                         padding: const EdgeInsets.all(8.0),
@@ -361,22 +377,6 @@ class _HomeViewState extends ConsumerState<HomeView> {
                     BottomNavigationBarItem(
                       icon: Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: SvgPicture.asset(Assets.svg.walletHome),
-                      ),
-                      activeIcon: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: SvgPicture.asset(
-                          Assets.svg.walletHome,
-                          color: Theme.of(context)
-                              .extension<StackColors>()!
-                              .buttonBackPrimary,
-                        ),
-                      ),
-                      label: 'WALLET',
-                    ),
-                    BottomNavigationBarItem(
-                      icon: Padding(
-                        padding: const EdgeInsets.all(8.0),
                         child: SvgPicture.asset(Assets.svg.download),
                       ),
                       activeIcon: Padding(
@@ -390,9 +390,29 @@ class _HomeViewState extends ConsumerState<HomeView> {
                       ),
                       label: 'RECEIVE',
                     ),
+                    if (Constants.enableExchange)
+                      BottomNavigationBarItem(
+                        icon: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: SvgPicture.asset(Assets.svg.swapArrows),
+                        ),
+                        activeIcon: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: SvgPicture.asset(
+                            Assets.svg.swapArrows,
+                            color: Theme.of(context)
+                                .extension<StackColors>()!
+                                .buttonBackPrimary,
+                          ),
+                        ),
+                        label: 'SWAP',
+                      ),
                   ],
-                  onTap: _onTappedBar,
-                  currentIndex: currentIndex,
+                  onTap: (value) => ref
+                      .read(homeViewPageIndexStateProvider.state)
+                      .state = value,
+                  currentIndex:
+                      ref.watch(homeViewPageIndexStateProvider.state).state,
                   selectedItemColor: Theme.of(context)
                       .extension<StackColors>()!
                       .buttonBackPrimary,
@@ -405,11 +425,10 @@ class _HomeViewState extends ConsumerState<HomeView> {
                       controller: _pageController,
                       children: _children,
                       onPageChanged: (pageIndex) {
+                        _pageLock = true;
                         ref.read(homeViewPageIndexStateProvider.state).state =
                             pageIndex;
-                        setState(() {
-                          currentIndex = pageIndex;
-                        });
+                        _pageLock = false;
                       },
                     ),
                   ),

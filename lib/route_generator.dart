@@ -1,11 +1,19 @@
-import 'package:epicpay/models/contact_address_entry.dart';
+// import 'package:epicpay/models/contact_address_entry.dart';
+import 'package:epicpay/models/exchange/incomplete_exchange.dart';
 import 'package:epicpay/models/paymint/transactions_model.dart';
 import 'package:epicpay/pages/add_wallet_views/create_restore_wallet_view.dart';
 import 'package:epicpay/pages/add_wallet_views/restore_wallet_view/restore_options_view/restore_options_view.dart';
 import 'package:epicpay/pages/add_wallet_views/restore_wallet_view/restore_wallet_view.dart';
-import 'package:epicpay/pages/address_book_views/address_book_view.dart';
-import 'package:epicpay/pages/address_book_views/subviews/add_address_book_entry_view.dart';
-import 'package:epicpay/pages/address_book_views/subviews/edit_contact_address_view.dart';
+import 'package:epicpay/pages/exchange_view/edit_trade_note_view.dart';
+import 'package:epicpay/pages/exchange_view/exchange_step_views/confirm_send_details_view.dart';
+import 'package:epicpay/pages/exchange_view/exchange_step_views/step_1_view.dart';
+import 'package:epicpay/pages/exchange_view/exchange_step_views/step_2_view.dart';
+import 'package:epicpay/pages/exchange_view/exchange_step_views/step_3_view.dart';
+import 'package:epicpay/pages/exchange_view/exchange_step_views/step_4_view.dart';
+import 'package:epicpay/pages/exchange_view/trade_details_view.dart';
+// import 'package:epicpay/pages/address_book_views/address_book_view.dart';
+// import 'package:epicpay/pages/address_book_views/subviews/add_address_book_entry_view.dart';
+// import 'package:epicpay/pages/address_book_views/subviews/edit_contact_address_view.dart';
 import 'package:epicpay/pages/help/help_view.dart';
 import 'package:epicpay/pages/home_view/home_view.dart';
 import 'package:epicpay/pages/intro_view.dart';
@@ -101,25 +109,25 @@ class RouteGenerator {
             builder: (_) => const HelpView(),
             settings: RouteSettings(name: settings.name));
 
-      case AddressBookView.routeName:
-        if (args is void Function(String, String)) {
-          return getRoute(
-            shouldUseMaterialRoute: useMaterialPageRoute,
-            builder: (_) => AddressBookView(
-              onSendPressed: args,
-            ),
-            settings: RouteSettings(
-              name: settings.name,
-            ),
-          );
-        }
-        return getRoute(
-          shouldUseMaterialRoute: useMaterialPageRoute,
-          builder: (_) => const AddressBookView(),
-          settings: RouteSettings(
-            name: settings.name,
-          ),
-        );
+      // case AddressBookView.routeName:
+      //   if (args is void Function(String, String)) {
+      //     return getRoute(
+      //       shouldUseMaterialRoute: useMaterialPageRoute,
+      //       builder: (_) => AddressBookView(
+      //         onSendPressed: args,
+      //       ),
+      //       settings: RouteSettings(
+      //         name: settings.name,
+      //       ),
+      //     );
+      //   }
+      //   return getRoute(
+      //     shouldUseMaterialRoute: useMaterialPageRoute,
+      //     builder: (_) => const AddressBookView(),
+      //     settings: RouteSettings(
+      //       name: settings.name,
+      //     ),
+      //   );
 
       case SecurityView.routeName:
         if (args is bool) {
@@ -168,11 +176,11 @@ class RouteGenerator {
             builder: (_) => const ManageNodesView(),
             settings: RouteSettings(name: settings.name));
 
-      case AddAddressBookEntryView.routeName:
-        return getRoute(
-            shouldUseMaterialRoute: useMaterialPageRoute,
-            builder: (_) => const AddAddressBookEntryView(),
-            settings: RouteSettings(name: settings.name));
+      // case AddAddressBookEntryView.routeName:
+      //   return getRoute(
+      //       shouldUseMaterialRoute: useMaterialPageRoute,
+      //       builder: (_) => const AddAddressBookEntryView(),
+      //       settings: RouteSettings(name: settings.name));
 
       case HiddenSettings.routeName:
         return getRoute(
@@ -227,20 +235,20 @@ class RouteGenerator {
         }
         return _routeError("${settings.name} invalid args: ${args.toString()}");
 
-      case EditContactAddressView.routeName:
-        if (args is Tuple2<String, ContactAddressEntry>) {
-          return getRoute(
-            shouldUseMaterialRoute: useMaterialPageRoute,
-            builder: (_) => EditContactAddressView(
-              contactId: args.item1,
-              addressEntry: args.item2,
-            ),
-            settings: RouteSettings(
-              name: settings.name,
-            ),
-          );
-        }
-        return _routeError("${settings.name} invalid args: ${args.toString()}");
+      // case EditContactAddressView.routeName:
+      //   if (args is Tuple2<String, ContactAddressEntry>) {
+      //     return getRoute(
+      //       shouldUseMaterialRoute: useMaterialPageRoute,
+      //       builder: (_) => EditContactAddressView(
+      //         contactId: args.item1,
+      //         addressEntry: args.item2,
+      //       ),
+      //       settings: RouteSettings(
+      //         name: settings.name,
+      //       ),
+      //     );
+      //   }
+      //   return _routeError("${settings.name} invalid args: ${args.toString()}");
 
       case NetworkSettingsView.routeName:
         return getRoute(
@@ -463,6 +471,115 @@ class RouteGenerator {
             name: settings.name,
           ),
         );
+
+      // exchange steps
+
+      case Step1View.routeName:
+        if (args is IncompleteExchangeModel) {
+          return getRoute(
+            shouldUseMaterialRoute: useMaterialPageRoute,
+            builder: (_) => Step1View(
+              model: args,
+            ),
+            settings: RouteSettings(
+              name: settings.name,
+            ),
+          );
+        }
+        return _routeError("${settings.name} invalid args: ${args.toString()}");
+
+      case Step2View.routeName:
+        if (args is IncompleteExchangeModel) {
+          return getRoute(
+            shouldUseMaterialRoute: useMaterialPageRoute,
+            builder: (_) => Step2View(
+              model: args,
+            ),
+            settings: RouteSettings(
+              name: settings.name,
+            ),
+          );
+        }
+        return _routeError("${settings.name} invalid args: ${args.toString()}");
+
+      case Step3View.routeName:
+        if (args is IncompleteExchangeModel) {
+          return getRoute(
+            shouldUseMaterialRoute: useMaterialPageRoute,
+            builder: (_) => Step3View(
+              model: args,
+            ),
+            settings: RouteSettings(
+              name: settings.name,
+            ),
+          );
+        }
+        return _routeError("${settings.name} invalid args: ${args.toString()}");
+
+      case Step4View.routeName:
+        if (args is IncompleteExchangeModel) {
+          return getRoute(
+            shouldUseMaterialRoute: useMaterialPageRoute,
+            builder: (_) => Step4View(
+              model: args,
+            ),
+            settings: RouteSettings(
+              name: settings.name,
+            ),
+          );
+        }
+        return _routeError("${settings.name} invalid args: ${args.toString()}");
+
+      case ConfirmSendDetails.routeName:
+        if (args is IncompleteExchangeModel) {
+          return getRoute(
+            shouldUseMaterialRoute: useMaterialPageRoute,
+            builder: (_) => ConfirmSendDetails(
+              model: args,
+            ),
+            settings: RouteSettings(
+              name: settings.name,
+            ),
+          );
+        }
+        return _routeError("${settings.name} invalid args: ${args.toString()}");
+
+      case TradeDetailsView.routeName:
+        if (args is ({
+          String tradeId,
+          Transaction? transactionIfSentFromStack,
+          String? walletId,
+          String? walletName,
+        })) {
+          return getRoute(
+            shouldUseMaterialRoute: useMaterialPageRoute,
+            builder: (_) => TradeDetailsView(
+              walletId: args.walletId,
+              walletName: args.walletName,
+              tradeId: args.tradeId,
+              transactionIfSentFromStack: args.transactionIfSentFromStack,
+            ),
+            settings: RouteSettings(
+              name: settings.name,
+            ),
+          );
+        }
+        return _routeError("${settings.name} invalid args: ${args.toString()}");
+
+      case EditTradeNoteView.routeName:
+        if (args is ({String tradeId, String note})) {
+          return getRoute(
+            shouldUseMaterialRoute: useMaterialPageRoute,
+            builder: (_) => EditTradeNoteView(
+              tradeId: args.tradeId,
+              note: args.note,
+            ),
+            settings: RouteSettings(
+              name: settings.name,
+            ),
+          );
+        }
+        return _routeError("${settings.name} invalid args: ${args.toString()}");
 
       case GenerateUriQrCodeView.routeName:
         if (args is Tuple2<Coin, String>) {

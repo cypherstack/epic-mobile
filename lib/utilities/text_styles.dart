@@ -155,7 +155,7 @@ class STextStyles {
     }
   }
 
-  static TextStyle titleBold12_400(BuildContext context) {
+  static TextStyle w400_16(BuildContext context) {
     switch (_theme(context).themeType) {
       case ThemeType.light:
         return GoogleFonts.poppins(
@@ -532,6 +532,25 @@ class STextStyles {
       case ThemeType.dark:
         return GoogleFonts.poppins(
           color: _theme(context).textLight,
+          fontWeight: FontWeight.w400,
+          fontSize: 14,
+          height: 21 / 14,
+        );
+    }
+  }
+
+  static TextStyle bodySmallMed(BuildContext context) {
+    switch (_theme(context).themeType) {
+      case ThemeType.light:
+        return GoogleFonts.poppins(
+          color: _theme(context).textMedium,
+          fontWeight: FontWeight.w400,
+          fontSize: 14,
+          height: 21 / 14,
+        );
+      case ThemeType.dark:
+        return GoogleFonts.poppins(
+          color: _theme(context).textMedium,
           fontWeight: FontWeight.w400,
           fontSize: 14,
           height: 21 / 14,
@@ -1097,6 +1116,44 @@ class STextStyles {
           color: _theme(context).textDark,
           fontWeight: FontWeight.w600,
           fontSize: 16,
+        );
+    }
+  }
+
+  static TextStyle error(BuildContext context) {
+    switch (_theme(context).themeType) {
+      case ThemeType.light:
+        return GoogleFonts.poppins(
+          color: _theme(context).textError,
+          fontWeight: FontWeight.w400,
+          fontSize: 10,
+          height: 14 / 10,
+        );
+      case ThemeType.dark:
+        return GoogleFonts.poppins(
+          color: _theme(context).textError,
+          fontWeight: FontWeight.w400,
+          fontSize: 10,
+          height: 14 / 10,
+        );
+    }
+  }
+
+  static TextStyle errorBold(BuildContext context) {
+    switch (_theme(context).themeType) {
+      case ThemeType.light:
+        return GoogleFonts.poppins(
+          color: _theme(context).textError,
+          fontWeight: FontWeight.w600,
+          fontSize: 10,
+          height: 14 / 10,
+        );
+      case ThemeType.dark:
+        return GoogleFonts.poppins(
+          color: _theme(context).textError,
+          fontWeight: FontWeight.w600,
+          fontSize: 10,
+          height: 14 / 10,
         );
     }
   }
