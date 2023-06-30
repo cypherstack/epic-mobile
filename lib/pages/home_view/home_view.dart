@@ -16,6 +16,7 @@ import 'package:epicpay/services/event_bus/events/global/refresh_percent_changed
 import 'package:epicpay/services/event_bus/events/global/wallet_sync_status_changed_event.dart';
 import 'package:epicpay/services/event_bus/global_event_bus.dart';
 import 'package:epicpay/utilities/assets.dart';
+import 'package:epicpay/utilities/constants.dart';
 import 'package:epicpay/utilities/text_styles.dart';
 import 'package:epicpay/utilities/theme/stack_colors.dart';
 import 'package:epicpay/widgets/background.dart';
@@ -116,7 +117,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
         walletId: ref.read(walletProvider)!.walletId,
         coin: ref.read(walletProvider)!.coin,
       ),
-      const ExchangeView(),
+      if (Constants.enableExchange) const ExchangeView(),
     ];
 
     if (ref.read(walletProvider)!.isRefreshing) {
@@ -389,22 +390,23 @@ class _HomeViewState extends ConsumerState<HomeView> {
                       ),
                       label: 'RECEIVE',
                     ),
-                    BottomNavigationBarItem(
-                      icon: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: SvgPicture.asset(Assets.svg.swapArrows),
-                      ),
-                      activeIcon: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: SvgPicture.asset(
-                          Assets.svg.swapArrows,
-                          color: Theme.of(context)
-                              .extension<StackColors>()!
-                              .buttonBackPrimary,
+                    if (Constants.enableExchange)
+                      BottomNavigationBarItem(
+                        icon: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: SvgPicture.asset(Assets.svg.swapArrows),
                         ),
+                        activeIcon: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: SvgPicture.asset(
+                            Assets.svg.swapArrows,
+                            color: Theme.of(context)
+                                .extension<StackColors>()!
+                                .buttonBackPrimary,
+                          ),
+                        ),
+                        label: 'SWAP',
                       ),
-                      label: 'SWAP',
-                    ),
                   ],
                   onTap: (value) => ref
                       .read(homeViewPageIndexStateProvider.state)

@@ -36,7 +36,6 @@ import 'package:epicpay/utilities/theme/dark_colors.dart';
 import 'package:epicpay/utilities/theme/stack_colors.dart';
 import 'package:epicpay/utilities/util.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -156,7 +155,7 @@ class MaterialAppWithTheme extends ConsumerStatefulWidget {
 
 class _MaterialAppWithThemeState extends ConsumerState<MaterialAppWithTheme>
     with WidgetsBindingObserver {
-  static const platform = MethodChannel("STACK_WALLET_RESTORE");
+  // static const platform = MethodChannel("STACK_WALLET_RESTORE");
   final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
   late final Prefs _prefs;
@@ -177,6 +176,10 @@ class _MaterialAppWithThemeState extends ConsumerState<MaterialAppWithTheme>
 
       await DB.instance.init();
       await _prefs.init();
+
+      final familiarity = ref.read(prefsChangeNotifierProvider).familiarity + 1;
+      ref.read(prefsChangeNotifierProvider).familiarity = familiarity;
+      Constants.exchangeForExperiencedUsers(familiarity);
 
       _nodeService = ref.read(nodeServiceChangeNotifierProvider);
 

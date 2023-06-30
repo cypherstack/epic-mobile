@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:epicpay/utilities/enums/coin_enum.dart';
+import 'package:epicpay/utilities/util.dart';
 
 class _LayoutSizing {
   const _LayoutSizing();
@@ -11,6 +14,13 @@ class _LayoutSizing {
 
 abstract class Constants {
   static const size = _LayoutSizing();
+
+  static void exchangeForExperiencedUsers(int count) {
+    enableExchange =
+        Util.isDesktop || Platform.isAndroid || count > 8 || !Platform.isIOS;
+  }
+
+  static bool enableExchange = Util.isDesktop || !Platform.isIOS;
 
   static const int satsPerCoin = 100000000;
   static const int decimalPlaces = 8;

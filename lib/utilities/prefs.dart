@@ -30,6 +30,7 @@ class Prefs extends ChangeNotifier {
       _showTestNetCoins = await _getShowTestNetCoins();
       _hideBlockExplorerWarning = await _getHideBlockExplorerWarning();
       _refreshPeriod = await _getRefreshPeriod();
+      _familiarity = await _getHasFamiliarity();
       await _setAmountUnits();
       await _setMaxDecimals();
 
@@ -52,6 +53,7 @@ class Prefs extends ChangeNotifier {
     _showTestNetCoins = await _getShowTestNetCoins();
     _hideBlockExplorerWarning = await _getHideBlockExplorerWarning();
     _refreshPeriod = await _getRefreshPeriod();
+    _familiarity = await _getHasFamiliarity();
   }
 
   // last timestamp user unlocked wallet
@@ -432,5 +434,26 @@ class Prefs extends ChangeNotifier {
       // use some sane max rather than up to 30 that nano uses
       _amountDecimals[coin] = decimals;
     }
+  }
+
+  // familiarity
+
+  int _familiarity = 0;
+
+  int get familiarity => _familiarity;
+
+  set familiarity(int familiarity) {
+    if (_familiarity != familiarity) {
+      DB.instance.put<dynamic>(
+          boxName: DB.boxNamePrefs, key: "familiarity", value: familiarity);
+      _familiarity = familiarity;
+      notifyListeners();
+    }
+  }
+
+  Future<int> _getHasFamiliarity() async {
+    return await DB.instance.get<dynamic>(
+            boxName: DB.boxNamePrefs, key: "familiarity") as int? ??
+        0;
   }
 }
