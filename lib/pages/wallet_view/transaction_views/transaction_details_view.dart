@@ -100,7 +100,7 @@ class _TransactionDetailsViewState
   Widget whatIsIt(String type) {
     Color color;
     String label;
-
+    print("THIS TRANSACTION IS $_transaction");
     if (_transaction.isCancelled) {
       color = Theme.of(context).extension<StackColors>()!.accentColorRed;
       label = "Cancelled";

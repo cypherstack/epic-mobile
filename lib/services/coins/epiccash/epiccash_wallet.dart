@@ -149,6 +149,7 @@ Future<void> executeNative(Map<String, dynamic> arguments) async {
       final secretKeyIndex = arguments['secretKeyIndex'] as int?;
       final epicboxConfig = arguments['epicboxConfig'] as String?;
       final minimumConfirmations = arguments['minimumConfirmations'] as int?;
+      final note = arguments['note'] as String?;
 
       Map<String, dynamic> result = {};
       if (!(wallet == null ||
@@ -158,7 +159,7 @@ Future<void> executeNative(Map<String, dynamic> arguments) async {
           epicboxConfig == null ||
           minimumConfirmations == null)) {
         var res = await createTransaction(wallet, amount, address,
-            secretKeyIndex, epicboxConfig, minimumConfirmations);
+            secretKeyIndex, epicboxConfig, minimumConfirmations, note!);
         result['result'] = res;
         sendPort.send(result);
         return;
@@ -555,6 +556,7 @@ class EpicCashWallet extends CoinServiceAPI {
       // TODO determine whether it is worth sending change to a change address.
       dynamic message;
       String receiverAddress = txData['addresss'] as String;
+      print("TX DATA FOR SENDING IS $txData");
 
       if (!receiverAddress.startsWith("http://") ||
           !receiverAddress.startsWith("https://")) {
@@ -595,6 +597,7 @@ class EpicCashWallet extends CoinServiceAPI {
             "secretKeyIndex": 0,
             "epicboxConfig": epicboxConfig.toString(),
             "minimumConfirmations": MINIMUM_CONFIRMATIONS,
+            "note": txData['note']
           }, name: walletName);
 
           message = await receivePort.first;
