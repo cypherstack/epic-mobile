@@ -156,9 +156,9 @@ class TransactionAdapter extends TypeAdapter<Transaction> {
       ..writeByte(18)
       ..write(obj.slateId)
       ..writeByte(19)
-      ..write(obj.otherData),
+      ..write(obj.otherData)
       ..writeByte(20)
-      ..write(obj.numberOfMessages),
+      ..write(obj.numberOfMessages)
       ..writeByte(21)
       ..write(obj.onChainNote);
   }
