@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export SCRIPTS=$(pwd)
+
 sudo apt update && sudo apt upgrade -y && sudo apt dist-upgrade -y
 mkdir "$HOME/development"
 mkdir "$HOME/projects"
@@ -35,10 +37,11 @@ sudo apt-get install -y unzip automake build-essential file pkg-config git pytho
 sudo apt install -y libc6-dev-i386
 
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh  -s -- -y
+rustup install 1.68
 cargo install cargo-ndk
 rustup target add aarch64-linux-android armv7-linux-androideabi i686-linux-android x86_64-linux-android
 
 # build stack wallet plugins
-cd $EPIC_MOBILE
-cd scripts/android
+cd $SCRIPTS/android
+./install_ndk.sh
 ./build_all.sh
