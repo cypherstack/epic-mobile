@@ -98,7 +98,6 @@ class _TransactionDetailsViewState
   Widget whatIsIt(String type) {
     Color color;
     String label;
-    print("THIS TRANSACTION IS $_transaction");
     if (_transaction.isCancelled) {
       color = Theme.of(context).extension<StackColors>()!.accentColorRed;
       label = "Cancelled";
@@ -375,6 +374,7 @@ class _TransactionDetailsViewState
                                     autocorrect: false,
                                     enableSuggestions: false,
                                     controller: noteController,
+                                    readOnly: true,
                                     onChanged: (value) {
                                       ref
                                           .read(
@@ -403,7 +403,7 @@ class _TransactionDetailsViewState
                                       focusedErrorBorder: InputBorder.none,
                                       // border: InputBorder.none,
                                       isCollapsed: true,
-                                      hintText: "Type something...",
+                                      hintText: "${_transaction.note}",
                                       hintStyle:
                                           STextStyles.body(context).copyWith(
                                         color: Theme.of(context)
