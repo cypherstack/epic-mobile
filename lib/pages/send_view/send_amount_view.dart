@@ -562,6 +562,7 @@ class _SendAmountViewState extends ConsumerState<SendAmountView> {
                                 Expanded(
                                   child: TextField(
                                     autocorrect: true,
+                                    maxLength: 256,
                                     enableSuggestions: true,
                                     controller: noteController,
                                     focusNode: _noteFocusNode,

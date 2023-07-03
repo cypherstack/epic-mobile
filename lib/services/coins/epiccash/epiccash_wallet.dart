@@ -556,7 +556,6 @@ class EpicCashWallet extends CoinServiceAPI {
       // TODO determine whether it is worth sending change to a change address.
       dynamic message;
       String receiverAddress = txData['addresss'] as String;
-      print("TX DATA FOR SENDING IS $txData");
 
       if (!receiverAddress.startsWith("http://") ||
           !receiverAddress.startsWith("https://")) {
@@ -575,7 +574,7 @@ class EpicCashWallet extends CoinServiceAPI {
             "wallet": wallet!,
             "selectionStrategyIsAll": selectionStrategyIsAll,
             "minimumConfirmations": MINIMUM_CONFIRMATIONS,
-            "message": "",
+            "message": txData['note'],
             "amount": txData['recipientAmt'],
             "address": txData['addresss']
           }, name: walletName);
@@ -1818,10 +1817,6 @@ class EpicCashWallet extends CoinServiceAPI {
     // return message;
     final String transactions = message['result'] as String;
     final jsonTransactions = json.decode(transactions) as List;
-    // for (var el in jsonTransactions) {
-    //   Logging.instance.log("gettran: $el",
-    //       normalLength: false, addToDebugMessagesDB: true);
-    // }
 
     final priceData =
         await _priceAPI.getPricesAnd24hChange(baseCurrency: _prefs.currency);
@@ -1868,6 +1863,8 @@ class EpicCashWallet extends CoinServiceAPI {
       DateTime dt = DateTime.parse(tx["creation_ts"] as String);
 
       tx['numberOfMessages'] = tx['messages']?['messages']?.length;
+      tx['note'] = tx['messages']?['messages']?[0]?['message'];
+
 
       Map<String, dynamic> midSortedTx = {};
       midSortedTx["txType"] = (tx["tx_type"] == "TxReceived" ||
@@ -1918,10 +1915,12 @@ class EpicCashWallet extends CoinServiceAPI {
       midSortedTx["key_id"] = tx["parent_key_id"];
       midSortedTx["otherData"] = tx["id"].toString();
       midSortedTx["numberOfMessages"] = tx["numberOfMessages"];
+      midSortedTx["note"] = tx['note'];
 
       if (txHeight >= latestTxnBlockHeight) {
         latestTxnBlockHeight = txHeight;
       }
+
 
       midSortedArray.add(midSortedTx);
       cachedMap?.remove(tx["id"].toString());
