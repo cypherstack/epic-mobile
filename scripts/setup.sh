@@ -18,10 +18,10 @@ echo 'export PATH="$PATH:'${FLUTTER_DIR}'"' >> ~/.bashrc
 source ~/.bashrc
 flutter doctor
 
-# setup stack_wallet github
+# setup epic-mobile github
 cd $PROJECTS
-git clone https://github.com/cypherstack/stack_wallet.git
-cd stack_wallet
+git clone https://github.com/cypherstack/epic-mobile.git
+cd epic-mobile
 export EPIC_MOBILE=$(pwd)
 git submodule update --init --recursive
 
