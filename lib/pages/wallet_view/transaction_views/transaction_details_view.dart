@@ -405,7 +405,7 @@ class _TransactionDetailsViewState
                                       focusedErrorBorder: InputBorder.none,
                                       // border: InputBorder.none,
                                       isCollapsed: true,
-                                      hintText: "${_transaction.note}",
+                                      hintText: "${_transaction.onChainNote}",
                                       hintStyle:
                                           STextStyles.body(context).copyWith(
                                         color: Theme.of(context)
