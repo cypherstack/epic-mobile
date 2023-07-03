@@ -24,13 +24,13 @@ The following prerequisities can be installed with the setup script `scripts/set
 - Android setup ([Android Studio](https://developer.android.com/studio) and subsequent dependencies)
 
 ### Scripted setup
-[`scripts/setup.sh`](https://github.com/cypherstack/stack_wallet/blob/main/scripts/setup.sh) is provided as a tool to set up a stock Ubuntu 20.04 installation for building: download the script and run it anywhere.  This script should skip the entire [Manual setup](#manual-setup) section below and prepare you for [running](#running).  It will set up the stack_wallet repository in `~/projects/stack_wallet` and build it there. 
+[`scripts/setup.sh`](https://github.com/cypherstack/epic-mobile/blob/main/scripts/setup.sh) is provided as a tool to set up a stock Ubuntu 20.04 installation for building: download the script and run it anywhere.  This script should skip the entire [Manual setup](#manual-setup) section below and prepare you for [running](#running).
 
 ### Manual setup
 After installing the prerequisites listed above, download the code and init the submodules
 ```
-git clone https://github.com/cypherstack/stack_wallet.git
-cd stack_wallet
+git clone https://github.com/cypherstack/epic-mobile.git
+cd epic-mobile
 git submodule update --init --recursive
 ```
 
