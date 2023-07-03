@@ -18,12 +18,12 @@ echo 'export PATH="$PATH:'${FLUTTER_DIR}'"' >> ~/.bashrc
 source ~/.bashrc
 flutter doctor
 
-# setup epic-mobile github
-cd $PROJECTS
-git clone https://github.com/cypherstack/epic-mobile.git
-cd epic-mobile
-export EPIC_MOBILE=$(pwd)
-git submodule update --init --recursive
+# # setup epic-mobile github
+# cd $PROJECTS
+# git clone https://github.com/cypherstack/epic-mobile.git
+# cd epic-mobile
+# export EPIC_MOBILE=$(pwd)
+# git submodule update --init --recursive
 
 #install stack wallet dependencies
 sudo apt-get install -y unzip automake build-essential file pkg-config git python libtool libtinfo5 cmake openjdk-8-jre-headless libgit2-dev clang libncurses5-dev libncursesw5-dev zlib1g-dev llvm 
