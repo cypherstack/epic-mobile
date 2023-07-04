@@ -299,7 +299,7 @@ class _TransactionDetailsViewState
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
       noteController.text = await ref
           .read(notesServiceChangeNotifierProvider(walletId))
-          .getNoteFor(txid: _transaction.txid);
+          .getNoteFor(txid: _transaction.slateId!);
     });
     isSent = _transaction.txType.toLowerCase() == "sent";
     divCount = isSent ? 9 : 7;
