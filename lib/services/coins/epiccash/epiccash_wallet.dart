@@ -148,7 +148,7 @@ Future<void> executeNative(Map<String, dynamic> arguments) async {
       final secretKeyIndex = arguments['secretKeyIndex'] as int?;
       final epicboxConfig = arguments['epicboxConfig'] as String?;
       final minimumConfirmations = arguments['minimumConfirmations'] as int?;
-      final note = arguments['note'] as String?;
+      final note = arguments['message'] as String?;
 
       Map<String, dynamic> result = {};
       if (!(wallet == null ||
@@ -573,7 +573,7 @@ class EpicCashWallet extends CoinServiceAPI {
             "wallet": wallet!,
             "selectionStrategyIsAll": selectionStrategyIsAll,
             "minimumConfirmations": MINIMUM_CONFIRMATIONS,
-            "message": txData['note'],
+            "message": txData['onChainNote'],
             "amount": txData['recipientAmt'],
             "address": txData['addresss']
           }, name: walletName);
@@ -595,7 +595,7 @@ class EpicCashWallet extends CoinServiceAPI {
             "secretKeyIndex": 0,
             "epicboxConfig": epicboxConfig.toString(),
             "minimumConfirmations": MINIMUM_CONFIRMATIONS,
-            "note": txData['note']
+            "message": txData['onChainNote']
           }, name: walletName);
 
           message = await receivePort.first;
@@ -606,6 +606,7 @@ class EpicCashWallet extends CoinServiceAPI {
             throw Exception("createTransaction isolate failed");
           }
           stop(receivePort);
+
           Logging.instance.log('Closing createTransaction!\n  $message',
               level: LogLevel.Info);
         }
