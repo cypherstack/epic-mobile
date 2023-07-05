@@ -168,6 +168,8 @@ class Transaction {
   // @HiveField(19)
   final int?
       numberOfMessages; // null means old type of tx in hive, otherwise an int value represent the number of messages present
+  // @HiveField(20)
+  final String? onChainNote;
 
   Transaction({
     required this.txid,
@@ -191,6 +193,7 @@ class Transaction {
     this.slateId,
     this.otherData,
     this.numberOfMessages,
+    this.onChainNote,
   });
 
   factory Transaction.fromJson(Map<String, dynamic> json) {
@@ -204,6 +207,8 @@ class Transaction {
         .map((output) =>
             Output.fromJson(Map<String, dynamic>.from(output as Map)))
         .toList();
+
+    print("THIS TRANSACTION JSON IS $json}");
 
     return Transaction(
       txid: json['txid'] as String,
@@ -227,6 +232,7 @@ class Transaction {
       slateId: json["slateId"] as String?,
       otherData: json["otherData"] as String?,
       numberOfMessages: json["numberOfMessages"] as int?,
+      onChainNote: json["note"] as String?,
     );
   }
 
@@ -258,6 +264,7 @@ class Transaction {
       confirmations: json["confirmations"] as int? ?? 0,
       otherData: json["otherData"] as String?,
       numberOfMessages: json["numberOfMessages"] as int?,
+      onChainNote: json["note"] as String?,
     );
   }
 
@@ -285,6 +292,7 @@ class Transaction {
     String? slateId,
     String? otherData,
     int? numberOfMessages,
+    String? onChainNote,
   }) {
     return Transaction(
       txid: txid ?? this.txid,
@@ -309,13 +317,14 @@ class Transaction {
       slateId: slateId ?? this.slateId,
       otherData: otherData ?? this.otherData,
       numberOfMessages: numberOfMessages ?? this.numberOfMessages,
+      onChainNote: onChainNote ?? this.onChainNote,
     );
   }
 
   @override
   String toString() {
     String transaction =
-        "{txid: $txid, type: $txType, subType: $subType, value: $amount, fee: $fees, height: $height, confirm: $confirmedStatus, isCancelled: $isCancelled, confirmations: $confirmations, address: $address, timestamp: $timestamp, worthNow: $worthNow, inputs: $inputs, slateid: $slateId, numberOfMessages: $numberOfMessages }";
+        "{txid: $txid, type: $txType, subType: $subType, value: $amount, fee: $fees, height: $height, confirm: $confirmedStatus, isCancelled: $isCancelled, confirmations: $confirmations, address: $address, timestamp: $timestamp, worthNow: $worthNow, inputs: $inputs, slateid: $slateId, numberOfMessages: $numberOfMessages, note: $onChainNote }";
     return transaction;
   }
 }

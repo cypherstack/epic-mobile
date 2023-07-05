@@ -60,11 +60,13 @@ class _SendAmountViewState extends ConsumerState<SendAmountView> {
   late TextEditingController sendToController;
   late TextEditingController cryptoAmountController;
   late TextEditingController baseAmountController;
-  late TextEditingController noteController;
+  late TextEditingController onChainNoteController;
+  late TextEditingController localNoteController;
   late TextEditingController feeController;
 
   final _addressFocusNode = FocusNode();
-  final _noteFocusNode = FocusNode();
+  final _onChainNoteFocusNode = FocusNode();
+  final _appNoteFocusNode = FocusNode();
   final _cryptoFocus = FocusNode();
   final _baseFocus = FocusNode();
 
@@ -109,7 +111,7 @@ class _SendAmountViewState extends ConsumerState<SendAmountView> {
           divHeight = _getInRange(clampInput);
           screenDiff = clampInput - divHeight;
           screenDiff = screenDiff! * divCount;
-          screenDiff = screenDiff! - ((divHeight == minDivHeight) ? 5 : 16);
+          screenDiff = screenDiff! - ((divHeight == minDivHeight) ? 6 : 16);
         }
       }
 
@@ -364,7 +366,8 @@ class _SendAmountViewState extends ConsumerState<SendAmountView> {
         sendingState = SendingState.sending;
       });
 
-      txData["note"] = noteController.text;
+      txData["onChainNote"] = onChainNoteController.text;
+      txData["localNote"] = localNoteController.text;
       txData["address"] = address;
 
       final txid = await ref.read(walletProvider)!.confirmSend(txData: txData);
@@ -373,10 +376,10 @@ class _SendAmountViewState extends ConsumerState<SendAmountView> {
         ref.read(walletProvider)!.refresh(),
       );
 
-      // save note
+      // save local note (TX ID IS THE SLATE ID)
       await ref
           .read(notesServiceChangeNotifierProvider(walletId))
-          .editOrAddNote(txid: txid, note: noteController.text);
+          .editOrAddNote(txid: txid, note: localNoteController.text);
 
       setState(() {
         sendingState = SendingState.sent;
@@ -443,7 +446,8 @@ class _SendAmountViewState extends ConsumerState<SendAmountView> {
     sendToController = TextEditingController();
     cryptoAmountController = TextEditingController();
     baseAmountController = TextEditingController();
-    noteController = TextEditingController();
+    onChainNoteController = TextEditingController();
+    localNoteController = TextEditingController();
     feeController = TextEditingController();
 
     onCryptoAmountChanged = _cryptoAmountChanged;
@@ -485,7 +489,7 @@ class _SendAmountViewState extends ConsumerState<SendAmountView> {
       }
     });
 
-    divCount = 5;
+    divCount = 6;
     _setSize();
     super.initState();
   }
@@ -497,10 +501,11 @@ class _SendAmountViewState extends ConsumerState<SendAmountView> {
     sendToController.dispose();
     cryptoAmountController.dispose();
     baseAmountController.dispose();
-    noteController.dispose();
+    onChainNoteController.dispose();
+    localNoteController.dispose();
     feeController.dispose();
 
-    _noteFocusNode.dispose();
+    _onChainNoteFocusNode.dispose();
     _addressFocusNode.dispose();
     _cryptoFocus.dispose();
     _baseFocus.dispose();
@@ -554,7 +559,7 @@ class _SendAmountViewState extends ConsumerState<SendAmountView> {
                           _Divider(height: divHeight),
                           SendAmountItemBase(
                             title: Text(
-                              "NOTE (OPTIONAL)",
+                              "ONCHAIN NOTE (OPTIONAL)",
                               style: STextStyles.overLineBold(context),
                             ),
                             body: Row(
@@ -562,9 +567,10 @@ class _SendAmountViewState extends ConsumerState<SendAmountView> {
                                 Expanded(
                                   child: TextField(
                                     autocorrect: true,
+                                    maxLength: 256,
                                     enableSuggestions: true,
-                                    controller: noteController,
-                                    focusNode: _noteFocusNode,
+                                    controller: onChainNoteController,
+                                    focusNode: _onChainNoteFocusNode,
                                     style: STextStyles.body(context),
                                     onChanged: (_) => setState(() {}),
                                     decoration: InputDecoration(
@@ -585,7 +591,7 @@ class _SendAmountViewState extends ConsumerState<SendAmountView> {
                                     ),
                                   ),
                                 ),
-                                if (noteController.text.isNotEmpty)
+                                if (onChainNoteController.text.isNotEmpty)
                                   TextFieldIconButton(
                                     height: 20,
                                     width: 20,
@@ -595,7 +601,59 @@ class _SendAmountViewState extends ConsumerState<SendAmountView> {
                                     ),
                                     onTap: () async {
                                       setState(() {
-                                        noteController.text = "";
+                                        onChainNoteController.text = "";
+                                      });
+                                    },
+                                  ),
+                              ],
+                            ),
+                          ),
+                          _Divider(height: divHeight),
+                          SendAmountItemBase(
+                            title: Text(
+                              "LOCAL NOTE (OPTIONAL)",
+                              style: STextStyles.overLineBold(context),
+                            ),
+                            body: Row(
+                              children: [
+                                Expanded(
+                                  child: TextField(
+                                    autocorrect: true,
+                                    maxLength: 256,
+                                    enableSuggestions: true,
+                                    controller: localNoteController,
+                                    focusNode: _appNoteFocusNode,
+                                    style: STextStyles.body(context),
+                                    onChanged: (_) => setState(() {}),
+                                    decoration: InputDecoration(
+                                      contentPadding: const EdgeInsets.all(0),
+                                      hintText: "Type something...",
+                                      hintStyle:
+                                      STextStyles.body(context).copyWith(
+                                        color: Theme.of(context)
+                                            .extension<StackColors>()!
+                                            .textDark,
+                                      ),
+                                      fillColor: Theme.of(context)
+                                          .extension<StackColors>()!
+                                          .background,
+                                      enabledBorder: InputBorder.none,
+                                      focusedBorder: InputBorder.none,
+                                      isCollapsed: true,
+                                    ),
+                                  ),
+                                ),
+                                if (localNoteController.text.isNotEmpty)
+                                  TextFieldIconButton(
+                                    height: 20,
+                                    width: 20,
+                                    child: const XIcon(
+                                      width: 16,
+                                      height: 16,
+                                    ),
+                                    onTap: () async {
+                                      setState(() {
+                                        localNoteController.text = "";
                                       });
                                     },
                                   ),

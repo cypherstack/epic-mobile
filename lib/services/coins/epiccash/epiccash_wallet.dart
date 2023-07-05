@@ -148,6 +148,7 @@ Future<void> executeNative(Map<String, dynamic> arguments) async {
       final secretKeyIndex = arguments['secretKeyIndex'] as int?;
       final epicboxConfig = arguments['epicboxConfig'] as String?;
       final minimumConfirmations = arguments['minimumConfirmations'] as int?;
+      final note = arguments['message'] as String?;
 
       Map<String, dynamic> result = {};
       if (!(wallet == null ||
@@ -157,7 +158,7 @@ Future<void> executeNative(Map<String, dynamic> arguments) async {
           epicboxConfig == null ||
           minimumConfirmations == null)) {
         var res = await createTransaction(wallet, amount, address,
-            secretKeyIndex, epicboxConfig, minimumConfirmations);
+            secretKeyIndex, epicboxConfig, minimumConfirmations, note!);
         result['result'] = res;
         sendPort.send(result);
         return;
@@ -572,7 +573,7 @@ class EpicCashWallet extends CoinServiceAPI {
             "wallet": wallet!,
             "selectionStrategyIsAll": selectionStrategyIsAll,
             "minimumConfirmations": MINIMUM_CONFIRMATIONS,
-            "message": "",
+            "message": txData['onChainNote'],
             "amount": txData['recipientAmt'],
             "address": txData['addresss']
           }, name: walletName);
@@ -594,6 +595,7 @@ class EpicCashWallet extends CoinServiceAPI {
             "secretKeyIndex": 0,
             "epicboxConfig": epicboxConfig.toString(),
             "minimumConfirmations": MINIMUM_CONFIRMATIONS,
+            "message": txData['onChainNote']
           }, name: walletName);
 
           message = await receivePort.first;
@@ -604,6 +606,7 @@ class EpicCashWallet extends CoinServiceAPI {
             throw Exception("createTransaction isolate failed");
           }
           stop(receivePort);
+
           Logging.instance.log('Closing createTransaction!\n  $message',
               level: LogLevel.Info);
         }
@@ -1839,10 +1842,6 @@ class EpicCashWallet extends CoinServiceAPI {
     // return message;
     final String transactions = message['result'] as String;
     final jsonTransactions = json.decode(transactions) as List;
-    // for (var el in jsonTransactions) {
-    //   Logging.instance.log("gettran: $el",
-    //       normalLength: false, addToDebugMessagesDB: true);
-    // }
 
     final priceData =
         await _priceAPI.getPricesAnd24hChange(baseCurrency: _prefs.currency);
@@ -1889,6 +1888,8 @@ class EpicCashWallet extends CoinServiceAPI {
       DateTime dt = DateTime.parse(tx["creation_ts"] as String);
 
       tx['numberOfMessages'] = tx['messages']?['messages']?.length;
+      tx['note'] = tx['messages']?['messages']?[0]?['message'];
+
 
       Map<String, dynamic> midSortedTx = {};
       midSortedTx["txType"] = (tx["tx_type"] == "TxReceived" ||
@@ -1939,10 +1940,12 @@ class EpicCashWallet extends CoinServiceAPI {
       midSortedTx["key_id"] = tx["parent_key_id"];
       midSortedTx["otherData"] = tx["id"].toString();
       midSortedTx["numberOfMessages"] = tx["numberOfMessages"];
+      midSortedTx["note"] = tx['note'];
 
       if (txHeight >= latestTxnBlockHeight) {
         latestTxnBlockHeight = txHeight;
       }
+
 
       midSortedArray.add(midSortedTx);
       cachedMap?.remove(tx["id"].toString());

@@ -108,13 +108,15 @@ class TransactionAdapter extends TypeAdapter<Transaction> {
       isCancelled: fields[17] as bool,
       slateId: fields[18] as String?,
       otherData: fields[19] as String?,
+      numberOfMessages: fields[20] as int?,
+      onChainNote: fields[21] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, Transaction obj) {
     writer
-      ..writeByte(20)
+      ..writeByte(22)
       ..writeByte(0)
       ..write(obj.txid)
       ..writeByte(1)
@@ -154,7 +156,11 @@ class TransactionAdapter extends TypeAdapter<Transaction> {
       ..writeByte(18)
       ..write(obj.slateId)
       ..writeByte(19)
-      ..write(obj.otherData);
+      ..write(obj.otherData)
+      ..writeByte(20)
+      ..write(obj.numberOfMessages)
+      ..writeByte(21)
+      ..write(obj.onChainNote);
   }
 
   @override

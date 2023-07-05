@@ -98,7 +98,6 @@ class _TransactionDetailsViewState
   Widget whatIsIt(String type) {
     Color color;
     String label;
-
     if (_transaction.isCancelled) {
       color = Theme.of(context).extension<StackColors>()!.accentColorRed;
       label = "Cancelled";
@@ -298,10 +297,10 @@ class _TransactionDetailsViewState
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
       noteController.text = await ref
           .read(notesServiceChangeNotifierProvider(walletId))
-          .getNoteFor(txid: _transaction.txid);
+          .getNoteFor(txid: _transaction.slateId!);
     });
     isSent = _transaction.txType.toLowerCase() == "sent";
-    divCount = isSent ? 8 : 6;
+    divCount = isSent ? 9 : 7;
     _setSize();
     super.initState();
   }
@@ -315,7 +314,6 @@ class _TransactionDetailsViewState
   @override
   Widget build(BuildContext context) {
     final scaleFactor = MediaQuery.of(context).textScaleFactor * 0.85;
-
     return Background(
       child: Scaffold(
         backgroundColor: Theme.of(context).extension<StackColors>()!.background,
@@ -366,9 +364,16 @@ class _TransactionDetailsViewState
                                 _Divider(
                                   height: divHeight,
                                 ),
+                                TXDetailsItem(
+                                  title: "ONCHAIN NOTE",
+                                  info: _transaction.onChainNote?? "",
+                                ),
+                                _Divider(
+                                  height: divHeight,
+                                ),
                                 TXDetailsItemBase(
                                   title: Text(
-                                    "NOTE",
+                                    "LOCAL NOTE",
                                     style: STextStyles.overLineBold(context),
                                   ),
                                   body: TextField(
@@ -378,12 +383,12 @@ class _TransactionDetailsViewState
                                     onChanged: (value) {
                                       ref
                                           .read(
-                                              notesServiceChangeNotifierProvider(
-                                                  walletId))
+                                          notesServiceChangeNotifierProvider(
+                                              walletId))
                                           .editOrAddNote(
-                                            txid: _transaction.txid,
-                                            note: value,
-                                          );
+                                        txid: _transaction.slateId!,
+                                        note: value,
+                                      );
                                     },
                                     style: STextStyles.body(context),
                                     textAlignVertical: TextAlignVertical.center,
@@ -392,7 +397,7 @@ class _TransactionDetailsViewState
                                       fillColor: Colors.transparent,
                                       filled: true,
                                       contentPadding:
-                                          const EdgeInsets.symmetric(
+                                      const EdgeInsets.symmetric(
                                         vertical: 0,
                                         horizontal: 0,
                                       ),
@@ -405,7 +410,7 @@ class _TransactionDetailsViewState
                                       isCollapsed: true,
                                       hintText: "Type something...",
                                       hintStyle:
-                                          STextStyles.body(context).copyWith(
+                                      STextStyles.body(context).copyWith(
                                         color: Theme.of(context)
                                             .extension<StackColors>()!
                                             .textDark,
