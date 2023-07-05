@@ -314,7 +314,6 @@ class _TransactionDetailsViewState
   @override
   Widget build(BuildContext context) {
     final scaleFactor = MediaQuery.of(context).textScaleFactor * 0.85;
-
     return Background(
       child: Scaffold(
         backgroundColor: Theme.of(context).extension<StackColors>()!.background,
@@ -367,7 +366,7 @@ class _TransactionDetailsViewState
                                 ),
                                 TXDetailsItem(
                                   title: "ONCHAIN NOTE",
-                                  info: _transaction.onChainNote!,
+                                  info: _transaction.onChainNote?? "",
                                 ),
                                 _Divider(
                                   height: divHeight,
