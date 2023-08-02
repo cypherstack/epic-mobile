@@ -520,8 +520,7 @@ class _TransactionDetailsViewState
                                 const SizedBox(
                                   height: 16,
                                 ),
-                                if (isSent &&
-                                    _transaction.confirmedStatus == false &&
+                                if (_transaction.confirmedStatus == false &&
                                     _transaction.isCancelled == false)
                                   TextButton(
                                     style: ButtonStyle(
