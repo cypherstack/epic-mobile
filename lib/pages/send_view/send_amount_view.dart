@@ -394,7 +394,7 @@ class _SendAmountViewState extends ConsumerState<SendAmountView> {
           ),
         );
         // ensure return to wallet view
-        ref.read(homeViewPageIndexStateProvider.state).state = 1;
+        ref.read(homeViewPageIndexStateProvider.state).state = 0;
       }
       sendingState = SendingState.waiting;
     } catch (e) {
@@ -629,7 +629,7 @@ class _SendAmountViewState extends ConsumerState<SendAmountView> {
                                       contentPadding: const EdgeInsets.all(0),
                                       hintText: "Type something...",
                                       hintStyle:
-                                      STextStyles.body(context).copyWith(
+                                          STextStyles.body(context).copyWith(
                                         color: Theme.of(context)
                                             .extension<StackColors>()!
                                             .textDark,
