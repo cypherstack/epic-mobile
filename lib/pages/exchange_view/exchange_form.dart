@@ -591,7 +591,7 @@ class _ExchangeFormState extends ConsumerState<ExchangeForm> {
       ref
           .read(pSwapDataService)
           .getAggregateCurrency(
-            dummyEpic,
+            dummyBTC,
             SupportedRateType.estimated,
             null,
           )
@@ -607,7 +607,7 @@ class _ExchangeFormState extends ConsumerState<ExchangeForm> {
       ref
           .read(pSwapDataService)
           .getAggregateCurrency(
-            dummyBTC,
+            dummyEpic,
             SupportedRateType.estimated,
             null,
           )
