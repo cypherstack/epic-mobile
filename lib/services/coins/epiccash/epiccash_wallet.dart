@@ -581,7 +581,7 @@ class EpicCashWallet extends CoinServiceAPI {
           message = await receivePort.first;
           if (message is String) {
             stop(receivePort);
-            throw Exception("txHttpSend isolate failed");
+            throw Exception(message);
           }
           stop(receivePort);
           Logging.instance
@@ -1890,7 +1890,6 @@ class EpicCashWallet extends CoinServiceAPI {
       tx['numberOfMessages'] = tx['messages']?['messages']?.length;
       tx['note'] = tx['messages']?['messages']?[0]?['message'];
 
-
       Map<String, dynamic> midSortedTx = {};
       midSortedTx["txType"] = (tx["tx_type"] == "TxReceived" ||
               tx["tx_type"] == "TxReceivedCancelled")
@@ -1945,7 +1944,6 @@ class EpicCashWallet extends CoinServiceAPI {
       if (txHeight >= latestTxnBlockHeight) {
         latestTxnBlockHeight = txHeight;
       }
-
 
       midSortedArray.add(midSortedTx);
       cachedMap?.remove(tx["id"].toString());
