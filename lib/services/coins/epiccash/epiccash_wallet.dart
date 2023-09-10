@@ -766,24 +766,8 @@ class EpicCashWallet extends CoinServiceAPI {
           key: "lastScannedBlock",
           value: await getRestoreHeight());
 
-      if (!await startScans()) {
-        refreshMutex = false;
-        GlobalEventBus.instance.fire(
-          NodeConnectionStatusChangedEvent(
-            NodeConnectionStatus.disconnected,
-            walletId,
-            coin,
-          ),
-        );
-        GlobalEventBus.instance.fire(
-          WalletSyncStatusChangedEvent(
-            WalletSyncStatus.unableToSync,
-            walletId,
-            coin,
-          ),
-        );
-        return;
-      }
+      await _startScans();
+
       GlobalEventBus.instance.fire(
         WalletSyncStatusChangedEvent(
           WalletSyncStatus.synced,
@@ -792,12 +776,23 @@ class EpicCashWallet extends CoinServiceAPI {
         ),
       );
     } catch (e, s) {
+      GlobalEventBus.instance.fire(
+        WalletSyncStatusChangedEvent(
+          WalletSyncStatus.unableToSync,
+          walletId,
+          coin,
+        ),
+      );
+
+      Logging.instance.log(
+        "Exception rethrown from fullRescan(): $e\n$s",
+        level: LogLevel.Error,
+        printFullLength: true,
+      );
+      rethrow;
+    } finally {
       refreshMutex = false;
-      Logging.instance
-          .log("$e, $s", level: LogLevel.Error, printFullLength: true);
     }
-    refreshMutex = false;
-    return;
   }
 
   @override
@@ -1243,7 +1238,7 @@ class EpicCashWallet extends CoinServiceAPI {
     return config!;
   }
 
-  Future<bool> startScans() async {
+  Future<void> _startScans() async {
     try {
       //First stop the current listener
       if (ListenerManager.pointer != null) {
@@ -1255,64 +1250,92 @@ class EpicCashWallet extends CoinServiceAPI {
       }
       final wallet = await _secureStore.read(key: '${_walletId}_wallet');
 
-      var restoreHeight =
-          DB.instance.get<dynamic>(boxName: walletId, key: "restoreHeight");
-      var chainHeight = await this.chainHeight;
-      if (!DB.instance.containsKey<dynamic>(
-              boxName: walletId, key: 'lastScannedBlock') ||
-          DB.instance
-                  .get<dynamic>(boxName: walletId, key: 'lastScannedBlock') ==
-              null) {
-        await DB.instance.put<dynamic>(
-            boxName: walletId,
-            key: "lastScannedBlock",
-            value: await getRestoreHeight());
-      }
-      int lastScannedBlock = DB.instance
-          .get<dynamic>(boxName: walletId, key: 'lastScannedBlock') as int;
-      const MAX_PER_LOOP = 10000;
-      await getSyncPercent;
-      for (; lastScannedBlock < chainHeight;) {
-        chainHeight = await this.chainHeight;
-        lastScannedBlock = DB.instance
-            .get<dynamic>(boxName: walletId, key: 'lastScannedBlock') as int;
-        Logging.instance.log(
-            "chainHeight: $chainHeight, restoreHeight: $restoreHeight, lastScannedBlock: $lastScannedBlock",
-            level: LogLevel.Info);
-        int? nextScannedBlock;
-        await m.protect(() async {
-          ReceivePort receivePort = await getIsolate({
-            "function": "scanOutPuts",
-            "wallet": wallet!,
-            "startHeight": lastScannedBlock,
-            "numberOfBlocks": MAX_PER_LOOP,
-          }, name: walletName);
+      // max number of blocks to scan per loop iteration
+      const scanChunkSize = 10000;
 
-          var message = await receivePort.first;
-          if (message is String) {
-            Logging.instance
-                .log("this is a string $message", level: LogLevel.Error);
-            stop(receivePort);
-            throw Exception("scanOutPuts isolate failed");
-          }
-          nextScannedBlock = int.parse(message['outputs'] as String);
-          stop(receivePort);
-          Logging.instance
-              .log('Closing scanOutPuts!\n  $message', level: LogLevel.Info);
-        });
-        await DB.instance.put<dynamic>(
+      // force firing of scan progress event
+      await getSyncPercent;
+
+      // fetch current chain height and last scanned block (should be the
+      // restore height if full rescan or a wallet restore)
+      int chainHeight = await this.chainHeight;
+      int lastScannedBlock = DB.instance.get<dynamic>(
             boxName: walletId,
-            key: "lastScannedBlock",
-            value: nextScannedBlock!);
+            key: 'lastScannedBlock',
+          ) as int? ??
+          await getRestoreHeight();
+
+      // loop while scanning in chain in chunks (of blocks?)
+      while (lastScannedBlock < chainHeight) {
+        Logging.instance.log(
+          "chainHeight: $chainHeight, lastScannedBlock: $lastScannedBlock",
+          level: LogLevel.Info,
+        );
+
+        final int nextScannedBlock = await m.protect(() async {
+          ReceivePort? receivePort;
+          try {
+            receivePort = await getIsolate({
+              "function": "scanOutPuts",
+              "wallet": wallet!,
+              "startHeight": lastScannedBlock,
+              "numberOfBlocks": scanChunkSize,
+            }, name: walletName);
+
+            // get response
+            final message = await receivePort.first;
+
+            // check for error message
+            if (message is String) {
+              throw Exception("scanOutPuts isolate failed: $message");
+            }
+
+            // attempt to grab next scanned block number
+            final nextScanned = int.tryParse(message['outputs'] as String);
+            if (nextScanned == null) {
+              throw Exception(
+                "scanOutPuts failed to parse next scanned block number from: $message",
+              );
+            }
+
+            return nextScanned;
+          } catch (_) {
+            rethrow;
+          } finally {
+            if (receivePort != null) {
+              // kill isolate
+              stop(receivePort);
+            }
+          }
+        });
+
+        // update local cache
+        await DB.instance.put<dynamic>(
+          boxName: walletId,
+          key: "lastScannedBlock",
+          value: nextScannedBlock,
+        );
+
+        // force firing of scan progress event
         await getSyncPercent;
+
+        // update while loop condition variables
+        chainHeight = await this.chainHeight;
+        lastScannedBlock = nextScannedBlock;
       }
-      Logging.instance.log("successfully at the tip", level: LogLevel.Info);
+
+      Logging.instance.log(
+        "_startScans successfully at the tip",
+        level: LogLevel.Info,
+      );
       //Once scanner completes restart listener
       await listenToEpicbox();
-      return true;
     } catch (e, s) {
-      Logging.instance.log("$e, $s", level: LogLevel.Warning);
-      return false;
+      Logging.instance.log(
+        "_startScans failed: $e\n$s",
+        level: LogLevel.Error,
+      );
+      rethrow;
     }
   }
 
@@ -1422,13 +1445,10 @@ class EpicCashWallet extends CoinServiceAPI {
   }
 
   Future<int> getRestoreHeight() async {
-    if (DB.instance
-        .containsKey<dynamic>(boxName: walletId, key: "restoreHeight")) {
-      return (DB.instance.get<dynamic>(boxName: walletId, key: "restoreHeight"))
-          as int;
-    }
-    return (DB.instance.get<dynamic>(boxName: walletId, key: "creationHeight"))
-        as int;
+    return DB.instance.get<dynamic>(boxName: walletId, key: "restoreHeight")
+            as int? ??
+        DB.instance.get<dynamic>(boxName: walletId, key: "creationHeight")
+            as int;
   }
 
   Future<int> get chainHeight async {
@@ -1618,26 +1638,9 @@ class EpicCashWallet extends CoinServiceAPI {
             boxName: walletId, key: "creationHeight", value: await chainHeight);
       }
 
-      if (!await startScans()) {
-        refreshMutex = false;
-        _isConnected = false;
-        GlobalEventBus.instance.fire(
-          NodeConnectionStatusChangedEvent(
-            NodeConnectionStatus.disconnected,
-            walletId,
-            coin,
-          ),
-        );
-        GlobalEventBus.instance.fire(
-          WalletSyncStatusChangedEvent(
-            WalletSyncStatus.unableToSync,
-            walletId,
-            coin,
-          ),
-        );
-        return;
-      }
+      await _startScans();
 
+      // TODO: Is this supposed to be awaited????
       startSync();
 
       GlobalEventBus.instance.fire(RefreshPercentChangedEvent(0.0, walletId));
@@ -1890,7 +1893,6 @@ class EpicCashWallet extends CoinServiceAPI {
       tx['numberOfMessages'] = tx['messages']?['messages']?.length;
       tx['note'] = tx['messages']?['messages']?[0]?['message'];
 
-
       Map<String, dynamic> midSortedTx = {};
       midSortedTx["txType"] = (tx["tx_type"] == "TxReceived" ||
               tx["tx_type"] == "TxReceivedCancelled")
@@ -1945,7 +1947,6 @@ class EpicCashWallet extends CoinServiceAPI {
       if (txHeight >= latestTxnBlockHeight) {
         latestTxnBlockHeight = txHeight;
       }
-
 
       midSortedArray.add(midSortedTx);
       cachedMap?.remove(tx["id"].toString());
