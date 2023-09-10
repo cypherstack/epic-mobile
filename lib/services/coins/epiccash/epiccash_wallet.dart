@@ -1851,28 +1851,14 @@ class EpicCashWallet extends CoinServiceAPI {
     Decimal currentPrice = priceData[coin]?.item1 ?? Decimal.zero;
     final List<Map<String, dynamic>> midSortedArray = [];
 
-    int latestTxnBlockHeight =
-        DB.instance.get<dynamic>(boxName: walletId, key: "storedTxnDataHeight")
-                as int? ??
-            0;
     final slatesToCommits = await getSlatesToCommits();
-    final cachedTransactions =
-        DB.instance.get<dynamic>(boxName: walletId, key: 'latest_tx_model')
-            as TransactionData?;
-    var cachedMap = cachedTransactions?.getAllTransactions();
+
     for (var tx in jsonTransactions) {
       Logging.instance.log("tx: $tx", level: LogLevel.Info);
       final txHeight = tx["kernel_lookup_min_height"] as int? ?? 0;
       // TODO: does "confirmed" mean finalized? If so please remove this todo
       final isConfirmed = tx["confirmed"] as bool;
-      // TODO: since we are now caching tx history in hive are we losing anything by skipping here?
-      // TODO: we can skip this filtering if it causes issues as the cache is later merged with updated data anyways
-      // this would just make processing and updating cache more efficient
-      if (txHeight > 0 &&
-          txHeight < latestTxnBlockHeight - MINIMUM_CONFIRMATIONS &&
-          isConfirmed) {
-        continue;
-      }
+
       // Logging.instance.log("Transactions listed below");
       // Logging.instance.log(jsonTransactions);
       int amt = 0;
@@ -1944,14 +1930,7 @@ class EpicCashWallet extends CoinServiceAPI {
       midSortedTx["numberOfMessages"] = tx["numberOfMessages"];
       midSortedTx["note"] = tx['note'];
 
-      if (txHeight >= latestTxnBlockHeight) {
-        latestTxnBlockHeight = txHeight;
-      }
-
       midSortedArray.add(midSortedTx);
-      cachedMap?.remove(tx["id"].toString());
-      cachedMap?.remove(commitId);
-      Logging.instance.log("cmap: $cachedMap", level: LogLevel.Info);
     }
 
     midSortedArray
@@ -1990,16 +1969,9 @@ class EpicCashWallet extends CoinServiceAPI {
     }
     final transactionsMap =
         TransactionData.fromJson(result).getAllTransactions();
-    if (cachedMap != null) {
-      transactionsMap.addAll(cachedMap);
-    }
 
     final txModel = TransactionData.fromMap(transactionsMap);
 
-    await DB.instance.put<dynamic>(
-        boxName: walletId,
-        key: 'storedTxnDataHeight',
-        value: latestTxnBlockHeight);
     await DB.instance.put<dynamic>(
         boxName: walletId, key: 'latest_tx_model', value: txModel);
 
