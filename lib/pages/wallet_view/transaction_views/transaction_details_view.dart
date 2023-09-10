@@ -366,7 +366,7 @@ class _TransactionDetailsViewState
                                 ),
                                 TXDetailsItem(
                                   title: "ONCHAIN NOTE",
-                                  info: _transaction.onChainNote?? "",
+                                  info: _transaction.onChainNote ?? "",
                                 ),
                                 _Divider(
                                   height: divHeight,
@@ -383,12 +383,12 @@ class _TransactionDetailsViewState
                                     onChanged: (value) {
                                       ref
                                           .read(
-                                          notesServiceChangeNotifierProvider(
-                                              walletId))
+                                              notesServiceChangeNotifierProvider(
+                                                  walletId))
                                           .editOrAddNote(
-                                        txid: _transaction.slateId!,
-                                        note: value,
-                                      );
+                                            txid: _transaction.slateId!,
+                                            note: value,
+                                          );
                                     },
                                     style: STextStyles.body(context),
                                     textAlignVertical: TextAlignVertical.center,
@@ -397,7 +397,7 @@ class _TransactionDetailsViewState
                                       fillColor: Colors.transparent,
                                       filled: true,
                                       contentPadding:
-                                      const EdgeInsets.symmetric(
+                                          const EdgeInsets.symmetric(
                                         vertical: 0,
                                         horizontal: 0,
                                       ),
@@ -410,7 +410,7 @@ class _TransactionDetailsViewState
                                       isCollapsed: true,
                                       hintText: "Type something...",
                                       hintStyle:
-                                      STextStyles.body(context).copyWith(
+                                          STextStyles.body(context).copyWith(
                                         color: Theme.of(context)
                                             .extension<StackColors>()!
                                             .textDark,
@@ -520,7 +520,8 @@ class _TransactionDetailsViewState
                                 const SizedBox(
                                   height: 16,
                                 ),
-                                if (_transaction.confirmedStatus == false &&
+                                if (isSent &&
+                                    _transaction.confirmedStatus == false &&
                                     _transaction.isCancelled == false)
                                   TextButton(
                                     style: ButtonStyle(
