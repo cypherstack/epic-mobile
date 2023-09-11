@@ -521,7 +521,7 @@ class _TransactionDetailsViewState
                                   height: 16,
                                 ),
                                 if (isSent &&
-                                    _transaction.confirmedStatus == false &&
+                                    _transaction.confirmations < 1 &&
                                     _transaction.isCancelled == false)
                                   TextButton(
                                     style: ButtonStyle(
