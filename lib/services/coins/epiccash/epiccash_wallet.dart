@@ -34,6 +34,7 @@ import 'package:epicpay/utilities/prefs.dart';
 import 'package:epicpay/utilities/test_epic_node_connection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_libepiccash/epic_cash.dart';
+import 'package:flutter_libepiccash/models/transaction.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hive/hive.dart';
 import 'package:http/http.dart';
@@ -42,6 +43,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:stack_wallet_backup/generate_password.dart';
 import 'package:tuple/tuple.dart';
 import 'package:websocket_universal/websocket_universal.dart';
+import 'package:flutter_libepiccash/lib.dart' as epiccash;
 
 const int MINIMUM_CONFIRMATIONS = 3;
 
@@ -276,20 +278,6 @@ Future<String> _initGetAddressInfoWrapper(
 Future<String> _walletMnemonicWrapper(int throwaway) async {
   final String mnemonic = walletMnemonic();
   return mnemonic;
-}
-
-Future<String> _recoverWrapper(
-    Tuple4<String, String, String, String> data) async {
-  return recoverWallet(data.item1, data.item2, data.item3, data.item4);
-}
-
-Future<int> _getChainHeightWrapper(String config) async {
-  try {
-    final int chainHeight = getChainHeight(config);
-    return chainHeight;
-  } catch (_) {
-    rethrow;
-  }
 }
 
 class EpicCashWallet extends CoinServiceAPI {
@@ -1384,14 +1372,11 @@ class EpicCashWallet extends CoinServiceAPI {
       await _secureStore.write(
           key: '${_walletId}_epicboxConfig', value: epicboxConfig.toString());
 
-      await compute(
-        _recoverWrapper,
-        Tuple4(
-          stringConfig,
-          password,
-          mnemonic,
-          name,
-        ),
+      await epiccash.LibEpiccash.recoverWallet(
+        config: stringConfig,
+        password: password,
+        mnemonic: mnemonic,
+        name: name,
       );
 
       await DB.instance
@@ -1453,18 +1438,8 @@ class EpicCashWallet extends CoinServiceAPI {
 
   Future<int> get chainHeight async {
     final config = await getRealConfig();
-    int? latestHeight;
-    try {
-      await m.protect(() async {
-        latestHeight = await compute(
-          _getChainHeightWrapper,
-          config,
-        );
-      });
-    } catch (e, s) {
-      Logging.instance.log("$e $s", level: LogLevel.Error);
-    }
-    return latestHeight!;
+    int? latestHeight = await epiccash.LibEpiccash.getChainHeight(config: config);
+    return latestHeight;
   }
 
   int get storedChainHeight {
@@ -1510,28 +1485,6 @@ class EpicCashWallet extends CoinServiceAPI {
       Logging.instance.log("$e $s", level: LogLevel.Error);
       return 0;
     }
-  }
-
-  Future<Map<dynamic, dynamic>> removeBadAndRepeats(
-      Map<dynamic, dynamic> pendingAndProcessedSlates) async {
-    var clone = <dynamic, Map<dynamic, dynamic>>{};
-    for (var indexPair in pendingAndProcessedSlates.entries) {
-      clone[indexPair.key] = <dynamic, dynamic>{};
-      for (var pendingProcessed
-          in (indexPair.value as Map<dynamic, dynamic>).entries) {
-        if (pendingProcessed.value is String &&
-                (pendingProcessed.value as String)
-                    .contains("has already been received") ||
-            (pendingProcessed.value as String)
-                .contains("Error Wallet store error: DB Not Found Error")) {
-        } else if (pendingProcessed.value is String &&
-            pendingProcessed.value as String == "[]") {
-        } else {
-          clone[indexPair.key]?[pendingProcessed.key] = pendingProcessed.value;
-        }
-      }
-    }
-    return clone;
   }
 
   Future<Map<dynamic, dynamic>> getSlatesToCommits() async {
@@ -1823,28 +1776,31 @@ class EpicCashWallet extends CoinServiceAPI {
     final wallet = await _secureStore.read(key: '${_walletId}_wallet');
     const refreshFromNode = 0;
 
-    dynamic message;
-    await m.protect(() async {
-      ReceivePort receivePort = await getIsolate({
-        "function": "getTransactions",
-        "wallet": wallet!,
-        "refreshFromNode": refreshFromNode,
-      }, name: walletName);
-
-      message = await receivePort.first;
-      if (message is String) {
-        Logging.instance
-            .log("this is a string $message", level: LogLevel.Error);
-        stop(receivePort);
-        throw Exception("getTransactions isolate failed");
-      }
-      stop(receivePort);
-      Logging.instance
-          .log('Closing getTransactions!\n $message', level: LogLevel.Info);
-    });
+    // dynamic message;
+    // await m.protect(() async {
+    //   ReceivePort receivePort = await getIsolate({
+    //     "function": "getTransactions",
+    //     "wallet": wallet!,
+    //     "refreshFromNode": refreshFromNode,
+    //   }, name: walletName);
+    //
+    //   message = await receivePort.first;
+    //   if (message is String) {
+    //     Logging.instance
+    //         .log("this is a string $message", level: LogLevel.Error);
+    //     stop(receivePort);
+    //     throw Exception("getTransactions isolate failed");
+    //   }
+    //   stop(receivePort);
+    //   Logging.instance
+    //       .log('Closing getTransactions!\n $message', level: LogLevel.Info);
+    // });
     // return message;
-    final String transactions = message['result'] as String;
-    final jsonTransactions = json.decode(transactions) as List;
+    // final String transactions = message['result'] as String;
+    // final jsonTransactions = json.decode(transactions) as List;
+
+    var transactions = await epiccash.LibEpiccash.getTransactions(
+        wallet: wallet!, refreshFromNode: refreshFromNode);
 
     final priceData =
         await _priceAPI.getPricesAnd24hChange(baseCurrency: _prefs.currency);
@@ -1853,60 +1809,59 @@ class EpicCashWallet extends CoinServiceAPI {
 
     final slatesToCommits = await getSlatesToCommits();
 
-    for (var tx in jsonTransactions) {
+    for (var tx in transactions) {
       Logging.instance.log("tx: $tx", level: LogLevel.Info);
-      final txHeight = tx["kernel_lookup_min_height"] as int? ?? 0;
+      final txHeight = tx.kernelLookupMinHeight ?? 0;
       // TODO: does "confirmed" mean finalized? If so please remove this todo
-      final isConfirmed = tx["confirmed"] as bool;
+      final isConfirmed = tx.confirmed;
 
       // Logging.instance.log("Transactions listed below");
       // Logging.instance.log(jsonTransactions);
       int amt = 0;
-      if (tx["tx_type"] == "TxReceived" ||
-          tx["tx_type"] == "TxReceivedCancelled") {
-        amt = int.parse(tx['amount_credited'] as String);
+      if (tx.txType == TransactionType.TxReceived ||
+          tx.txType == TransactionType.TxReceivedCancelled) {
+        amt = int.parse(tx.amountCredited);
       } else {
-        int debit = int.parse(tx['amount_debited'] as String);
-        int credit = int.parse(tx['amount_credited'] as String);
-        int fee = int.parse((tx['fee'] ?? "0") as String);
+        int debit = int.parse(tx.amountDebited);
+        int credit = int.parse(tx.amountCredited);
+        int fee = int.parse((tx.fee ?? "0"));
         amt = debit - credit - fee;
       }
       final String worthNow =
           (currentPrice * Decimal.parse(amt.toString())).toStringAsFixed(2);
 
-      DateTime dt = DateTime.parse(tx["creation_ts"] as String);
+      DateTime dt = DateTime.parse(tx.creationTs);
 
-      tx['numberOfMessages'] = tx['messages']?['messages']?.length;
-      tx['note'] = tx['messages']?['messages']?[0]?['message'];
+      int? numberOfMessages = tx.messages?.messages.length;
+      String? onChainNote = tx.messages?.messages[0].message;
 
       Map<String, dynamic> midSortedTx = {};
-      midSortedTx["txType"] = (tx["tx_type"] == "TxReceived" ||
-              tx["tx_type"] == "TxReceivedCancelled")
+      midSortedTx["txType"] = (tx.txType == TransactionType.TxReceived ||
+              tx.txType == TransactionType.TxReceivedCancelled)
           ? "Received"
           : "Sent";
-      String? slateId = tx['tx_slate_id'] as String?;
+      String? slateId = tx.txSlateId;
       String? address = slatesToCommits[slateId]
                   ?[midSortedTx["txType"] == "TxReceived" ? "from" : "to"]
               as String? ??
           "";
       String? commitId = slatesToCommits[slateId]?['commitId'] as String?;
       Logging.instance.log(
-          "commitId: $commitId, slateId: $slateId, id: ${tx["id"]}",
+          "commitId: $commitId, slateId: $slateId, id: ${tx.id}",
           level: LogLevel.Info);
 
-      bool isCancelled = tx["tx_type"] == "TxSentCancelled" ||
-          tx["tx_type"] == "TxReceivedCancelled";
+      bool isCancelled = tx.txType == TransactionType.TxSentCancelled ||
+          tx.txType == TransactionType.TxReceivedCancelled;
 
       midSortedTx["slateId"] = slateId;
       midSortedTx["isCancelled"] = isCancelled;
-      midSortedTx["txid"] = commitId ?? tx["id"].toString();
+      midSortedTx["txid"] = commitId ?? tx.id.toString();
       midSortedTx["confirmed_status"] = isConfirmed;
       midSortedTx["timestamp"] = (dt.millisecondsSinceEpoch ~/ 1000);
       midSortedTx["amount"] = amt;
       midSortedTx["worthNow"] = worthNow;
       midSortedTx["worthAtBlockTimestamp"] = worthNow;
-      midSortedTx["fees"] =
-          (tx["fee"] == null) ? 0 : int.parse(tx["fee"] as String);
+      midSortedTx["fees"] = (tx.fee == "null") ? 0 : int.parse(tx.fee!);
       midSortedTx["address"] =
           ""; // for this when you send a transaction you will just need to save in a hashmap in hive with the key being the txid, and the value being the address it was sent to. then you can look this value up right here in your hashmap.
       midSortedTx["address"] = address;
@@ -1919,16 +1874,16 @@ class EpicCashWallet extends CoinServiceAPI {
       }
       midSortedTx["confirmations"] = confirmations;
 
-      midSortedTx["inputSize"] = tx["num_inputs"];
-      midSortedTx["outputSize"] = tx["num_outputs"];
+      midSortedTx["inputSize"] = tx.numOutputs;
+      midSortedTx["outputSize"] = tx.numOutputs;
       midSortedTx["aliens"] = <dynamic>[];
       midSortedTx["inputs"] = <dynamic>[];
       midSortedTx["outputs"] = <dynamic>[];
-      midSortedTx["tx_slate_id"] = tx["tx_slate_id"];
-      midSortedTx["key_id"] = tx["parent_key_id"];
-      midSortedTx["otherData"] = tx["id"].toString();
-      midSortedTx["numberOfMessages"] = tx["numberOfMessages"];
-      midSortedTx["note"] = tx['note'];
+      midSortedTx["tx_slate_id"] = tx.txSlateId;
+      midSortedTx["key_id"] = tx.parentKeyId;
+      midSortedTx["otherData"] = tx.id.toString();
+      midSortedTx["numberOfMessages"] = numberOfMessages;
+      midSortedTx["note"] = onChainNote;
 
       midSortedArray.add(midSortedTx);
     }
