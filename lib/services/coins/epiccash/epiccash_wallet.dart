@@ -49,22 +49,6 @@ const int MINIMUM_CONFIRMATIONS = 3;
 
 const String GENESIS_HASH_MAINNET = "";
 const String GENESIS_HASH_TESTNET = "";
-
-class BadEpicHttpAddressException implements Exception {
-  final String? message;
-
-  BadEpicHttpAddressException({this.message});
-
-  @override
-  String toString() {
-    return "BadEpicHttpAddressException: $message";
-  }
-}
-
-abstract class ListenerManager {
-  static Pointer<Void>? pointer;
-}
-
 // isolate
 
 Map<ReceivePort, Isolate> isolates = {};
@@ -86,98 +70,6 @@ Future<void> executeNative(Map<String, dynamic> arguments) async {
   final SendPort sendPort = arguments['sendPort'] as SendPort;
   final function = arguments['function'] as String;
   try {
-    if (function == "getWalletInfo") {
-      final wallet = arguments['wallet'] as String?;
-      final refreshFromNode = arguments['refreshFromNode'] as int?;
-      final minimumConfirmations = arguments['minimumConfirmations'] as int?;
-      Map<String, dynamic> result = {};
-      if (!(wallet == null ||
-          refreshFromNode == null ||
-          minimumConfirmations == null)) {
-        var res =
-            await getWalletInfo(wallet, refreshFromNode, minimumConfirmations);
-        result['result'] = res;
-        sendPort.send(result);
-        return;
-      }
-    } else if (function == "getTransactions") {
-      final wallet = arguments['wallet'] as String?;
-      final refreshFromNode = arguments['refreshFromNode'] as int?;
-      Map<String, dynamic> result = {};
-      if (!(wallet == null || refreshFromNode == null)) {
-        var res = await getTransactions(wallet, refreshFromNode);
-        result['result'] = res;
-        sendPort.send(result);
-        return;
-      }
-    } else if (function == "startSync") {
-      final wallet = arguments['wallet'] as String?;
-      const int refreshFromNode = 1;
-      Map<String, dynamic> result = {};
-      if (!(wallet == null)) {
-        var res = await getWalletInfo(wallet, refreshFromNode, 10);
-        result['result'] = res;
-        sendPort.send(result);
-        return;
-      }
-    } else if (function == "getTransactionFees") {
-      final wallet = arguments['wallet'] as String?;
-      final amount = arguments['amount'] as int?;
-      final minimumConfirmations = arguments['minimumConfirmations'] as int?;
-      Map<String, dynamic> result = {};
-      if (!(wallet == null || amount == null || minimumConfirmations == null)) {
-        var res =
-            await getTransactionFees(wallet, amount, minimumConfirmations);
-        result['result'] = res;
-        sendPort.send(result);
-        return;
-      }
-    } else if (function == "createTransaction") {
-      final wallet = arguments['wallet'] as String?;
-      final amount = arguments['amount'] as int?;
-      final address = arguments['address'] as String?;
-      final secretKeyIndex = arguments['secretKeyIndex'] as int?;
-      final epicboxConfig = arguments['epicboxConfig'] as String?;
-      final minimumConfirmations = arguments['minimumConfirmations'] as int?;
-      final note = arguments['message'] as String?;
-
-      Map<String, dynamic> result = {};
-      if (!(wallet == null ||
-          amount == null ||
-          address == null ||
-          secretKeyIndex == null ||
-          epicboxConfig == null ||
-          minimumConfirmations == null)) {
-        var res = await createTransaction(wallet, amount, address,
-            secretKeyIndex, epicboxConfig, minimumConfirmations, note!);
-        result['result'] = res;
-        sendPort.send(result);
-        return;
-      }
-    } else if (function == "txHttpSend") {
-      final wallet = arguments['wallet'] as String?;
-      final selectionStrategyIsAll =
-          arguments['selectionStrategyIsAll'] as int?;
-      final minimumConfirmations = arguments['minimumConfirmations'] as int?;
-      final message = arguments['message'] as String?;
-      final amount = arguments['amount'] as int?;
-      final address = arguments['address'] as String?;
-
-      Map<String, dynamic> result = {};
-
-      if (!(wallet == null ||
-          selectionStrategyIsAll == null ||
-          minimumConfirmations == null ||
-          message == null ||
-          amount == null ||
-          address == null)) {
-        var res = await txHttpSend(wallet, selectionStrategyIsAll,
-            minimumConfirmations, message, amount, address);
-        result['result'] = res;
-        sendPort.send(result);
-        return;
-      }
-    }
 
     Logging.instance.log(
         "Error Arguments for $function not formatted correctly",
@@ -383,10 +275,9 @@ class EpicCashWallet extends CoinServiceAPI {
 
   @override
   Future<Decimal> get availableBalance async {
-    String walletBalances = (await allWalletBalances()) as String;
-    var jsonBalances = json.decode(walletBalances);
+    var walletBalances = await allWalletBalances();
     final double spendable =
-        jsonBalances['amount_currently_spendable'] as double;
+        walletBalances.spendable;
     return Decimal.parse(spendable.toString());
   }
 
@@ -518,7 +409,6 @@ class EpicCashWallet extends CoinServiceAPI {
 
       if (receiverAddress.startsWith("http://") ||
           receiverAddress.startsWith("https://")) {
-        const int selectionStrategyIsAll = 0;
         transaction = await epiccash.LibEpiccash.txHttpSend(
           wallet: wallet!,
           selectionStrategyIsAll: 0,
@@ -542,37 +432,10 @@ class EpicCashWallet extends CoinServiceAPI {
       Map<String, String> txAddressInfo = {};
       txAddressInfo['from'] = await currentReceivingAddress;
       txAddressInfo['to'] = txData['addresss'] as String;
-      await putSendToAddresses(transaction as String, txAddressInfo);
+      await putSendToAddresses(transaction, txAddressInfo);
 
       slateId = transaction.slateId;
       return slateId;
-
-      // Logging.instance.log("CONFIRM_RESULT_IS $sendTx", level: LogLevel.Info);
-      //
-      // final decodeData = json.decode(sendTx);
-      //
-      // if (decodeData[0] == "transaction_failed") {
-      //   String errorMessage = decodeData[1] as String;
-      //   throw Exception("Transaction failed with error code $errorMessage");
-      // } else {
-      //   final txCreateResult = decodeData[0];
-      //   // //TODO: second problem
-      //   final transaction = json.decode(txCreateResult as String);
-      //
-      //   final tx = transaction[0];
-      //   final txLogEntry = json.decode(tx as String);
-      //   final txLogEntryFirst = txLogEntry[0];
-      //
-      //   final wallet = await Hive.openBox<dynamic>(_walletId);
-      //   final slateToAddresses =
-      //       (await wallet.get("slate_to_address")) as Map? ?? {};
-      //   final slateId = txLogEntryFirst['tx_slate_id'] as String;
-      //   slateToAddresses[slateId] = txData['addresss'];
-      //
-      //   await wallet.put('slate_to_address', slateToAddresses);
-      //   await getSlatesToCommits();
-      //   return txLogEntryFirst['tx_slate_id'] as String;
-      // }
     } catch (e, s) {
       Logging.instance.log("Error sending $e - $s", level: LogLevel.Error);
       rethrow;
@@ -589,12 +452,6 @@ class EpicCashWallet extends CoinServiceAPI {
       boxName: walletId,
       key: "currentReceivingAddress",
     ) as String?;
-
-    // Logging.instance.log(
-    //   "WALLET ADDRESS FROM HIVE IS $walletAddress",
-    //   level: LogLevel.Info,
-    // );
-
     // if address doesn't exist in Hive, fetch from rust and store it
     if (walletAddress == null) {
       await m.protect(() async {
@@ -889,10 +746,9 @@ class EpicCashWallet extends CoinServiceAPI {
 
   @override
   Future<Decimal> get pendingBalance async {
-    String walletBalances = (await allWalletBalances()) as String;
-    final jsonBalances = json.decode(walletBalances);
+    var walletBalances = await allWalletBalances();
     final double pending =
-        jsonBalances['amount_awaiting_confirmation'] as double;
+        walletBalances.awaitingFinalization;
     return Decimal.parse(pending.toString());
   }
 
@@ -929,114 +785,21 @@ class EpicCashWallet extends CoinServiceAPI {
     final wallet = await _secureStore.read(key: '${_walletId}_wallet');
 
     try {
-      String? transactionFees;
-      await m.protect(() async {
-        ReceivePort receivePort = await getIsolate({
-          "function": "getTransactionFees",
-          "wallet": wallet!,
-          "amount": satoshiAmount,
-          "minimumConfirmations": MINIMUM_CONFIRMATIONS,
-        }, name: walletName);
-
-        var message = await receivePort.first;
-        if (message is String) {
-          Logging.instance
-              .log("this is a string $message", level: LogLevel.Error);
-          stop(receivePort);
-          throw Exception("getTransactionFees isolate failed");
-        }
-        stop(receivePort);
-        Logging.instance.log('Closing getTransactionFees!\n  $message',
-            level: LogLevel.Info);
-        // return message;
-        transactionFees = message['result'] as String;
-      });
-      // debugPrint(transactionFees);
-      dynamic decodeData;
-
       final available = await availableBalance;
       final availableSat = Format.decimalAmountToSatoshis(available);
 
-      if (satoshiAmount == availableSat) {
-        if (transactionFees!.contains("Required")) {
-          var splits = transactionFees!.split(" ");
-          Decimal required = Decimal.zero;
-          Decimal available = Decimal.zero;
-          for (int i = 0; i < splits.length; i++) {
-            var word = splits[i];
-            if (word == "Required:") {
-              required = Decimal.parse(splits[i + 1].replaceAll(",", ""));
-            } else if (word == "Available:") {
-              available = Decimal.parse(splits[i + 1].replaceAll(",", ""));
-            }
-          }
-          int largestSatoshiFee =
-              ((required - available) * Decimal.fromInt(100000000))
-                  .toBigInt()
-                  .toInt();
-          var amountSending = satoshiAmount - largestSatoshiFee;
-          //Get fees for this new amount
-
-          await m.protect(() async {
-            ReceivePort receivePort = await getIsolate({
-              "function": "getTransactionFees",
-              "wallet": wallet!,
-              "amount": amountSending,
-              "minimumConfirmations": MINIMUM_CONFIRMATIONS,
-            }, name: walletName);
-
-            var message = await receivePort.first;
-            if (message is String) {
-              Logging.instance
-                  .log("this is a string $message", level: LogLevel.Error);
-              stop(receivePort);
-              throw Exception("getTransactionFees isolate failed");
-            }
-            stop(receivePort);
-            Logging.instance.log('Closing getTransactionFees!\n  $message',
-                level: LogLevel.Info);
-            // return message;
-            transactionFees = message['result'] as String;
-          });
-        }
-        decodeData = json.decode(transactionFees!);
-      } else {
-        try {
-          decodeData = json.decode(transactionFees!);
-        } catch (e) {
-          if (ifErrorEstimateFee) {
-            //Error Not enough funds. Required: 0.56500000, Available: 0.56200000
-            if (transactionFees!.contains("Required")) {
-              var splits = transactionFees!.split(" ");
-              Decimal required = Decimal.zero;
-              Decimal available = Decimal.zero;
-              for (int i = 0; i < splits.length; i++) {
-                var word = splits[i];
-                if (word == "Required:") {
-                  required = Decimal.parse(splits[i + 1].replaceAll(",", ""));
-                } else if (word == "Available:") {
-                  available = Decimal.parse(splits[i + 1].replaceAll(",", ""));
-                }
-              }
-              int largestSatoshiFee =
-                  ((required - available) * Decimal.fromInt(100000000))
-                      .toBigInt()
-                      .toInt();
-              Logging.instance.log("largestSatoshiFee $largestSatoshiFee",
-                  level: LogLevel.Info);
-              return largestSatoshiFee;
-            }
-          }
-          rethrow;
-        }
-      }
+      var transactionFees = await epiccash.LibEpiccash.getTransactionFees(
+        wallet: wallet!,
+        amount: satoshiAmount,
+        minimumConfirmations: MINIMUM_CONFIRMATIONS,
+        available: availableSat,
+      );
 
       //TODO: first problem
       int realfee = 0;
       try {
-        var txObject = decodeData[0];
         realfee =
-            (Decimal.parse(txObject["fee"].toString())).toBigInt().toInt();
+            (Decimal.parse(transactionFees.fee.toString())).toBigInt().toInt();
       } catch (e, s) {
         debugPrint("$e $s");
       }
@@ -1324,9 +1087,8 @@ class EpicCashWallet extends CoinServiceAPI {
     Logging.instance.log("STARTING WALLET LISTENER ....", level: LogLevel.Info);
     final wallet = await _secureStore.read(key: '${_walletId}_wallet');
     EpicBoxConfigModel epicboxConfig = await getEpicBoxConfig();
-
-    ListenerManager.pointer =
-        epicboxListenerStart(wallet!, epicboxConfig.toString());
+    epiccash.LibEpiccash.startEpicboxListener(
+        wallet: wallet!, epicboxConfig: epicboxConfig.toString());
   }
 
   Future<int> getRestoreHeight() async {
@@ -1405,20 +1167,14 @@ class EpicCashWallet extends CoinServiceAPI {
   }
 
   Future<bool> putSendToAddresses(
-      String slateMessage, Map<String, String> txAddressInfo) async {
+      ({String slateId, String commitId}) slateData, Map<String, String> txAddressInfo) async {
     try {
       var slatesToCommits = await getSlatesToCommits();
-      final slate0 = jsonDecode(slateMessage);
-      final slate = jsonDecode(slate0[0] as String);
-      final part1 = jsonDecode(slate[0] as String);
-      final part2 = jsonDecode(slate[1] as String);
-      final slateId = part1[0]['tx_slate_id'];
-      final commitId = part2['tx']['body']['outputs'][0]['commit'];
 
       final from = txAddressInfo['from'];
       final to = txAddressInfo['to'];
-      slatesToCommits[slateId] = {
-        "commitId": commitId,
+      slatesToCommits[slateData.slateId] = {
+        "commitId": slateData.commitId,
         "from": from,
         "to": to,
       };
@@ -1664,10 +1420,9 @@ class EpicCashWallet extends CoinServiceAPI {
 
   @override
   Future<Decimal> get totalBalance async {
-    String walletBalances = (await allWalletBalances()) as String;
-    var jsonBalances = json.decode(walletBalances);
-    double total = jsonBalances['total'] as double;
-    double awaiting = jsonBalances['amount_awaiting_finalization'] as double;
+    var walletBalances = await allWalletBalances();
+    double total = walletBalances.total;
+    double awaiting = walletBalances.awaitingFinalization;
     total = total + awaiting;
     return Decimal.parse(total.toString());
   }
@@ -1676,30 +1431,6 @@ class EpicCashWallet extends CoinServiceAPI {
     final currentChainHeight = await chainHeight;
     final wallet = await _secureStore.read(key: '${_walletId}_wallet');
     const refreshFromNode = 0;
-
-    // dynamic message;
-    // await m.protect(() async {
-    //   ReceivePort receivePort = await getIsolate({
-    //     "function": "getTransactions",
-    //     "wallet": wallet!,
-    //     "refreshFromNode": refreshFromNode,
-    //   }, name: walletName);
-    //
-    //   message = await receivePort.first;
-    //   if (message is String) {
-    //     Logging.instance
-    //         .log("this is a string $message", level: LogLevel.Error);
-    //     stop(receivePort);
-    //     throw Exception("getTransactions isolate failed");
-    //   }
-    //   stop(receivePort);
-    //   Logging.instance
-    //       .log('Closing getTransactions!\n $message', level: LogLevel.Info);
-    // });
-    // return message;
-    // final String transactions = message['result'] as String;
-    // final jsonTransactions = json.decode(transactions) as List;
-
     var transactions = await epiccash.LibEpiccash.getTransactions(
         wallet: wallet!, refreshFromNode: refreshFromNode);
 
