@@ -1185,7 +1185,23 @@ class EpicCashWallet extends CoinServiceAPI {
     EpicBoxServerModel? _epicBox = DB.instance.get<EpicBoxServerModel>(
         boxName: DB.boxNamePrimaryEpicBox, key: 'primary');
 
+    // Make sure that _epicBoxConfig's host is the default.
+    if (_epicBoxConfig.host != DefaultEpicBoxes.defaultEpicBoxServer.host) {
+      _epicBoxConfig = EpicBoxConfigModel.fromServer(
+          DefaultEpicBoxes.defaultEpicBoxServer);
+      await _secureStore.write(
+          key: '${_walletId}_epicboxConfig', value: _epicBoxConfig.toString());
+    }
+
     if (_epicBox != null) {
+      // Make sure that _epicBox's host is the default.
+      if (_epicBox?.host != DefaultEpicBoxes.defaultEpicBoxServer.host) {
+        _epicBox = DefaultEpicBoxes.defaultEpicBoxServer;
+        await DB.instance.put<EpicBoxServerModel>(
+            boxName: DB.boxNamePrimaryEpicBox, key: 'primary', value: _epicBox);
+      }
+
+      // Make sure secure storage matches hive.
       if (_epicBoxConfig.host != _epicBox?.host) {
         _epicBoxConfig = EpicBoxConfigModel.fromServer(_epicBox!);
         await _secureStore.write(
