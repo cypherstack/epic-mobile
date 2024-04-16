@@ -77,9 +77,9 @@ class _WalletEpicBoxSettingsViewState
             ),
           ],
         ),
-        body: SafeArea(
+        body: const SafeArea(
           child: Padding(
-            padding: const EdgeInsets.only(
+            padding: EdgeInsets.only(
               left: 24,
               top: 24,
               bottom: 24,
@@ -89,11 +89,11 @@ class _WalletEpicBoxSettingsViewState
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Padding(
-                    padding: const EdgeInsets.only(right: 24),
+                    padding: EdgeInsets.only(right: 24),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: const [
+                      children: [
                         EpicBoxList(
                           popBackToRoute: EpicBoxSettingsView.routeName,
                         ),

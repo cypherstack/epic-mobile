@@ -457,7 +457,7 @@ class EpicCashWallet extends CoinServiceAPI {
   late PriceAPI _priceAPI;
 
   /// returns an empty String on success, error message on failure
-  Future<String> cancelPendingTransaction(String tx_slate_id) async {
+  Future<String> cancelPendingTransaction(String txSlateId) async {
     final String wallet =
         (await _secureStore.read(key: '${_walletId}_wallet'))!;
 
@@ -467,7 +467,7 @@ class EpicCashWallet extends CoinServiceAPI {
         _cancelTransactionWrapper,
         Tuple2(
           wallet,
-          tx_slate_id,
+          txSlateId,
         ),
       );
     });
@@ -1187,23 +1187,23 @@ class EpicCashWallet extends CoinServiceAPI {
 
     // Make sure that _epicBoxConfig's host is the default.
     if (_epicBoxConfig.host != DefaultEpicBoxes.defaultEpicBoxServer.host) {
-      _epicBoxConfig = EpicBoxConfigModel.fromServer(
-          DefaultEpicBoxes.defaultEpicBoxServer);
+      _epicBoxConfig =
+          EpicBoxConfigModel.fromServer(DefaultEpicBoxes.defaultEpicBoxServer);
       await _secureStore.write(
           key: '${_walletId}_epicboxConfig', value: _epicBoxConfig.toString());
     }
 
     if (_epicBox != null) {
       // Make sure that _epicBox's host is the default.
-      if (_epicBox?.host != DefaultEpicBoxes.defaultEpicBoxServer.host) {
+      if (_epicBox.host != DefaultEpicBoxes.defaultEpicBoxServer.host) {
         _epicBox = DefaultEpicBoxes.defaultEpicBoxServer;
         await DB.instance.put<EpicBoxServerModel>(
             boxName: DB.boxNamePrimaryEpicBox, key: 'primary', value: _epicBox);
       }
 
       // Make sure secure storage matches hive.
-      if (_epicBoxConfig.host != _epicBox?.host) {
-        _epicBoxConfig = EpicBoxConfigModel.fromServer(_epicBox!);
+      if (_epicBoxConfig.host != _epicBox.host) {
+        _epicBoxConfig = EpicBoxConfigModel.fromServer(_epicBox);
         await _secureStore.write(
             key: '${_walletId}_epicboxConfig',
             value: _epicBoxConfig.toString());
@@ -1222,7 +1222,7 @@ class EpicCashWallet extends CoinServiceAPI {
           level: LogLevel.Error,
         );
       }
-    } catch (e, s) {
+    } catch (e) {
       rethrow;
     }
 
@@ -1657,7 +1657,8 @@ class EpicCashWallet extends CoinServiceAPI {
       await _startScans();
 
       // TODO: Is this supposed to be awaited????
-      startSync();
+      // (wrapped in unawaited()) for now
+      unawaited(startSync());
 
       GlobalEventBus.instance.fire(RefreshPercentChangedEvent(0.0, walletId));
 

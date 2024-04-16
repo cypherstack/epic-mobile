@@ -347,11 +347,6 @@ class _AddEditEpicBoxViewState extends ConsumerState<AddEditEpicBoxView>
   }
 
   @override
-  void dispose() {
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final EpicBoxServerModel? epicBox =
         viewType == AddEditEpicBoxViewType.edit && epicBoxId != null
