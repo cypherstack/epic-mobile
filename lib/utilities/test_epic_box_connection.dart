@@ -1,68 +1,30 @@
-import 'package:epicpay/pages/settings_views/epicbox_settings_view/manage_epicbox_views/add_edit_epicbox_view.dart';
 import 'package:epicpay/utilities/logger.dart';
-import 'package:websocket_universal/websocket_universal.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
 
 Future<bool> _testEpicBoxConnection(String host, int port) async {
+  WebSocketChannel? channel;
   try {
-    final websocketConnectionUri = 'wss://$host:$port';
-    const connectionOptions = SocketConnectionOptions(
-      pingIntervalMs: 3000,
-      timeoutConnectionMs: 4000,
+    final uri = Uri.parse('wss://$host:$port');
 
-      /// see ping/pong messages in [logEventStream] stream
-      skipPingMessages: true,
-
-      /// Set this attribute to `true` if do not need any ping/pong
-      /// messages and ping measurement. Default is `false`
-      pingRestrictionForce: true,
+    channel = WebSocketChannel.connect(
+      uri,
     );
 
-    final IMessageProcessor<String, String> textSocketProcessor =
-        SocketSimpleTextProcessor();
-    final textSocketHandler = IWebSocketHandler<String, String>.createClient(
-      websocketConnectionUri,
-      textSocketProcessor,
-      connectionOptions: connectionOptions,
+    await channel.ready;
+
+    final response = await channel.stream.first.timeout(
+      const Duration(seconds: 2),
     );
 
-    // Listening to webSocket status changes
-    // textSocketHandler.socketHandlerStateStream.listen((stateEvent) {
-    //   debugPrint('> status changed to ${stateEvent.status}');
-    // });
-
-    // Listening to server responses:
-    bool isConnected = true;
-    textSocketHandler.incomingMessagesStream.listen((inMsg) {
-      Logging.instance.log(
-          'Epic Box server test webSocket message from server: "$inMsg"',
-          level: LogLevel.Info);
-
-      if (inMsg.contains("Challenge")) {
-        // Successful response, close socket
-        Logging.instance
-            .log('Epic Box server test succeeded', level: LogLevel.Info);
-
-        // Disconnect from server:
-        textSocketHandler.disconnect('manual disconnect');
-        // Disposing webSocket:
-        textSocketHandler.close();
-      } /* else if(inMsg.contains("InvalidRequest")) {
-        // Handle when many InvalidRequest responses occur
-      }*/
-    });
-
-    // Connecting to server:
-    final isTextSocketConnected = await textSocketHandler.connect();
-    if (!isTextSocketConnected) {
-      Logging.instance.log(
-          'Epic Box server test failed: "$host":"$port" unable to connect',
-          level: LogLevel.Warning);
-      isConnected = false;
-    }
-    return isConnected;
-  } catch (e, s) {
-    Logging.instance.log("$e\n$s", level: LogLevel.Warning);
+    return response is String && response.contains("Challenge");
+  } catch (_) {
+    Logging.instance.log(
+      "_testEpicBoxConnection failed on \"$host:$port\"",
+      level: LogLevel.Info,
+    );
     return false;
+  } finally {
+    await channel?.sink.close();
   }
 }
 
@@ -82,5 +44,16 @@ Future<EpicBoxFormData?> testEpicBoxConnection(EpicBoxFormData data) async {
   } catch (e, s) {
     Logging.instance.log("$e\n$s", level: LogLevel.Warning);
     return null;
+  }
+}
+
+class EpicBoxFormData {
+  String? name, host, login, password;
+  int? port;
+  bool? useSSL, isFailover;
+
+  @override
+  String toString() {
+    return "{ name: $name, host: $host, port: $port, useSSL: $useSSL }";
   }
 }

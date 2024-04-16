@@ -486,17 +486,6 @@ class _AddEditEpicBoxViewState extends ConsumerState<AddEditEpicBoxView>
   }
 }
 
-class EpicBoxFormData {
-  String? name, host, login, password;
-  int? port;
-  bool? useSSL, isFailover;
-
-  @override
-  String toString() {
-    return "{ name: $name, host: $host, port: $port, useSSL: $useSSL }";
-  }
-}
-
 final epicBoxFormDataProvider =
     Provider<EpicBoxFormData>((_) => EpicBoxFormData());
 

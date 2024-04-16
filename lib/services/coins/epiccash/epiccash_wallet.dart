@@ -30,6 +30,7 @@ import 'package:epicpay/utilities/flutter_secure_storage_interface.dart';
 import 'package:epicpay/utilities/format.dart';
 import 'package:epicpay/utilities/logger.dart';
 import 'package:epicpay/utilities/prefs.dart';
+import 'package:epicpay/utilities/test_epic_box_connection.dart';
 import 'package:epicpay/utilities/test_epic_node_connection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_libepiccash/epic_cash.dart';
@@ -40,7 +41,6 @@ import 'package:mutex/mutex.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:stack_wallet_backup/generate_password.dart';
 import 'package:tuple/tuple.dart';
-import 'package:websocket_universal/websocket_universal.dart';
 
 const int MINIMUM_CONFIRMATIONS = 3;
 
@@ -474,65 +474,19 @@ class EpicCashWallet extends CoinServiceAPI {
   }
 
   Future<bool> testEpicboxServer(String host, int port) async {
-    final websocketConnectionUri = 'wss://$host:$port';
-    const connectionOptions = SocketConnectionOptions(
-      pingIntervalMs: 3000,
-      timeoutConnectionMs: 4000,
-
-      /// see ping/pong messages in [logEventStream] stream
-      skipPingMessages: true,
-
-      /// Set this attribute to `true` if do not need any ping/pong
-      /// messages and ping measurement. Default is `false`
-      pingRestrictionForce: true,
+    final data = await testEpicBoxConnection(
+      EpicBoxFormData()
+        ..host = host
+        ..port = port,
     );
 
-    final IMessageProcessor<String, String> textSocketProcessor =
-        SocketSimpleTextProcessor();
-    final textSocketHandler = IWebSocketHandler<String, String>.createClient(
-      websocketConnectionUri,
-      textSocketProcessor,
-      connectionOptions: connectionOptions,
-    );
+    // if the data is not null, then the connection test succeeded
+    _isEpicBoxConnected = data != null;
 
-    // Listening to server responses:
-    bool isConnected = true;
-    textSocketHandler.incomingMessagesStream.listen((inMsg) {
-      Logging.instance.log(
-          'Epic Box server test webSocket message from server $host:$port: "$inMsg"',
-          level: LogLevel.Info);
-
-      if (inMsg.contains("Challenge")) {
-        // Successful response, close socket
-        Logging.instance.log('Epic Box server $host:$port test succeeded',
-            level: LogLevel.Info);
-
-        _isEpicBoxConnected = isConnected;
-        GlobalEventBus.instance.fire(
-          EpicBoxStatusChangedEvent(
-            isConnected
-                ? EpicBoxStatus.connected
-                : EpicBoxStatus.unableToConnect,
-            walletId,
-          ),
-        );
-
-        // Disconnect from server:
-        textSocketHandler.disconnect('manual disconnect');
-        // Disposing webSocket:
-        textSocketHandler.close();
-      } /* else if(inMsg.contains("InvalidRequest")) {
-        // Handle when many InvalidRequest responses occur
-      }*/
-    });
-
-    // Connecting to server:
-    final isTextSocketConnected = await textSocketHandler.connect();
-    if (!isTextSocketConnected) {
+    if (!_isEpicBoxConnected) {
       Logging.instance.log(
           'Epic Box server test failed: server $host:$port unable to connect',
           level: LogLevel.Warning);
-      isConnected = false;
       _isEpicBoxConnected = false;
       GlobalEventBus.instance.fire(
         EpicBoxStatusChangedEvent(
@@ -540,9 +494,16 @@ class EpicCashWallet extends CoinServiceAPI {
           walletId,
         ),
       );
+    } else {
+      GlobalEventBus.instance.fire(
+        EpicBoxStatusChangedEvent(
+          isConnected ? EpicBoxStatus.connected : EpicBoxStatus.unableToConnect,
+          walletId,
+        ),
+      );
     }
 
-    return isConnected;
+    return _isEpicBoxConnected;
   }
 
   @override
