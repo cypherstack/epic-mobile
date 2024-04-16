@@ -142,10 +142,12 @@ class _AddEditEpicBoxViewState extends ConsumerState<AddEditEpicBoxView>
         .whenComplete(() => entry.remove());
   }
 
-  Future<EpicBoxFormData?> _testConnection(
-      {bool showNotification = true}) async {
-    final formData =
-        await testEpicBoxConnection(ref.read(epicBoxFormDataProvider));
+  Future<EpicBoxFormData?> _testConnection({
+    bool showNotification = true,
+  }) async {
+    final formData = await testEpicBoxConnection(
+      ref.read(epicBoxFormDataProvider),
+    );
 
     if (showNotification && mounted) {
       unawaited(
