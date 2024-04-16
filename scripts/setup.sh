@@ -12,7 +12,7 @@ sudo apt install -y unzip pkg-config clang cmake ninja-build libgtk-3-dev
 cd $DEVELOPMENT
 git clone https://github.com/flutter/flutter.git
 cd flutter 
-git checkout 3.0.3
+git checkout 3.19.5
 export FLUTTER_DIR=$(pwd)/bin
 echo 'export PATH="$PATH:'${FLUTTER_DIR}'"' >> ~/.bashrc
 source ~/.bashrc
@@ -20,8 +20,8 @@ flutter doctor
 
 # setup stack_wallet github
 cd $PROJECTS
-git clone https://github.com/cypherstack/stack_wallet.git
-cd stack_wallet
+git clone https://github.com/cypherstack/epic-mobile.git
+cd epic-mobile
 export EPIC_MOBILE=$(pwd)
 git submodule update --init --recursive
 
