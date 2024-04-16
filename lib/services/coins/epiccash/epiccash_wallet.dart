@@ -6,7 +6,6 @@ import 'dart:isolate';
 
 import 'package:decimal/decimal.dart';
 import 'package:epicpay/db/hive/db.dart';
-import 'package:epicpay/models/epicbox_config_model.dart';
 import 'package:epicpay/models/epicbox_server_model.dart';
 import 'package:epicpay/models/node_model.dart';
 import 'package:epicpay/models/paymint/fee_object_model.dart';
@@ -549,7 +548,7 @@ class EpicCashWallet extends CoinServiceAPI {
   @override
   Future<String> confirmSend({required Map<String, dynamic> txData}) async {
     try {
-      EpicBoxConfigModel epicboxConfig = await getEpicBoxConfig();
+      final epicboxConfig = await getEpicBoxConfig();
       final wallet = await _secureStore.read(key: '${_walletId}_wallet');
 
       // TODO determine whether it is worth sending change to a change address.
@@ -658,7 +657,7 @@ class EpicCashWallet extends CoinServiceAPI {
   Future<String> get currentReceivingAddress async {
     final wallet = await _secureStore.read(key: '${_walletId}_wallet');
 
-    EpicBoxConfigModel epicboxConfig = await getEpicBoxConfig();
+    final epicboxConfig = await getEpicBoxConfig();
 
     String? walletAddress = DB.instance.get<dynamic>(
       boxName: walletId,
@@ -866,16 +865,11 @@ class EpicCashWallet extends CoinServiceAPI {
 
     final String password = generatePassword();
     String stringConfig = await getConfig();
-    EpicBoxConfigModel epicboxConfig = await getEpicBoxConfig();
 
     await _secureStore.write(
         key: '${_walletId}_mnemonic', value: mnemonicString);
     await _secureStore.write(key: '${_walletId}_config', value: stringConfig);
     await _secureStore.write(key: '${_walletId}_password', value: password);
-    Logging.instance.log("Saving ${_walletId}_epicboxConfig: $epicboxConfig",
-        level: LogLevel.Info);
-    await _secureStore.write(
-        key: '${_walletId}_epicboxConfig', value: epicboxConfig.toString());
 
     String name = _walletId;
 
@@ -1163,51 +1157,19 @@ class EpicCashWallet extends CoinServiceAPI {
     return stringConfig;
   }
 
-  Future<EpicBoxConfigModel> getEpicBoxConfig() async {
-    EpicBoxConfigModel? _epicBoxConfig;
-    // read epicbox config from secure store
-    String? storedConfig =
-        await _secureStore.read(key: '${_walletId}_epicboxConfig');
+  Future<EpicBoxServerModel> getEpicBoxConfig() async {
+    EpicBoxServerModel? _epicBoxConfig = DB.instance.get<EpicBoxServerModel>(
+      boxName: DB.boxNamePrimaryEpicBox,
+      key: 'primary',
+    );
 
-    if (storedConfig == null) {
-      // if no config stored, use the default epicbox server as config, this is on first creation/ restore
-      _epicBoxConfig =
-          EpicBoxConfigModel.fromServer(DefaultEpicBoxes.defaultEpicBoxServer);
-      //Update secureStore
-      await _secureStore.write(
-          key: '${_walletId}_epicboxConfig', value: _epicBoxConfig.toString());
-    } else {
-      // if a config is stored, test it
-      _epicBoxConfig = EpicBoxConfigModel.fromString(
-          storedConfig); // fromString handles checking old config formats
-    }
-    //Now check if secureStoreConfig is the same as the Hive one
-    EpicBoxServerModel? _epicBox = DB.instance.get<EpicBoxServerModel>(
-        boxName: DB.boxNamePrimaryEpicBox, key: 'primary');
-
-    // Make sure that _epicBoxConfig's host is the default.
-    if (_epicBoxConfig.host != DefaultEpicBoxes.defaultEpicBoxServer.host) {
-      _epicBoxConfig =
-          EpicBoxConfigModel.fromServer(DefaultEpicBoxes.defaultEpicBoxServer);
-      await _secureStore.write(
-          key: '${_walletId}_epicboxConfig', value: _epicBoxConfig.toString());
-    }
-
-    if (_epicBox != null) {
-      // Make sure that _epicBox's host is the default.
-      if (_epicBox.host != DefaultEpicBoxes.defaultEpicBoxServer.host) {
-        _epicBox = DefaultEpicBoxes.defaultEpicBoxServer;
-        await DB.instance.put<EpicBoxServerModel>(
-            boxName: DB.boxNamePrimaryEpicBox, key: 'primary', value: _epicBox);
-      }
-
-      // Make sure secure storage matches hive.
-      if (_epicBoxConfig.host != _epicBox.host) {
-        _epicBoxConfig = EpicBoxConfigModel.fromServer(_epicBox);
-        await _secureStore.write(
-            key: '${_walletId}_epicboxConfig',
-            value: _epicBoxConfig.toString());
-      }
+    if (_epicBoxConfig == null) {
+      _epicBoxConfig = DefaultEpicBoxes.defaultEpicBoxServer;
+      await DB.instance.put<EpicBoxServerModel>(
+        boxName: DB.boxNamePrimaryEpicBox,
+        key: 'primary',
+        value: _epicBoxConfig,
+      );
     }
 
     try {
@@ -1389,16 +1351,11 @@ class EpicCashWallet extends CoinServiceAPI {
       final String password = generatePassword();
 
       String stringConfig = await getConfig();
-      EpicBoxConfigModel epicboxConfig = await getEpicBoxConfig();
       final String name = _walletName.trim();
 
       await _secureStore.write(key: '${_walletId}_mnemonic', value: mnemonic);
       await _secureStore.write(key: '${_walletId}_config', value: stringConfig);
       await _secureStore.write(key: '${_walletId}_password', value: password);
-      Logging.instance.log("Saving ${_walletId}_epicboxConfig: $stringConfig",
-          level: LogLevel.Info);
-      await _secureStore.write(
-          key: '${_walletId}_epicboxConfig', value: epicboxConfig.toString());
 
       await compute(
         _recoverWrapper,
@@ -1454,7 +1411,7 @@ class EpicCashWallet extends CoinServiceAPI {
   Future<void> listenToEpicbox() async {
     Logging.instance.log("STARTING WALLET LISTENER ....", level: LogLevel.Info);
     final wallet = await _secureStore.read(key: '${_walletId}_wallet');
-    EpicBoxConfigModel epicboxConfig = await getEpicBoxConfig();
+    final epicboxConfig = await getEpicBoxConfig();
 
     ListenerManager.pointer =
         epicboxListenerStart(wallet!, epicboxConfig.toString());
