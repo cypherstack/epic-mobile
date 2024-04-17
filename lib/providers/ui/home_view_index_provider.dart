@@ -10,3 +10,7 @@ final homeViewPageIndexStateProvider = StateProvider<int>((_) {
 
   return 0;
 });
+
+final prevHomeViewPageIndexStateProvider = StateProvider<int>((_) {
+  return 0;
+});

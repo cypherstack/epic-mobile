@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:epicpay/pages/exchange_view/exchange_view.dart';
 import 'package:epicpay/pages/help/help_view.dart';
 import 'package:epicpay/pages/home_view/sub_widgets/connection_status_bar.dart';
+import 'package:epicpay/pages/pay_view/pay_qr.dart';
 import 'package:epicpay/pages/receive_view/receive_view.dart';
 import 'package:epicpay/pages/send_view/send_view.dart';
 import 'package:epicpay/pages/settings_views/epicbox_settings_view/epicbox_settings_view.dart';
@@ -118,6 +119,10 @@ class _HomeViewState extends ConsumerState<HomeView> {
         coin: ref.read(walletProvider)!.coin,
       ),
       if (Constants.enableExchange) const ExchangeView(),
+      PayView(
+        walletId: ref.read(walletProvider)!.walletId,
+        coin: ref.read(walletProvider)!.coin,
+      ),
     ];
 
     if (ref.read(walletProvider)!.isRefreshing) {
@@ -225,6 +230,9 @@ class _HomeViewState extends ConsumerState<HomeView> {
         } else {
           _pageController.jumpToPage(next);
         }
+
+        ref.read(prevHomeViewPageIndexStateProvider.state).state =
+            previous ?? 0;
       }
     });
 
@@ -407,6 +415,24 @@ class _HomeViewState extends ConsumerState<HomeView> {
                         ),
                         label: 'SWAP',
                       ),
+                    BottomNavigationBarItem(
+                      icon: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: SvgPicture.asset(
+                          Assets.svg.pay,
+                        ),
+                      ),
+                      activeIcon: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: SvgPicture.asset(
+                          Assets.svg.pay,
+                          color: Theme.of(context)
+                              .extension<StackColors>()!
+                              .buttonBackPrimary,
+                        ),
+                      ),
+                      label: 'PAY',
+                    ),
                   ],
                   onTap: (value) => ref
                       .read(homeViewPageIndexStateProvider.state)
@@ -426,6 +452,17 @@ class _HomeViewState extends ConsumerState<HomeView> {
                       children: _children,
                       onPageChanged: (pageIndex) {
                         _pageLock = true;
+                        if (pageIndex !=
+                            ref
+                                .read(prevHomeViewPageIndexStateProvider.state)
+                                .state) {
+                          ref
+                                  .read(prevHomeViewPageIndexStateProvider.state)
+                                  .state =
+                              ref
+                                  .read(homeViewPageIndexStateProvider.state)
+                                  .state;
+                        }
                         ref.read(homeViewPageIndexStateProvider.state).state =
                             pageIndex;
                         _pageLock = false;
