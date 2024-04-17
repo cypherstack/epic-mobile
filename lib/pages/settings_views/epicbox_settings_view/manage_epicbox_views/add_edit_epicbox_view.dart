@@ -568,7 +568,8 @@ class _EpicBoxFormState extends ConsumerState<EpicBoxForm> {
     onChanged = widget.onChanged;
     _nameController = TextEditingController();
     _hostController = TextEditingController();
-    _portController = TextEditingController();
+    _portController = TextEditingController()
+      ..text = "443"; // default to 443 as requested in telegram
     _usernameController = TextEditingController();
 
     if (widget.epicBox != null) {
