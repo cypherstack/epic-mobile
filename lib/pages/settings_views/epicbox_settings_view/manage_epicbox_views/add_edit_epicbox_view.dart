@@ -563,6 +563,16 @@ class _EpicBoxFormState extends ConsumerState<EpicBoxForm> {
     setState(() {});
   }
 
+  void _removeHttp() {
+    if (!_hostFocusNode.hasFocus) {
+      if (_hostController.text.startsWith("http://") ||
+          _hostController.text.startsWith("https://")) {
+        _hostController.text = _hostController.text
+            .substring(_hostController.text.indexOf("://") + 3);
+      }
+    }
+  }
+
   @override
   void initState() {
     onChanged = widget.onChanged;
@@ -589,6 +599,8 @@ class _EpicBoxFormState extends ConsumerState<EpicBoxForm> {
       enableSSLCheckbox = true;
     }
 
+    _hostFocusNode.addListener(_removeHttp);
+
     super.initState();
   }
 
@@ -597,6 +609,8 @@ class _EpicBoxFormState extends ConsumerState<EpicBoxForm> {
     _nameController.dispose();
     _hostController.dispose();
     _portController.dispose();
+
+    _hostFocusNode.removeListener(_removeHttp);
 
     _nameFocusNode.dispose();
     _hostFocusNode.dispose();
