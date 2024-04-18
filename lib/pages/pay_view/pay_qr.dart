@@ -6,6 +6,7 @@ import 'package:epicpay/pages/send_view/send_view.dart';
 import 'package:epicpay/providers/global/wallet_provider.dart';
 import 'package:epicpay/providers/ui/home_view_index_provider.dart';
 import 'package:epicpay/services/coins/epiccash/epiccash_wallet.dart';
+import 'package:epicpay/utilities/address_utils.dart';
 import 'package:epicpay/utilities/barcode_scanner_interface.dart';
 import 'package:epicpay/utilities/clipboard_interface.dart';
 import 'package:epicpay/utilities/constants.dart';
@@ -102,7 +103,40 @@ Future<void> scan(
       );
     }
   } catch (e) {
-    // show error dialog with options: cancel, retry
+    // try route non pay qr data
+    try {
+      final results = AddressUtils.parseUri(qrResult.rawContent);
+
+      SendViewAutoFillData? data;
+
+      if (results.isNotEmpty && results["scheme"] == Coin.epicCash.uriScheme) {
+        data = SendViewAutoFillData(
+          address: results["address"]!,
+          contactLabel: results["address"]!,
+          pay: false,
+        );
+
+        // now check for non standard encoded basic address
+      } else if (ref
+          .read(walletProvider)!
+          .validateAddress(qrResult.rawContent)) {
+        data = SendViewAutoFillData(
+          address: qrResult.rawContent,
+          contactLabel: qrResult.rawContent,
+          pay: false,
+        );
+      }
+
+      if (data != null && context.mounted) {
+        ref.read(sendViewFillDataProvider.state).state = data;
+        ref.read(homeViewPageIndexStateProvider.state).state = 1;
+      }
+      return;
+    } catch (_) {
+      // ignore to continue
+    }
+
+    // otherwise show error dialog with options: cancel, retry
 
     bool? retry;
 
