@@ -619,7 +619,46 @@ class EpicCashWallet extends CoinServiceAPI {
   // address based on the epicbox host/domain/URL we must force an update here
   Future<bool> updateEpicBox() async {
     try {
-      await currentReceivingAddress;
+      // await currentReceivingAddress;
+
+      final epicboxConfig = await getEpicBoxConfig();
+
+      String? walletAddress = DB.instance.get<dynamic>(
+        boxName: walletId,
+        key: "currentReceivingAddress",
+      ) as String?;
+
+      // check if new epic box server is the same as the previous one
+      // if so, return early
+      if (walletAddress?.endsWith(epicboxConfig.host) == true) {
+        return true;
+      }
+
+      final wallet = await _secureStore.read(key: '${_walletId}_wallet');
+
+      if (ListenerManager.pointer != null) {
+        epicboxListenerStop(ListenerManager.pointer!);
+      }
+
+      await m.protect(() async {
+        walletAddress = await compute(
+          _initGetAddressInfoWrapper,
+          Tuple3(wallet!, 0, epicboxConfig.toString()),
+        );
+      });
+
+      ListenerManager.pointer = epicboxListenerStart(
+        wallet!,
+        epicboxConfig.toString(),
+      );
+
+      // update address with new epicbox
+      await DB.instance.put<dynamic>(
+        boxName: walletId,
+        key: "currentReceivingAddress",
+        value: walletAddress,
+      );
+
       return true;
     } catch (e, s) {
       Logging.instance.log("$e, $s", level: LogLevel.Error);
@@ -634,53 +673,16 @@ class EpicCashWallet extends CoinServiceAPI {
       key: "currentReceivingAddress",
     ) as String?;
 
-    // if address doesn't exist in Hive, fetch from rust and store it
     if (walletAddress == null) {
-      final wallet = await _secureStore.read(key: '${_walletId}_wallet');
-      final epicboxConfig = await getEpicBoxConfig();
-      await m.protect(() async {
-        walletAddress = await compute(
-          _initGetAddressInfoWrapper,
-          Tuple3(wallet!, 0, epicboxConfig.toString()),
-        );
-      });
-
-      await DB.instance.put<dynamic>(
+      await updateEpicBox();
+      walletAddress = DB.instance.get<dynamic>(
         boxName: walletId,
         key: "currentReceivingAddress",
-        value: walletAddress,
-      );
-
-      // Logging.instance.log(
-      //   "WALLET ADDRESS FROM RUST IS $walletAddress",
-      //   level: LogLevel.Info,
-      // );
-    } else {
-      final epicboxConfig = await getEpicBoxConfig();
-      if (!walletAddress.endsWith(epicboxConfig.host)) {
-        if (walletAddress.contains("@")) {
-          walletAddress = walletAddress.split("@").first;
-        }
-
-        // append current epic box domain
-        walletAddress += "@${epicboxConfig.host}";
-
-        await DB.instance.put<dynamic>(
-          boxName: walletId,
-          key: "currentReceivingAddress",
-          value: walletAddress,
-        );
-      }
+      ) as String;
     }
-    // Logging.instance.log(
-    //   "WALLET_ADDRESS_IS $walletAddress",
-    //   level: LogLevel.Info,
-    // );
 
-    return walletAddress!;
+    return walletAddress;
   }
-  //     _currentReceivingAddress ??= _getCurrentAddressForChain(0);
-  // Future<String>? _currentReceivingAddress;
 
   @override
   Future<void> exit() async {
@@ -860,7 +862,7 @@ class EpicCashWallet extends CoinServiceAPI {
     await _secureStore.write(key: '${_walletId}_wallet', value: walletOpen);
 
     //Store Epic box address info
-    await currentReceivingAddress;
+    await updateEpicBox();
 
     // subtract a couple days to ensure we have a buffer for SWB
     final bufferedCreateHeight = calculateRestoreHeightFrom(
@@ -890,7 +892,7 @@ class EpicCashWallet extends CoinServiceAPI {
     await DB.instance
         .put<dynamic>(boxName: walletId, key: "isFavorite", value: false);
     //Store wallet address in hive
-    await currentReceivingAddress;
+    await updateEpicBox();
   }
 
   bool refreshMutex = false;
@@ -1358,7 +1360,7 @@ class EpicCashWallet extends CoinServiceAPI {
       await _secureStore.write(key: '${_walletId}_wallet', value: walletOpen);
 
       //Store Epic box address info
-      await currentReceivingAddress;
+      await updateEpicBox();
     } catch (e, s) {
       Logging.instance
           .log("Error recovering wallet $e\n$s", level: LogLevel.Error);
