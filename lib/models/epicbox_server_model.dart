@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:hive/hive.dart';
 
 part 'type_adaptors/epicbox_server_model.g.dart';
@@ -80,4 +82,13 @@ class EpicBoxServerModel {
       'isDown': isDown,
     };
   }
+
+  /// Lol required for libepiccash ffi
+  @override
+  String toString() => jsonEncode({
+        'epicbox_domain': host,
+        'epicbox_port': port,
+        'epicbox_protocol_insecure': false,
+        'epicbox_address_index': 0,
+      });
 }

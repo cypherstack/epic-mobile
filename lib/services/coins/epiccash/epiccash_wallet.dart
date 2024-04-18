@@ -6,7 +6,6 @@ import 'dart:isolate';
 
 import 'package:decimal/decimal.dart';
 import 'package:epicpay/db/hive/db.dart';
-import 'package:epicpay/models/epicbox_config_model.dart';
 import 'package:epicpay/models/epicbox_server_model.dart';
 import 'package:epicpay/models/node_model.dart';
 import 'package:epicpay/models/paymint/fee_object_model.dart';
@@ -31,6 +30,7 @@ import 'package:epicpay/utilities/flutter_secure_storage_interface.dart';
 import 'package:epicpay/utilities/format.dart';
 import 'package:epicpay/utilities/logger.dart';
 import 'package:epicpay/utilities/prefs.dart';
+import 'package:epicpay/utilities/test_epic_box_connection.dart';
 import 'package:epicpay/utilities/test_epic_node_connection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_libepiccash/epic_cash.dart';
@@ -41,7 +41,6 @@ import 'package:mutex/mutex.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:stack_wallet_backup/generate_password.dart';
 import 'package:tuple/tuple.dart';
-import 'package:websocket_universal/websocket_universal.dart';
 
 const int MINIMUM_CONFIRMATIONS = 3;
 
@@ -457,7 +456,7 @@ class EpicCashWallet extends CoinServiceAPI {
   late PriceAPI _priceAPI;
 
   /// returns an empty String on success, error message on failure
-  Future<String> cancelPendingTransaction(String tx_slate_id) async {
+  Future<String> cancelPendingTransaction(String txSlateId) async {
     final String wallet =
         (await _secureStore.read(key: '${_walletId}_wallet'))!;
 
@@ -467,7 +466,7 @@ class EpicCashWallet extends CoinServiceAPI {
         _cancelTransactionWrapper,
         Tuple2(
           wallet,
-          tx_slate_id,
+          txSlateId,
         ),
       );
     });
@@ -475,65 +474,19 @@ class EpicCashWallet extends CoinServiceAPI {
   }
 
   Future<bool> testEpicboxServer(String host, int port) async {
-    final websocketConnectionUri = 'wss://$host:$port';
-    const connectionOptions = SocketConnectionOptions(
-      pingIntervalMs: 3000,
-      timeoutConnectionMs: 4000,
-
-      /// see ping/pong messages in [logEventStream] stream
-      skipPingMessages: true,
-
-      /// Set this attribute to `true` if do not need any ping/pong
-      /// messages and ping measurement. Default is `false`
-      pingRestrictionForce: true,
+    final data = await testEpicBoxConnection(
+      EpicBoxFormData()
+        ..host = host
+        ..port = port,
     );
 
-    final IMessageProcessor<String, String> textSocketProcessor =
-        SocketSimpleTextProcessor();
-    final textSocketHandler = IWebSocketHandler<String, String>.createClient(
-      websocketConnectionUri,
-      textSocketProcessor,
-      connectionOptions: connectionOptions,
-    );
+    // if the data is not null, then the connection test succeeded
+    _isEpicBoxConnected = data != null;
 
-    // Listening to server responses:
-    bool isConnected = true;
-    textSocketHandler.incomingMessagesStream.listen((inMsg) {
-      Logging.instance.log(
-          'Epic Box server test webSocket message from server $host:$port: "$inMsg"',
-          level: LogLevel.Info);
-
-      if (inMsg.contains("Challenge")) {
-        // Successful response, close socket
-        Logging.instance.log('Epic Box server $host:$port test succeeded',
-            level: LogLevel.Info);
-
-        _isEpicBoxConnected = isConnected;
-        GlobalEventBus.instance.fire(
-          EpicBoxStatusChangedEvent(
-            isConnected
-                ? EpicBoxStatus.connected
-                : EpicBoxStatus.unableToConnect,
-            walletId,
-          ),
-        );
-
-        // Disconnect from server:
-        textSocketHandler.disconnect('manual disconnect');
-        // Disposing webSocket:
-        textSocketHandler.close();
-      } /* else if(inMsg.contains("InvalidRequest")) {
-        // Handle when many InvalidRequest responses occur
-      }*/
-    });
-
-    // Connecting to server:
-    final isTextSocketConnected = await textSocketHandler.connect();
-    if (!isTextSocketConnected) {
+    if (!_isEpicBoxConnected) {
       Logging.instance.log(
           'Epic Box server test failed: server $host:$port unable to connect',
           level: LogLevel.Warning);
-      isConnected = false;
       _isEpicBoxConnected = false;
       GlobalEventBus.instance.fire(
         EpicBoxStatusChangedEvent(
@@ -541,15 +494,22 @@ class EpicCashWallet extends CoinServiceAPI {
           walletId,
         ),
       );
+    } else {
+      GlobalEventBus.instance.fire(
+        EpicBoxStatusChangedEvent(
+          isConnected ? EpicBoxStatus.connected : EpicBoxStatus.unableToConnect,
+          walletId,
+        ),
+      );
     }
 
-    return isConnected;
+    return _isEpicBoxConnected;
   }
 
   @override
   Future<String> confirmSend({required Map<String, dynamic> txData}) async {
     try {
-      EpicBoxConfigModel epicboxConfig = await getEpicBoxConfig();
+      final epicboxConfig = await getEpicBoxConfig();
       final wallet = await _secureStore.read(key: '${_walletId}_wallet');
 
       // TODO determine whether it is worth sending change to a change address.
@@ -654,24 +614,32 @@ class EpicCashWallet extends CoinServiceAPI {
     }
   }
 
-  @override
-  Future<String> get currentReceivingAddress async {
-    final wallet = await _secureStore.read(key: '${_walletId}_wallet');
+  // Used to update receiving address when updating epic box config
+  // Because we don't generate a new address for epic but we do change the
+  // address based on the epicbox host/domain/URL we must force an update here
+  Future<bool> updateEpicBox() async {
+    try {
+      // await currentReceivingAddress;
 
-    EpicBoxConfigModel epicboxConfig = await getEpicBoxConfig();
+      final epicboxConfig = await getEpicBoxConfig();
 
-    String? walletAddress = DB.instance.get<dynamic>(
-      boxName: walletId,
-      key: "currentReceivingAddress",
-    ) as String?;
+      String? walletAddress = DB.instance.get<dynamic>(
+        boxName: walletId,
+        key: "currentReceivingAddress",
+      ) as String?;
 
-    // Logging.instance.log(
-    //   "WALLET ADDRESS FROM HIVE IS $walletAddress",
-    //   level: LogLevel.Info,
-    // );
+      // check if new epic box server is the same as the previous one
+      // if so, return early
+      if (walletAddress?.endsWith(epicboxConfig.host) == true) {
+        return true;
+      }
 
-    // if address doesn't exist in Hive, fetch from rust and store it
-    if (walletAddress == null) {
+      final wallet = await _secureStore.read(key: '${_walletId}_wallet');
+
+      if (ListenerManager.pointer != null) {
+        epicboxListenerStop(ListenerManager.pointer!);
+      }
+
       await m.protect(() async {
         walletAddress = await compute(
           _initGetAddressInfoWrapper,
@@ -679,39 +647,42 @@ class EpicCashWallet extends CoinServiceAPI {
         );
       });
 
+      ListenerManager.pointer = epicboxListenerStart(
+        wallet!,
+        epicboxConfig.toString(),
+      );
+
+      // update address with new epicbox
       await DB.instance.put<dynamic>(
         boxName: walletId,
         key: "currentReceivingAddress",
         value: walletAddress,
       );
 
-      // Logging.instance.log(
-      //   "WALLET ADDRESS FROM RUST IS $walletAddress",
-      //   level: LogLevel.Info,
-      // );
-    } else if (!walletAddress.endsWith(epicboxConfig.host)) {
-      if (walletAddress.contains("@")) {
-        walletAddress = walletAddress.split("@").first;
-      }
-
-      // append current epic box domain
-      walletAddress += "@${epicboxConfig.host}";
-
-      await DB.instance.put<dynamic>(
-        boxName: walletId,
-        key: "currentReceivingAddress",
-        value: walletAddress,
-      );
+      return true;
+    } catch (e, s) {
+      Logging.instance.log("$e, $s", level: LogLevel.Error);
+      throw Exception("Error in updateEpicBox (_getCurrentAddressForChain)");
     }
-    // Logging.instance.log(
-    //   "WALLET_ADDRESS_IS $walletAddress",
-    //   level: LogLevel.Info,
-    // );
-
-    return walletAddress!;
   }
-  //     _currentReceivingAddress ??= _getCurrentAddressForChain(0);
-  // Future<String>? _currentReceivingAddress;
+
+  @override
+  Future<String> get currentReceivingAddress async {
+    String? walletAddress = DB.instance.get<dynamic>(
+      boxName: walletId,
+      key: "currentReceivingAddress",
+    ) as String?;
+
+    if (walletAddress == null) {
+      await updateEpicBox();
+      walletAddress = DB.instance.get<dynamic>(
+        boxName: walletId,
+        key: "currentReceivingAddress",
+      ) as String;
+    }
+
+    return walletAddress;
+  }
 
   @override
   Future<void> exit() async {
@@ -866,16 +837,11 @@ class EpicCashWallet extends CoinServiceAPI {
 
     final String password = generatePassword();
     String stringConfig = await getConfig();
-    EpicBoxConfigModel epicboxConfig = await getEpicBoxConfig();
 
     await _secureStore.write(
         key: '${_walletId}_mnemonic', value: mnemonicString);
     await _secureStore.write(key: '${_walletId}_config', value: stringConfig);
     await _secureStore.write(key: '${_walletId}_password', value: password);
-    Logging.instance.log("Saving ${_walletId}_epicboxConfig: $epicboxConfig",
-        level: LogLevel.Info);
-    await _secureStore.write(
-        key: '${_walletId}_epicboxConfig', value: epicboxConfig.toString());
 
     String name = _walletId;
 
@@ -896,7 +862,7 @@ class EpicCashWallet extends CoinServiceAPI {
     await _secureStore.write(key: '${_walletId}_wallet', value: walletOpen);
 
     //Store Epic box address info
-    await currentReceivingAddress;
+    await updateEpicBox();
 
     // subtract a couple days to ensure we have a buffer for SWB
     final bufferedCreateHeight = calculateRestoreHeightFrom(
@@ -926,7 +892,7 @@ class EpicCashWallet extends CoinServiceAPI {
     await DB.instance
         .put<dynamic>(boxName: walletId, key: "isFavorite", value: false);
     //Store wallet address in hive
-    await currentReceivingAddress;
+    await updateEpicBox();
   }
 
   bool refreshMutex = false;
@@ -1163,83 +1129,39 @@ class EpicCashWallet extends CoinServiceAPI {
     return stringConfig;
   }
 
-  Future<EpicBoxConfigModel> getEpicBoxConfig() async {
-    EpicBoxConfigModel? _epicBoxConfig;
-    // read epicbox config from secure store
-    String? storedConfig =
-        await _secureStore.read(key: '${_walletId}_epicboxConfig');
+  Future<EpicBoxServerModel> getEpicBoxConfig() async {
+    EpicBoxServerModel? _epicBoxConfig = DB.instance.get<EpicBoxServerModel>(
+      boxName: DB.boxNamePrimaryEpicBox,
+      key: 'primary',
+    );
 
-    if (storedConfig == null) {
-      // if no config stored, use the default epicbox server as config, this is on first creation/ restore
-      _epicBoxConfig =
-          EpicBoxConfigModel.fromServer(DefaultEpicBoxes.defaultEpicBoxServer);
-      //Update secureStore
-      await _secureStore.write(
-          key: '${_walletId}_epicboxConfig', value: _epicBoxConfig.toString());
-    } else {
-      // if a config is stored, test it
-      _epicBoxConfig = EpicBoxConfigModel.fromString(
-          storedConfig); // fromString handles checking old config formats
-    }
-    //Now check if secureStoreConfig is the same as the Hive one
-    EpicBoxServerModel? _epicBox = DB.instance.get<EpicBoxServerModel>(
-        boxName: DB.boxNamePrimaryEpicBox, key: 'primary');
-
-    // Make sure that _epicBoxConfig's host is the default.
-    if (_epicBoxConfig.host != DefaultEpicBoxes.defaultEpicBoxServer.host) {
-      _epicBoxConfig = EpicBoxConfigModel.fromServer(
-          DefaultEpicBoxes.defaultEpicBoxServer);
-      await _secureStore.write(
-          key: '${_walletId}_epicboxConfig', value: _epicBoxConfig.toString());
-    }
-
-    if (_epicBox != null) {
-      // Make sure that _epicBox's host is the default.
-      if (_epicBox?.host != DefaultEpicBoxes.defaultEpicBoxServer.host) {
-        _epicBox = DefaultEpicBoxes.defaultEpicBoxServer;
-        await DB.instance.put<EpicBoxServerModel>(
-            boxName: DB.boxNamePrimaryEpicBox, key: 'primary', value: _epicBox);
-      }
-
-      // Make sure secure storage matches hive.
-      if (_epicBoxConfig.host != _epicBox?.host) {
-        _epicBoxConfig = EpicBoxConfigModel.fromServer(_epicBox!);
-        await _secureStore.write(
-            key: '${_walletId}_epicboxConfig',
-            value: _epicBoxConfig.toString());
-      }
-    }
-
-    try {
-      bool isEpicboxConnected = await testEpicboxServer(
-        _epicBoxConfig.host,
-        _epicBoxConfig.port ?? 443,
+    if (_epicBoxConfig == null) {
+      _epicBoxConfig = DefaultEpicBoxes.defaultEpicBoxServer;
+      await DB.instance.put<EpicBoxServerModel>(
+        boxName: DB.boxNamePrimaryEpicBox,
+        key: 'primary',
+        value: _epicBoxConfig,
       );
-
-      if (!isEpicboxConnected) {
-        Logging.instance.log(
-          "Error in getEpicBoxConfig (not connected to epicbox server)",
-          level: LogLevel.Error,
-        );
-      }
-    } catch (e, s) {
-      rethrow;
     }
+
+    // TODO: WHy is this here? It takes too long any time we want the config
+    // try {
+    //   bool isEpicboxConnected = await testEpicboxServer(
+    //     _epicBoxConfig.host,
+    //     _epicBoxConfig.port ?? 443,
+    //   );
+    //
+    //   if (!isEpicboxConnected) {
+    //     Logging.instance.log(
+    //       "Error in getEpicBoxConfig (not connected to epicbox server)",
+    //       level: LogLevel.Error,
+    //     );
+    //   }
+    // } catch (e) {
+    //   rethrow;
+    // }
 
     return _epicBoxConfig;
-  }
-
-  // Used to update receiving address when updating epic box config
-  // Because we don't generate a new address for epic but we do change the
-  // address based on the epicbox host/domain/URL we must force an update here
-  Future<bool> updateEpicBox() async {
-    try {
-      await currentReceivingAddress;
-      return true;
-    } catch (e, s) {
-      Logging.instance.log("$e, $s", level: LogLevel.Error);
-      throw Exception("Error in updateEpicBox (_getCurrentAddressForChain)");
-    }
   }
 
   Future<String> getRealConfig() async {
@@ -1389,16 +1311,11 @@ class EpicCashWallet extends CoinServiceAPI {
       final String password = generatePassword();
 
       String stringConfig = await getConfig();
-      EpicBoxConfigModel epicboxConfig = await getEpicBoxConfig();
       final String name = _walletName.trim();
 
       await _secureStore.write(key: '${_walletId}_mnemonic', value: mnemonic);
       await _secureStore.write(key: '${_walletId}_config', value: stringConfig);
       await _secureStore.write(key: '${_walletId}_password', value: password);
-      Logging.instance.log("Saving ${_walletId}_epicboxConfig: $stringConfig",
-          level: LogLevel.Info);
-      await _secureStore.write(
-          key: '${_walletId}_epicboxConfig', value: epicboxConfig.toString());
 
       await compute(
         _recoverWrapper,
@@ -1443,7 +1360,7 @@ class EpicCashWallet extends CoinServiceAPI {
       await _secureStore.write(key: '${_walletId}_wallet', value: walletOpen);
 
       //Store Epic box address info
-      await currentReceivingAddress;
+      await updateEpicBox();
     } catch (e, s) {
       Logging.instance
           .log("Error recovering wallet $e\n$s", level: LogLevel.Error);
@@ -1454,7 +1371,7 @@ class EpicCashWallet extends CoinServiceAPI {
   Future<void> listenToEpicbox() async {
     Logging.instance.log("STARTING WALLET LISTENER ....", level: LogLevel.Info);
     final wallet = await _secureStore.read(key: '${_walletId}_wallet');
-    EpicBoxConfigModel epicboxConfig = await getEpicBoxConfig();
+    final epicboxConfig = await getEpicBoxConfig();
 
     ListenerManager.pointer =
         epicboxListenerStart(wallet!, epicboxConfig.toString());
@@ -1657,7 +1574,8 @@ class EpicCashWallet extends CoinServiceAPI {
       await _startScans();
 
       // TODO: Is this supposed to be awaited????
-      startSync();
+      // (wrapped in unawaited()) for now
+      unawaited(startSync());
 
       GlobalEventBus.instance.fire(RefreshPercentChangedEvent(0.0, walletId));
 

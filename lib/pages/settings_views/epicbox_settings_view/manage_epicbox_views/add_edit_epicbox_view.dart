@@ -142,10 +142,12 @@ class _AddEditEpicBoxViewState extends ConsumerState<AddEditEpicBoxView>
         .whenComplete(() => entry.remove());
   }
 
-  Future<EpicBoxFormData?> _testConnection(
-      {bool showNotification = true}) async {
-    final formData =
-        await testEpicBoxConnection(ref.read(epicBoxFormDataProvider));
+  Future<EpicBoxFormData?> _testConnection({
+    bool showNotification = true,
+  }) async {
+    final formData = await testEpicBoxConnection(
+      ref.read(epicBoxFormDataProvider),
+    );
 
     if (showNotification && mounted) {
       unawaited(
@@ -347,11 +349,6 @@ class _AddEditEpicBoxViewState extends ConsumerState<AddEditEpicBoxView>
   }
 
   @override
-  void dispose() {
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final EpicBoxServerModel? epicBox =
         viewType == AddEditEpicBoxViewType.edit && epicBoxId != null
@@ -489,17 +486,6 @@ class _AddEditEpicBoxViewState extends ConsumerState<AddEditEpicBoxView>
   }
 }
 
-class EpicBoxFormData {
-  String? name, host, login, password;
-  int? port;
-  bool? useSSL, isFailover;
-
-  @override
-  String toString() {
-    return "{ name: $name, host: $host, port: $port, useSSL: $useSSL }";
-  }
-}
-
 final epicBoxFormDataProvider =
     Provider<EpicBoxFormData>((_) => EpicBoxFormData());
 
@@ -577,12 +563,23 @@ class _EpicBoxFormState extends ConsumerState<EpicBoxForm> {
     setState(() {});
   }
 
+  void _removeHttp() {
+    if (!_hostFocusNode.hasFocus) {
+      if (_hostController.text.startsWith("http://") ||
+          _hostController.text.startsWith("https://")) {
+        _hostController.text = _hostController.text
+            .substring(_hostController.text.indexOf("://") + 3);
+      }
+    }
+  }
+
   @override
   void initState() {
     onChanged = widget.onChanged;
     _nameController = TextEditingController();
     _hostController = TextEditingController();
-    _portController = TextEditingController();
+    _portController = TextEditingController()
+      ..text = "443"; // default to 443 as requested in telegram
     _usernameController = TextEditingController();
 
     if (widget.epicBox != null) {
@@ -602,6 +599,8 @@ class _EpicBoxFormState extends ConsumerState<EpicBoxForm> {
       enableSSLCheckbox = true;
     }
 
+    _hostFocusNode.addListener(_removeHttp);
+
     super.initState();
   }
 
@@ -610,6 +609,8 @@ class _EpicBoxFormState extends ConsumerState<EpicBoxForm> {
     _nameController.dispose();
     _hostController.dispose();
     _portController.dispose();
+
+    _hostFocusNode.removeListener(_removeHttp);
 
     _nameFocusNode.dispose();
     _hostFocusNode.dispose();

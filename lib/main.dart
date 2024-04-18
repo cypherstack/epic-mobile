@@ -3,7 +3,6 @@ import 'dart:io';
 
 import 'package:epicpay/db/hive/db.dart';
 import 'package:epicpay/db/isar/isar_db.dart';
-import 'package:epicpay/models/epicbox_config_model.dart';
 import 'package:epicpay/models/epicbox_server_model.dart';
 import 'package:epicpay/models/isar/models/exchange/currency.dart';
 import 'package:epicpay/models/isar/models/exchange/pair.dart';
@@ -101,7 +100,6 @@ void main() async {
 
   // epic box model adapters
   Hive.registerAdapter(EpicBoxServerModelAdapter());
-  Hive.registerAdapter(EpicBoxConfigModelAdapter());
 
   await Hive.initFlutter(appDirectory.path);
 

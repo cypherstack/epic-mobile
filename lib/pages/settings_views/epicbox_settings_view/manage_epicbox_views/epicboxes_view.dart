@@ -66,7 +66,7 @@ class _EpicBoxesViewState extends ConsumerState<EpicBoxesView> {
                     onTap: () {
                       Navigator.of(context).pushNamed(
                         AddEditEpicBoxView.routeName,
-                        arguments: Tuple3(
+                        arguments: const Tuple3(
                           AddEditEpicBoxViewType.add,
                           null,
                           EpicBoxesView.routeName,
@@ -80,8 +80,8 @@ class _EpicBoxesViewState extends ConsumerState<EpicBoxesView> {
             const SizedBox(
               width: 12,
             ),
-            Padding(
-              padding: const EdgeInsets.all(20),
+            const Padding(
+              padding: EdgeInsets.all(20),
               child: EpicBoxList(
                 popBackToRoute: EpicBoxSettingsView.routeName,
               ),
@@ -130,7 +130,7 @@ class _EpicBoxesViewState extends ConsumerState<EpicBoxesView> {
                     onPressed: () {
                       Navigator.of(context).pushNamed(
                         AddEditEpicBoxView.routeName,
-                        arguments: Tuple3(
+                        arguments: const Tuple3(
                           AddEditEpicBoxViewType.add,
                           null,
                           EpicBoxesView.routeName,
@@ -142,8 +142,8 @@ class _EpicBoxesViewState extends ConsumerState<EpicBoxesView> {
               ),
             ],
           ),
-          body: Padding(
-            padding: const EdgeInsets.only(
+          body: const Padding(
+            padding: EdgeInsets.only(
               top: 12,
               left: 12,
               right: 12,

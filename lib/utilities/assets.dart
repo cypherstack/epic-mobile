@@ -66,6 +66,7 @@ class _SVG {
   // String get themeLight => "assets/svg/light-mode.svg";
   // String get themeDark => "assets/svg/dark-theme.svg";
 
+  String get pay => "assets/svg/pay.svg";
   String get swapArrows => "assets/svg/swap-arrows.svg";
   String get clipboard => "assets/svg/clipboard.svg";
   String get eyeOff => "assets/svg/eye-off.svg";

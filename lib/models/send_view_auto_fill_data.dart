@@ -5,12 +5,18 @@ class SendViewAutoFillData {
   final String contactLabel;
   final Decimal? amount;
   final String note;
+  final String onChainNote;
+  final bool pay;
+  final String? overrideEpicBoxServer;
 
   SendViewAutoFillData({
     required this.address,
     required this.contactLabel,
     this.amount,
     this.note = "",
+    this.onChainNote = "",
+    this.pay = false,
+    this.overrideEpicBoxServer,
   });
 
   Map<String, dynamic> toJson() {
@@ -19,6 +25,9 @@ class SendViewAutoFillData {
       "contactLabel": contactLabel,
       "amount": amount,
       "note": note,
+      "onChainNote": onChainNote,
+      "pay": pay,
+      "overrideEpicBoxServer": overrideEpicBoxServer,
     };
   }
 

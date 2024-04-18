@@ -94,9 +94,11 @@ class _ReceiveViewState extends ConsumerState<ReceiveView> {
 
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
       final address = await ref.read(walletProvider)!.currentReceivingAddress;
-      setState(() {
-        receivingAddress = address;
-      });
+      if (mounted) {
+        setState(() {
+          receivingAddress = address;
+        });
+      }
     });
 
     super.initState();
@@ -107,12 +109,16 @@ class _ReceiveViewState extends ConsumerState<ReceiveView> {
     debugPrint("BUILD: $runtimeType");
     final width = MediaQuery.of(context).size.width;
 
-    ref.listen(walletProvider.select((value) => value!.currentReceivingAddress),
-        (previous, next) {
-      if (next is Future<String>) {
-        next.then((value) => setState(() => receivingAddress = value));
-      }
-    });
+    ref.listen(
+      walletProvider.select((value) => value!.currentReceivingAddress),
+      (previous, next) {
+        next.then((value) {
+          if (mounted) {
+            setState(() => receivingAddress = value);
+          }
+        });
+      },
+    );
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
