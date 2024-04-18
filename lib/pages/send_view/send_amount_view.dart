@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:decimal/decimal.dart';
+import 'package:epicpay/db/hive/db.dart';
 import 'package:epicpay/models/epicbox_server_model.dart';
 import 'package:epicpay/pages/home_view/home_view.dart';
 import 'package:epicpay/pages/pinpad_views/lock_screen_view.dart';
@@ -367,14 +368,18 @@ class _SendAmountViewState extends ConsumerState<SendAmountView> {
           .state!
           .overrideEpicBoxServer!;
       final wallet = ref.read(walletProvider)!.wallet as EpicCashWallet;
-      revertToEpicBoxServerAfterPay = await wallet.getEpicBoxConfig();
+      // revertToEpicBoxServerAfterPay = await wallet.getEpicBoxConfig();
+      revertToEpicBoxServerAfterPay = DB.instance.get<EpicBoxServerModel>(
+        boxName: DB.boxNamePrimaryEpicBox,
+        key: 'primary',
+      );
 
       await ref.read(nodeServiceChangeNotifierProvider).setPrimaryEpicBox(
-            epicBox: revertToEpicBoxServerAfterPay.copyWith(
-                host: overrideEpicBoxServer),
+            epicBox: revertToEpicBoxServerAfterPay!
+                .copyWith(host: overrideEpicBoxServer),
           );
 
-      await ref.read(walletProvider)!.updateEpicBox();
+      await wallet.updateEpicBox();
     }
 
     final amount = Format.decimalAmountToSatoshis(_amountToSend!);

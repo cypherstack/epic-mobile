@@ -614,24 +614,30 @@ class EpicCashWallet extends CoinServiceAPI {
     }
   }
 
+  // Used to update receiving address when updating epic box config
+  // Because we don't generate a new address for epic but we do change the
+  // address based on the epicbox host/domain/URL we must force an update here
+  Future<bool> updateEpicBox() async {
+    try {
+      await currentReceivingAddress;
+      return true;
+    } catch (e, s) {
+      Logging.instance.log("$e, $s", level: LogLevel.Error);
+      throw Exception("Error in updateEpicBox (_getCurrentAddressForChain)");
+    }
+  }
+
   @override
   Future<String> get currentReceivingAddress async {
-    final wallet = await _secureStore.read(key: '${_walletId}_wallet');
-
-    final epicboxConfig = await getEpicBoxConfig();
-
     String? walletAddress = DB.instance.get<dynamic>(
       boxName: walletId,
       key: "currentReceivingAddress",
     ) as String?;
 
-    // Logging.instance.log(
-    //   "WALLET ADDRESS FROM HIVE IS $walletAddress",
-    //   level: LogLevel.Info,
-    // );
-
     // if address doesn't exist in Hive, fetch from rust and store it
     if (walletAddress == null) {
+      final wallet = await _secureStore.read(key: '${_walletId}_wallet');
+      final epicboxConfig = await getEpicBoxConfig();
       await m.protect(() async {
         walletAddress = await compute(
           _initGetAddressInfoWrapper,
@@ -649,19 +655,22 @@ class EpicCashWallet extends CoinServiceAPI {
       //   "WALLET ADDRESS FROM RUST IS $walletAddress",
       //   level: LogLevel.Info,
       // );
-    } else if (!walletAddress.endsWith(epicboxConfig.host)) {
-      if (walletAddress.contains("@")) {
-        walletAddress = walletAddress.split("@").first;
+    } else {
+      final epicboxConfig = await getEpicBoxConfig();
+      if (!walletAddress.endsWith(epicboxConfig.host)) {
+        if (walletAddress.contains("@")) {
+          walletAddress = walletAddress.split("@").first;
+        }
+
+        // append current epic box domain
+        walletAddress += "@${epicboxConfig.host}";
+
+        await DB.instance.put<dynamic>(
+          boxName: walletId,
+          key: "currentReceivingAddress",
+          value: walletAddress,
+        );
       }
-
-      // append current epic box domain
-      walletAddress += "@${epicboxConfig.host}";
-
-      await DB.instance.put<dynamic>(
-        boxName: walletId,
-        key: "currentReceivingAddress",
-        value: walletAddress,
-      );
     }
     // Logging.instance.log(
     //   "WALLET_ADDRESS_IS $walletAddress",
@@ -1133,36 +1142,24 @@ class EpicCashWallet extends CoinServiceAPI {
       );
     }
 
-    try {
-      bool isEpicboxConnected = await testEpicboxServer(
-        _epicBoxConfig.host,
-        _epicBoxConfig.port ?? 443,
-      );
-
-      if (!isEpicboxConnected) {
-        Logging.instance.log(
-          "Error in getEpicBoxConfig (not connected to epicbox server)",
-          level: LogLevel.Error,
-        );
-      }
-    } catch (e) {
-      rethrow;
-    }
+    // TODO: WHy is this here? It takes too long any time we want the config
+    // try {
+    //   bool isEpicboxConnected = await testEpicboxServer(
+    //     _epicBoxConfig.host,
+    //     _epicBoxConfig.port ?? 443,
+    //   );
+    //
+    //   if (!isEpicboxConnected) {
+    //     Logging.instance.log(
+    //       "Error in getEpicBoxConfig (not connected to epicbox server)",
+    //       level: LogLevel.Error,
+    //     );
+    //   }
+    // } catch (e) {
+    //   rethrow;
+    // }
 
     return _epicBoxConfig;
-  }
-
-  // Used to update receiving address when updating epic box config
-  // Because we don't generate a new address for epic but we do change the
-  // address based on the epicbox host/domain/URL we must force an update here
-  Future<bool> updateEpicBox() async {
-    try {
-      await currentReceivingAddress;
-      return true;
-    } catch (e, s) {
-      Logging.instance.log("$e, $s", level: LogLevel.Error);
-      throw Exception("Error in updateEpicBox (_getCurrentAddressForChain)");
-    }
   }
 
   Future<String> getRealConfig() async {
