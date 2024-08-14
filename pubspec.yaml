@@ -14,8 +14,8 @@ description: Epic Pay
 version: 0.12.0+42
 
 environment:
-  sdk: ">=3.0.2 <4.0.0"
-  flutter: ^3.10.0
+  sdk: ">=3.4.3 <4.0.0"
+  flutter: ^3.22.2
 
 dependencies:
   flutter:
