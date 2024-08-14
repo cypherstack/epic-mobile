@@ -541,7 +541,7 @@ class EpicCashWallet extends CoinServiceAPI {
           message = await receivePort.first;
           if (message is String) {
             stop(receivePort);
-            throw Exception("txHttpSend isolate failed");
+            throw Exception("message");
           }
           stop(receivePort);
           Logging.instance
