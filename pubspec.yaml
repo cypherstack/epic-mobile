@@ -163,6 +163,8 @@ flutter:
     - assets/images/splash.png
     - assets/icon/icon.png
 
+    - assets/png/
+
     - google_fonts/
     - assets/svg/circle-check.svg
     - assets/svg/plus.svg
@@ -261,6 +263,12 @@ flutter:
     - assets/svg/wallet.svg
     - assets/svg/change-now-logo.svg
     - assets/svg/pay.svg
+    - assets/svg/buy-credit-card.svg
+    - assets/svg/epic-layer.svg
+    - assets/svg/btc-layer.svg
+    - assets/svg/usdt-layer.svg
+    - assets/svg/bitcoin.svg
+    - assets/svg/dollar.svg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

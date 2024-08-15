@@ -177,6 +177,13 @@ class _SVG {
   // String get messageQuestion => "assets/svg/message-question-1.svg";
 
   String get epicBG => "assets/svg/epic-bg.svg";
+  String get buy => "assets/svg/buy-credit-card.svg";
+
+  String get epic => "assets/svg/epic-layer.svg";
+  String get btc => "assets/svg/btc-layer.svg";
+  String get usdt => "assets/svg/usdt-layer.svg";
+  String get bitcoin => "assets/svg/bitcoin.svg";
+  String get dollar => "assets/svg/dollar.svg";
 
   String iconFor({required Coin coin}) {
     switch (coin) {
@@ -194,6 +201,10 @@ class _PNG {
   String get epicFast => "assets/images/epic-fast.png";
   String get epicClouds => "assets/images/epic-clouds.png";
   String get epicWelcome => "assets/images/epic-welcome.png";
+
+  String get btc => "assets/png/btc.png";
+  String get usdt => "assets/png/usdt.png";
+  String get usdc => "assets/png/usdc.png";
 }
 
 class _ANIMATIONS {
