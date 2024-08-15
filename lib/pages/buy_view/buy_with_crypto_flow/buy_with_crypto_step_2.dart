@@ -158,53 +158,56 @@ class _BuyWithCryptoStep2State extends ConsumerState<BuyWithCryptoStep2> {
               activeCount: 2,
             ),
             actions: [
-              AppBarIconButton(
-                icon: Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF222227),
-                    borderRadius: BorderRadius.circular(40),
-                  ),
-                  child: Center(
-                    child: SvgPicture.asset(
-                      Assets.svg.arrowLeft,
-                      width: 24,
-                      height: 24,
-                      color: Theme.of(context)
-                          .extension<StackColors>()!
-                          .textMedium,
+              Padding(
+                padding: const EdgeInsets.only(right: 18.0),
+                child: AppBarIconButton(
+                  icon: Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF222227),
+                      borderRadius: BorderRadius.circular(40),
+                    ),
+                    child: Center(
+                      child: SvgPicture.asset(
+                        Assets.svg.paste,
+                        width: 24,
+                        height: 24,
+                        color: Theme.of(context)
+                            .extension<StackColors>()!
+                            .textMedium,
+                      ),
                     ),
                   ),
+                  onPressed: () async {
+                    final value = await Clipboard.getData("text/plain");
+
+                    num? number;
+                    try {
+                      number = NumberFormat.decimalPattern(
+                        ref.read(localeServiceChangeNotifierProvider).locale,
+                      ).parse(value!.text!);
+                    } catch (_) {
+                      number = null;
+                    }
+
+                    if (number == null) {
+                      return;
+                    }
+
+                    final decimal = Decimal.tryParse(number.toString());
+
+                    if (mounted && decimal != null) {
+                      setState(() {
+                        _amountString = Decimal.parse(
+                          decimal.toStringAsFixed(widget.option.fractionDigits),
+                        ).toString();
+                      });
+
+                      amountChanged();
+                    }
+                  },
                 ),
-                onPressed: () async {
-                  final value = await Clipboard.getData("text/plain");
-
-                  num? number;
-                  try {
-                    number = NumberFormat.decimalPattern(
-                      ref.read(localeServiceChangeNotifierProvider).locale,
-                    ).parse(value!.text!);
-                  } catch (_) {
-                    number = null;
-                  }
-
-                  if (number == null) {
-                    return;
-                  }
-
-                  final decimal = Decimal.tryParse(number.toString());
-
-                  if (mounted && decimal != null) {
-                    setState(() {
-                      _amountString = Decimal.parse(
-                        decimal.toStringAsFixed(widget.option.fractionDigits),
-                      ).toString();
-                    });
-
-                    amountChanged();
-                  }
-                },
               ),
             ],
           ),

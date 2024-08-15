@@ -269,6 +269,7 @@ flutter:
     - assets/svg/usdt-layer.svg
     - assets/svg/bitcoin.svg
     - assets/svg/dollar.svg
+    - assets/svg/paste.svg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

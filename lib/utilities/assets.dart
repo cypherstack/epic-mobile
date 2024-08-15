@@ -184,6 +184,7 @@ class _SVG {
   String get usdt => "assets/svg/usdt-layer.svg";
   String get bitcoin => "assets/svg/bitcoin.svg";
   String get dollar => "assets/svg/dollar.svg";
+  String get paste => "assets/svg/paste.svg";
 
   String iconFor({required Coin coin}) {
     switch (coin) {
