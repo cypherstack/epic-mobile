@@ -1,9 +1,14 @@
 // import 'package:epicpay/models/contact_address_entry.dart';
+import 'package:decimal/decimal.dart';
 import 'package:epicpay/models/exchange/incomplete_exchange.dart';
 import 'package:epicpay/models/paymint/transactions_model.dart';
 import 'package:epicpay/pages/add_wallet_views/create_restore_wallet_view.dart';
 import 'package:epicpay/pages/add_wallet_views/restore_wallet_view/restore_options_view/restore_options_view.dart';
 import 'package:epicpay/pages/add_wallet_views/restore_wallet_view/restore_wallet_view.dart';
+import 'package:epicpay/pages/buy_view/buy_view.dart';
+import 'package:epicpay/pages/buy_view/buy_with_crypto_flow/buy_with_crypto_step_1.dart';
+import 'package:epicpay/pages/buy_view/buy_with_crypto_flow/buy_with_crypto_step_2.dart';
+import 'package:epicpay/pages/buy_view/buy_with_crypto_flow/buy_with_crypto_step_3.dart';
 import 'package:epicpay/pages/exchange_view/edit_trade_note_view.dart';
 import 'package:epicpay/pages/exchange_view/exchange_step_views/confirm_send_details_view.dart';
 import 'package:epicpay/pages/exchange_view/exchange_step_views/step_1_view.dart';
@@ -45,6 +50,7 @@ import 'package:epicpay/pages/settings_views/wallet_settings/wallet_settings_vie
 import 'package:epicpay/pages/wallet_view/transaction_views/transaction_details_view.dart';
 import 'package:epicpay/pages/wallet_view/transaction_views/transaction_search_filter_view.dart';
 import 'package:epicpay/pages/wallet_view/wallet_view.dart';
+import 'package:epicpay/utilities/amount/amount.dart';
 import 'package:epicpay/utilities/enums/coin_enum.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -384,6 +390,61 @@ class RouteGenerator {
             builder: (_) => ReceiveView(
               walletId: args.item1,
               coin: args.item2,
+            ),
+            settings: RouteSettings(
+              name: settings.name,
+            ),
+          );
+        }
+        return _routeError("${settings.name} invalid args: ${args.toString()}");
+
+      case BuyView.routeName:
+        if (args is Tuple2<String, Coin>) {
+          return getRoute(
+            shouldUseMaterialRoute: useMaterialPageRoute,
+            builder: (_) => BuyView(
+              walletId: args.item1,
+              coin: args.item2,
+            ),
+            settings: RouteSettings(
+              name: settings.name,
+            ),
+          );
+        }
+        return _routeError("${settings.name} invalid args: ${args.toString()}");
+
+      case BuyWithCryptoStep1.routeName:
+        return getRoute(
+          shouldUseMaterialRoute: useMaterialPageRoute,
+          builder: (_) => const BuyWithCryptoStep1(),
+          settings: RouteSettings(
+            name: settings.name,
+          ),
+        );
+
+      case BuyWithCryptoStep2.routeName:
+        if (args is ({BuyOption option, Decimal min, Decimal max})) {
+          return getRoute(
+            shouldUseMaterialRoute: useMaterialPageRoute,
+            builder: (_) => BuyWithCryptoStep2(
+              option: args.option,
+              min: args.min,
+              max: args.max,
+            ),
+            settings: RouteSettings(
+              name: settings.name,
+            ),
+          );
+        }
+        return _routeError("${settings.name} invalid args: ${args.toString()}");
+
+      case BuyWithCryptoStep3.routeName:
+        if (args is ({BuyOption option, Amount amount})) {
+          return getRoute(
+            shouldUseMaterialRoute: useMaterialPageRoute,
+            builder: (_) => BuyWithCryptoStep3(
+              option: args.option,
+              amount: args.amount,
             ),
             settings: RouteSettings(
               name: settings.name,
