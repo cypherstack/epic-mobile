@@ -172,6 +172,42 @@ class STextStyles {
     }
   }
 
+  static TextStyle error2(BuildContext context) {
+    switch (_theme(context).themeType) {
+      case ThemeType.light:
+        return GoogleFonts.poppins(
+          color: _theme(context).accentColorRed,
+          fontWeight: FontWeight.w400,
+          fontSize: 12,
+          height: 16.8 / 12,
+        );
+      case ThemeType.dark:
+        return GoogleFonts.poppins(
+          color: _theme(context).accentColorRed,
+          fontWeight: FontWeight.w400,
+          fontSize: 12,
+          height: 16.8 / 12,
+        );
+    }
+  }
+
+  static TextStyle w600_40(BuildContext context) {
+    switch (_theme(context).themeType) {
+      case ThemeType.light:
+        return GoogleFonts.poppins(
+          color: _theme(context).textLight,
+          fontWeight: FontWeight.w600,
+          fontSize: 40,
+        );
+      case ThemeType.dark:
+        return GoogleFonts.poppins(
+          color: _theme(context).textLight,
+          fontWeight: FontWeight.w600,
+          fontSize: 40,
+        );
+    }
+  }
+
   static TextStyle subtitle(BuildContext context) {
     switch (_theme(context).themeType) {
       case ThemeType.light:
