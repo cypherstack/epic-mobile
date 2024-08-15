@@ -236,6 +236,14 @@ class _BuyWithCryptoStep3State extends ConsumerState<BuyWithCryptoStep3> {
                               maxLines: 3,
                               focusNode: _addressFocusNode,
                               style: STextStyles.body(context),
+                              onChanged: (newValue) {
+                                _address = newValue;
+
+                                setState(() {
+                                  _addressToggleFlag =
+                                      _address?.isNotEmpty == true;
+                                });
+                              },
                               decoration: InputDecoration(
                                 hintText: "Paste address...",
                                 hintStyle: STextStyles.body(context).copyWith(
