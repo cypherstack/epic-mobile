@@ -172,6 +172,25 @@ class STextStyles {
     }
   }
 
+  static TextStyle w400_12_18h(BuildContext context) {
+    switch (_theme(context).themeType) {
+      case ThemeType.light:
+        return GoogleFonts.poppins(
+          color: _theme(context).textMedium,
+          fontWeight: FontWeight.w400,
+          fontSize: 12,
+          height: 18 / 12,
+        );
+      case ThemeType.dark:
+        return GoogleFonts.poppins(
+          color: _theme(context).textMedium,
+          fontWeight: FontWeight.w400,
+          fontSize: 12,
+          height: 18 / 12,
+        );
+    }
+  }
+
   static TextStyle error2(BuildContext context) {
     switch (_theme(context).themeType) {
       case ThemeType.light:

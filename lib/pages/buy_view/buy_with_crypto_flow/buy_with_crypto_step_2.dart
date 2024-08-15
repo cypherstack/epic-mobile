@@ -2,29 +2,20 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:decimal/decimal.dart';
-import 'package:epicpay/db/isar/isar_db.dart';
-import 'package:epicpay/models/isar/models/exchange/currency.dart';
 import 'package:epicpay/pages/buy_view/buy_with_crypto_flow/buy_with_crypto_step_1.dart';
 import 'package:epicpay/pages/buy_view/buy_with_crypto_flow/buy_with_crypto_step_3.dart';
-import 'package:epicpay/pages/loading_view.dart';
 import 'package:epicpay/providers/global/locale_provider.dart';
-import 'package:epicpay/providers/global/wallet_provider.dart';
-import 'package:epicpay/services/swap/change_now/change_now_exchange.dart';
-import 'package:epicpay/services/swap/exchange_response.dart';
-import 'package:epicpay/utilities/amount/amount.dart';
 import 'package:epicpay/utilities/assets.dart';
 import 'package:epicpay/utilities/text_styles.dart';
 import 'package:epicpay/utilities/theme/stack_colors.dart';
 import 'package:epicpay/widgets/background.dart';
 import 'package:epicpay/widgets/custom_buttons/app_bar_icon_button.dart';
 import 'package:epicpay/widgets/desktop/primary_button.dart';
-import 'package:epicpay/widgets/ep_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
-import 'package:isar/isar.dart';
 
 class BuyWithCryptoStep2 extends ConsumerStatefulWidget {
   const BuyWithCryptoStep2({
@@ -111,102 +102,21 @@ class _BuyWithCryptoStep2State extends ConsumerState<BuyWithCryptoStep2> {
   }
 
   bool _getAQuoteLock = false;
-  Future<void> _getAQuote() async {
+  Future<void> _nextPressed() async {
     if (_getAQuoteLock) {
       return;
     }
     _getAQuoteLock = true;
 
-    print("===========================================");
-
     try {
-      const timeout = Duration(seconds: 5);
-
-      final address = await ref.read(walletProvider)!.currentReceivingAddress;
-
-      // todo : REQUIRED
-      final addressRefund = "";
-
-      final epic = ref
-          .read(pIsarDB)
-          .isar
-          .currencies
-          .filter()
-          .exchangeNameEqualTo(ChangeNowExchange.exchangeName)
-          .tickerEqualTo("epic")
-          .and()
-          .networkEqualTo("epic")
-          .and()
-          .nameEqualTo("EpicCash")
-          .findFirstSync();
-
-      final resultFuture = ChangeNowExchange.instance
-          .createTrade(
-            from: widget.option.currency!,
-            to: epic!,
-            fixedRate: false,
-            amount: Decimal.parse(_amountString),
-            addressTo: address,
-            addressRefund: addressRefund,
-            refundExtraId: "",
-            reversed: false,
-          )
-          .timeout(
-            timeout,
-            onTimeout: () => ExchangeResponse(
-              value: null,
-              exception: ExchangeException("Get Quote timeout"),
-            ),
-          );
-
       if (mounted) {
-        final result = await showLoading(
-          whileFuture: resultFuture,
-          context: context,
-          delay: const Duration(seconds: 1),
-          timeout: timeout,
+        await Navigator.of(context).pushNamed(
+          BuyWithCryptoStep3.routeName,
+          arguments: (
+            amount: Decimal.parse(_amountString),
+            option: widget.option,
+          ),
         );
-
-        if (mounted) {
-          if (result == null) {
-            unawaited(
-              showDialog<void>(
-                context: context,
-                builder: (context) => const EPErrorDialog(
-                  title: "Unknown error",
-                  info: "showLoading result should never be null",
-                ),
-              ),
-            );
-            return;
-          }
-
-          if (result.exception != null) {
-            unawaited(
-              showDialog<void>(
-                context: context,
-                builder: (context) => EPErrorDialog(
-                  title: "Buy error",
-                  info: result.exception!.message,
-                ),
-              ),
-            );
-            return;
-          }
-
-          if (result.value != null) {
-            await Navigator.of(context).pushNamed(
-              BuyWithCryptoStep3.routeName,
-              arguments: (
-                amount: Amount.fromDecimal(
-                  Decimal.parse(_amountString),
-                  fractionDigits: widget.option.fractionDigits,
-                ),
-                option: widget.option,
-              ),
-            );
-          }
-        }
       }
     } finally {
       _getAQuoteLock = false;
@@ -298,109 +208,150 @@ class _BuyWithCryptoStep2State extends ConsumerState<BuyWithCryptoStep2> {
               ),
             ],
           ),
-          body: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Text(
-                "I want to spend",
-                textAlign: TextAlign.center,
-                style: STextStyles.titleH3(context),
-              ),
-              SizedBox(
-                height: height < 600 ? 8 : 40,
-              ),
-              Text(
-                "$_amountString  ${widget.option.ticker}",
-                textAlign: TextAlign.center,
-                style: STextStyles.w600_40(context).copyWith(
-                  color: amountIsZero(_amountString)
-                      ? Theme.of(context).extension<StackColors>()!.textDark
-                      : Theme.of(context).extension<StackColors>()!.textLight,
+          body: LayoutBuilder(
+            builder: (context, constraints) => SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: constraints.maxHeight,
                 ),
-              ),
-              const SizedBox(
-                height: 2,
-              ),
-              Text(
-                _minMax,
-                style: STextStyles.error2(context),
-              ),
-              const SizedBox(
-                height: 10,
-              ),
-              Expanded(
-                child: Center(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(
-                      maxWidth: 300,
-                      maxHeight: 400,
-                    ),
-                    child: LayoutBuilder(builder: (context, constraints) {
-                      final spaceWidth =
-                          (min(constraints.maxWidth, 300) - (3 * 72)) / 2;
-                      final spaceHeight =
-                          (min(constraints.maxHeight, 400) - (4 * 72)) / 3;
+                child: IntrinsicHeight(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        "I want to spend",
+                        textAlign: TextAlign.center,
+                        style: STextStyles.titleH3(context),
+                      ),
+                      SizedBox(
+                        height: height < 600 ? 8 : 40,
+                      ),
+                      Text(
+                        "$_amountString  ${widget.option.ticker}",
+                        textAlign: TextAlign.center,
+                        style: STextStyles.w600_40(context).copyWith(
+                          color: amountIsZero(_amountString)
+                              ? Theme.of(context)
+                                  .extension<StackColors>()!
+                                  .textDark
+                              : Theme.of(context)
+                                  .extension<StackColors>()!
+                                  .textLight,
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 2,
+                      ),
+                      Text(
+                        _minMax,
+                        style: STextStyles.error2(context),
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      Expanded(
+                        child: Center(
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(
+                              maxWidth: 300,
+                              maxHeight: 400,
+                            ),
+                            child: Builder(builder: (context) {
+                              final spaceWidth =
+                                  (min(constraints.maxWidth, 300) - (3 * 72)) /
+                                      2;
+                              final spaceHeight =
+                                  (min(constraints.maxHeight, 400) - (4 * 72)) /
+                                      3;
 
-                      final space = min(spaceWidth, spaceHeight);
+                              final space = min(spaceWidth, spaceHeight);
 
-                      Widget spacer() => SizedBox(width: space, height: space);
+                              Widget spacer() =>
+                                  SizedBox(width: space, height: space);
 
-                      return Column(
-                        children: [
-                          Row(
-                            children: [
-                              _Button(value: "1", onPressed: () => append("1")),
-                              spacer(),
-                              _Button(value: "2", onPressed: () => append("2")),
-                              spacer(),
-                              _Button(value: "3", onPressed: () => append("3")),
-                            ],
+                              return Column(
+                                children: [
+                                  Row(
+                                    children: [
+                                      _Button(
+                                          value: "1",
+                                          onPressed: () => append("1")),
+                                      spacer(),
+                                      _Button(
+                                          value: "2",
+                                          onPressed: () => append("2")),
+                                      spacer(),
+                                      _Button(
+                                          value: "3",
+                                          onPressed: () => append("3")),
+                                    ],
+                                  ),
+                                  spacer(),
+                                  Row(
+                                    children: [
+                                      _Button(
+                                          value: "4",
+                                          onPressed: () => append("4")),
+                                      spacer(),
+                                      _Button(
+                                          value: "5",
+                                          onPressed: () => append("5")),
+                                      spacer(),
+                                      _Button(
+                                          value: "6",
+                                          onPressed: () => append("6")),
+                                    ],
+                                  ),
+                                  spacer(),
+                                  Row(
+                                    children: [
+                                      _Button(
+                                          value: "7",
+                                          onPressed: () => append("7")),
+                                      spacer(),
+                                      _Button(
+                                          value: "8",
+                                          onPressed: () => append("8")),
+                                      spacer(),
+                                      _Button(
+                                          value: "9",
+                                          onPressed: () => append("9")),
+                                    ],
+                                  ),
+                                  spacer(),
+                                  Row(
+                                    children: [
+                                      _Button(
+                                          value: ".",
+                                          onPressed: () => append(".")),
+                                      spacer(),
+                                      _Button(
+                                          value: "0",
+                                          onPressed: () => append("0")),
+                                      spacer(),
+                                      _Undo(onPressed: undo),
+                                    ],
+                                  ),
+                                ],
+                              );
+                            }),
                           ),
-                          spacer(),
-                          Row(
-                            children: [
-                              _Button(value: "4", onPressed: () => append("4")),
-                              spacer(),
-                              _Button(value: "5", onPressed: () => append("5")),
-                              spacer(),
-                              _Button(value: "6", onPressed: () => append("6")),
-                            ],
-                          ),
-                          spacer(),
-                          Row(
-                            children: [
-                              _Button(value: "7", onPressed: () => append("7")),
-                              spacer(),
-                              _Button(value: "8", onPressed: () => append("8")),
-                              spacer(),
-                              _Button(value: "9", onPressed: () => append("9")),
-                            ],
-                          ),
-                          spacer(),
-                          Row(
-                            children: [
-                              _Button(value: ".", onPressed: () => append(".")),
-                              spacer(),
-                              _Button(value: "0", onPressed: () => append("0")),
-                              spacer(),
-                              _Undo(onPressed: undo),
-                            ],
-                          ),
-                        ],
-                      );
-                    }),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: PrimaryButton(
+                          label: "NEXT",
+                          enabled: double.parse(_amountString) > 0 &&
+                              _minMax.isEmpty,
+                          onPressed: _nextPressed,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: PrimaryButton(
-                  label: "GET A QUOTE",
-                  enabled: double.parse(_amountString) > 0 && _minMax.isEmpty,
-                  onPressed: _getAQuote,
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),
