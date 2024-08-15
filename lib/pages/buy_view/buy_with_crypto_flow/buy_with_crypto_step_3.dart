@@ -220,158 +220,161 @@ class _BuyWithCryptoStep3State extends ConsumerState<BuyWithCryptoStep3> {
                       ),
                       RoundedContainer(
                         color: Theme.of(context).extension<StackColors>()!.coal,
-                        child: Column(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 6,
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
                           children: [
-                            TextField(
-                              key: const Key(
-                                "buyRefundAddressFieldKey",
-                              ),
-                              controller: controller,
-                              readOnly: false,
-                              autocorrect: false,
-                              enableSuggestions: false,
-                              focusNode: _addressFocusNode,
-                              style: STextStyles.body(context),
-                              onChanged: (newValue) {
-                                _address = newValue;
-
-                                setState(() {
-                                  _addressToggleFlag =
-                                      _address?.isNotEmpty == true;
-                                });
-                              },
-                              decoration: InputDecoration(
-                                hintText: "Paste address...",
-                                hintStyle: STextStyles.body(context).copyWith(
-                                  color: Theme.of(context)
-                                      .extension<StackColors>()!
-                                      .textMedium,
+                            Expanded(
+                              child: TextField(
+                                key: const Key(
+                                  "buyRefundAddressFieldKey",
                                 ),
-                                isCollapsed: true,
-                                border: InputBorder.none,
-                                focusColor: Colors.transparent,
-                                fillColor: Colors.transparent,
-                                filled: true,
-                                contentPadding: const EdgeInsets.symmetric(
-                                  vertical: 4,
-                                  horizontal: 4,
+                                controller: controller,
+                                readOnly: false,
+                                autocorrect: false,
+                                enableSuggestions: false,
+                                focusNode: _addressFocusNode,
+                                style: STextStyles.body(context),
+                                maxLines: 1,
+                                onChanged: (newValue) {
+                                  _address = newValue;
+
+                                  setState(() {
+                                    _addressToggleFlag =
+                                        _address?.isNotEmpty == true;
+                                  });
+                                },
+                                decoration: InputDecoration(
+                                  hintText: "Paste address...",
+                                  hintStyle: STextStyles.body(context).copyWith(
+                                    color: Theme.of(context)
+                                        .extension<StackColors>()!
+                                        .textMedium,
+                                  ),
+                                  isCollapsed: true,
+                                  border: InputBorder.none,
+                                  focusColor: Colors.transparent,
+                                  fillColor: Colors.transparent,
+                                  filled: true,
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    vertical: 4,
+                                    horizontal: 4,
+                                  ),
                                 ),
                               ),
                             ),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                _addressToggleFlag
-                                    ? TextFieldIconButton(
-                                        key: const Key(
-                                          "buyViewClearAddressFieldButtonKey",
-                                        ),
-                                        onTap: () {
-                                          controller.text = "";
-                                          _address = "";
-                                          setState(() {
-                                            _addressToggleFlag = false;
-                                          });
-                                        },
-                                        child: const XIcon(),
-                                      )
-                                    : TextFieldIconButton(
-                                        key: const Key(
-                                          "buyViewPasteAddressFieldButtonKey",
-                                        ),
-                                        onTap: () async {
-                                          final ClipboardData? data =
-                                              await Clipboard.getData(
-                                            Clipboard.kTextPlain,
-                                          );
-                                          if (data?.text != null &&
-                                              data!.text!.isNotEmpty) {
-                                            String content = data.text!.trim();
-                                            if (content.contains("\n")) {
-                                              content = content.substring(
-                                                  0, content.indexOf("\n"));
-                                            }
-                                            content = formatAddress(content);
-
-                                            controller.text = content;
-                                            _address = content;
-
-                                            setState(() {
-                                              _addressToggleFlag =
-                                                  controller.text.isNotEmpty;
-                                            });
-                                          }
-                                        },
-                                        child: controller.text.isEmpty
-                                            ? SvgPicture.asset(
-                                                Assets.svg.paste,
-                                                width: 24,
-                                                height: 24,
-                                              )
-                                            : const XIcon(),
-                                      ),
-                                TextFieldIconButton(
-                                  key: const Key("buyViewScanQrButtonKey"),
-                                  onTap: () async {
-                                    try {
-                                      if (FocusScope.of(context).hasFocus) {
-                                        FocusScope.of(context).unfocus();
-                                        await Future<void>.delayed(
-                                          const Duration(milliseconds: 75),
-                                        );
-                                      }
-
-                                      final qrResult =
-                                          await const BarcodeScannerWrapper()
-                                              .scan();
-
-                                      Logging.instance.log(
-                                        "qrResult content: ${qrResult.rawContent}",
-                                        level: LogLevel.Info,
+                            _addressToggleFlag
+                                ? TextFieldIconButton(
+                                    key: const Key(
+                                      "buyViewClearAddressFieldButtonKey",
+                                    ),
+                                    onTap: () {
+                                      controller.text = "";
+                                      _address = "";
+                                      setState(() {
+                                        _addressToggleFlag = false;
+                                      });
+                                    },
+                                    child: const XIcon(),
+                                  )
+                                : TextFieldIconButton(
+                                    key: const Key(
+                                      "buyViewPasteAddressFieldButtonKey",
+                                    ),
+                                    onTap: () async {
+                                      final ClipboardData? data =
+                                          await Clipboard.getData(
+                                        Clipboard.kTextPlain,
                                       );
+                                      if (data?.text != null &&
+                                          data!.text!.isNotEmpty) {
+                                        String content = data.text!.trim();
+                                        if (content.contains("\n")) {
+                                          content = content.substring(
+                                              0, content.indexOf("\n"));
+                                        }
+                                        content = formatAddress(content);
 
-                                      final results = AddressUtils.parseUri(
-                                        qrResult.rawContent,
-                                      );
-
-                                      Logging.instance.log(
-                                        "qrResult parsed: $results",
-                                        level: LogLevel.Info,
-                                      );
-
-                                      if (results.isNotEmpty &&
-                                          results["scheme"] == "epic") {
-                                        // auto fill address
-                                        _address = results["address"] ?? "";
-                                        controller.text = _address!;
-
-                                        setState(() {
-                                          _addressToggleFlag =
-                                              controller.text.isNotEmpty;
-                                        });
-
-                                        // now check for non standard encoded basic address
-                                      } else {
-                                        _address = qrResult.rawContent;
-                                        controller.text = _address ?? "";
+                                        controller.text = content;
+                                        _address = content;
 
                                         setState(() {
                                           _addressToggleFlag =
                                               controller.text.isNotEmpty;
                                         });
                                       }
-                                    } on PlatformException catch (e, s) {
-                                      // here we ignore the exception caused by not giving permission
-                                      // to use the camera to scan a qr code
-                                      Logging.instance.log(
-                                        "Failed to get camera permissions while trying to scan qr code in Buy flow: $e\n$s",
-                                        level: LogLevel.Warning,
-                                      );
-                                    }
-                                  },
-                                  child: const QrCodeIcon(),
-                                ),
-                              ],
+                                    },
+                                    child: controller.text.isEmpty
+                                        ? SvgPicture.asset(
+                                            Assets.svg.paste,
+                                            width: 24,
+                                            height: 24,
+                                          )
+                                        : const XIcon(),
+                                  ),
+                            TextFieldIconButton(
+                              key: const Key("buyViewScanQrButtonKey"),
+                              onTap: () async {
+                                try {
+                                  if (FocusScope.of(context).hasFocus) {
+                                    FocusScope.of(context).unfocus();
+                                    await Future<void>.delayed(
+                                      const Duration(milliseconds: 75),
+                                    );
+                                  }
+
+                                  final qrResult =
+                                      await const BarcodeScannerWrapper()
+                                          .scan();
+
+                                  Logging.instance.log(
+                                    "qrResult content: ${qrResult.rawContent}",
+                                    level: LogLevel.Info,
+                                  );
+
+                                  final results = AddressUtils.parseUri(
+                                    qrResult.rawContent,
+                                  );
+
+                                  Logging.instance.log(
+                                    "qrResult parsed: $results",
+                                    level: LogLevel.Info,
+                                  );
+
+                                  if (results.isNotEmpty &&
+                                      results["scheme"] == "epic") {
+                                    // auto fill address
+                                    _address = results["address"] ?? "";
+                                    controller.text = _address!;
+
+                                    setState(() {
+                                      _addressToggleFlag =
+                                          controller.text.isNotEmpty;
+                                    });
+
+                                    // now check for non standard encoded basic address
+                                  } else {
+                                    _address = qrResult.rawContent;
+                                    controller.text = _address ?? "";
+
+                                    setState(() {
+                                      _addressToggleFlag =
+                                          controller.text.isNotEmpty;
+                                    });
+                                  }
+                                } on PlatformException catch (e, s) {
+                                  // here we ignore the exception caused by not giving permission
+                                  // to use the camera to scan a qr code
+                                  Logging.instance.log(
+                                    "Failed to get camera permissions while trying to scan qr code in Buy flow: $e\n$s",
+                                    level: LogLevel.Warning,
+                                  );
+                                }
+                              },
+                              child: const QrCodeIcon(),
                             ),
                           ],
                         ),
