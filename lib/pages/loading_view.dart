@@ -57,6 +57,7 @@ Future<T?> showLoading<T>({
   bool opaqueBG = false,
   void Function(Exception)? onException,
   Duration? delay,
+  Duration? timeout,
 }) async {
   final size = MediaQuery.of(context).size;
   unawaited(
@@ -86,9 +87,15 @@ Future<T?> showLoading<T>({
 
   try {
     if (delay != null) {
-      result = await minWaitFuture(whileFuture, delay: delay);
+      result = timeout == null
+          ? await minWaitFuture<T?>(whileFuture, delay: delay)
+          : await minWaitFuture(whileFuture, delay: delay).timeout(timeout,
+              onTimeout: () => throw Exception("showLoading timed out"));
     } else {
-      result = await whileFuture;
+      result = timeout == null
+          ? await whileFuture
+          : await whileFuture.timeout(timeout,
+              onTimeout: () => throw Exception("showLoading timed out"));
     }
   } catch (e, s) {
     Logging.instance.log(

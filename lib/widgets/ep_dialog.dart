@@ -22,6 +22,7 @@ class EPDialogBase extends StatelessWidget {
           borderRadius: BorderRadius.circular(
             20,
           ),
+          color: Colors.transparent,
           child: Container(
             decoration: BoxDecoration(
               color: Theme.of(context).extension<StackColors>()!.popupBG,
@@ -94,6 +95,38 @@ class EPDialog extends StatelessWidget {
               ],
             )
         ],
+      ),
+    );
+  }
+}
+
+class EPErrorDialog extends StatelessWidget {
+  const EPErrorDialog({super.key, required this.title, this.info});
+  final String title;
+  final String? info;
+
+  @override
+  Widget build(BuildContext context) {
+    return EPDialogBase(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: [
+            Text(
+              title,
+              style: STextStyles.baseXS(context),
+            ),
+            if (info != null)
+              const SizedBox(
+                height: 16,
+              ),
+            if (info != null)
+              Text(
+                info!,
+                style: STextStyles.baseXS(context),
+              ),
+          ],
+        ),
       ),
     );
   }

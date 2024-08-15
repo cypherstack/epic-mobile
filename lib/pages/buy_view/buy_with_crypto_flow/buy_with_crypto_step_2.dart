@@ -164,12 +164,7 @@ class _BuyWithCryptoStep2State extends ConsumerState<BuyWithCryptoStep2> {
           whileFuture: resultFuture,
           context: context,
           delay: const Duration(seconds: 1),
-        ).timeout(
-          timeout,
-          onTimeout: () => ExchangeResponse(
-            value: null,
-            exception: ExchangeException("showLoading timeout"),
-          ),
+          timeout: timeout,
         );
 
         if (mounted) {
@@ -177,7 +172,7 @@ class _BuyWithCryptoStep2State extends ConsumerState<BuyWithCryptoStep2> {
             unawaited(
               showDialog<void>(
                 context: context,
-                builder: (context) => const EPDialog(
+                builder: (context) => const EPErrorDialog(
                   title: "Unknown error",
                   info: "showLoading result should never be null",
                 ),
@@ -190,7 +185,7 @@ class _BuyWithCryptoStep2State extends ConsumerState<BuyWithCryptoStep2> {
             unawaited(
               showDialog<void>(
                 context: context,
-                builder: (context) => EPDialog(
+                builder: (context) => EPErrorDialog(
                   title: "Buy error",
                   info: result.exception!.message,
                 ),
