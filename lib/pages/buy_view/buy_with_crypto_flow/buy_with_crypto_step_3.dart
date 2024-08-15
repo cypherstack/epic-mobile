@@ -20,7 +20,6 @@ import 'package:epicpay/widgets/background.dart';
 import 'package:epicpay/widgets/custom_buttons/app_bar_icon_button.dart';
 import 'package:epicpay/widgets/desktop/primary_button.dart';
 import 'package:epicpay/widgets/ep_dialog.dart';
-import 'package:epicpay/widgets/icon_widgets/clipboard_icon.dart';
 import 'package:epicpay/widgets/icon_widgets/qrcode_icon.dart';
 import 'package:epicpay/widgets/icon_widgets/x_icon.dart';
 import 'package:epicpay/widgets/rounded_container.dart';
@@ -231,9 +230,6 @@ class _BuyWithCryptoStep3State extends ConsumerState<BuyWithCryptoStep3> {
                               readOnly: false,
                               autocorrect: false,
                               enableSuggestions: false,
-                              keyboardType: TextInputType.multiline,
-                              minLines: 3,
-                              maxLines: 3,
                               focusNode: _addressFocusNode,
                               style: STextStyles.body(context),
                               onChanged: (newValue) {
@@ -307,7 +303,11 @@ class _BuyWithCryptoStep3State extends ConsumerState<BuyWithCryptoStep3> {
                                           }
                                         },
                                         child: controller.text.isEmpty
-                                            ? const ClipboardIcon()
+                                            ? SvgPicture.asset(
+                                                Assets.svg.paste,
+                                                width: 24,
+                                                height: 24,
+                                              )
                                             : const XIcon(),
                                       ),
                                 TextFieldIconButton(
