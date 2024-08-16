@@ -31,6 +31,7 @@ class ChangeNowExchange extends Exchange {
     required String refundExtraId,
     Estimate? estimate,
     required bool reversed,
+    required bool zBuy,
   }) async {
     final result = await ChangeNowAPI.instance.createExchangeTransaction(
       from: from,
@@ -69,6 +70,7 @@ class ChangeNowExchange extends Exchange {
         updatedAt: DateTime.now().toIso8601String(),
         payinHash: null,
         payoutHash: null,
+        zBuy: zBuy,
       );
     }
 

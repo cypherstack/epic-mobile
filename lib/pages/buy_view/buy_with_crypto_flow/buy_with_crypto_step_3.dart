@@ -89,6 +89,7 @@ class _BuyWithCryptoStep3State extends ConsumerState<BuyWithCryptoStep3> {
             addressRefund: _address!,
             refundExtraId: "",
             reversed: false,
+            zBuy: true,
           )
           .timeout(
             timeout,

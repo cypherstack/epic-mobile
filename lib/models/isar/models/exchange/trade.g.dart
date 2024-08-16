@@ -121,6 +121,11 @@ const TradeSchema = CollectionSchema(
       id: 20,
       name: r'updatedAt',
       type: IsarType.string,
+    ),
+    r'zBuy': PropertySchema(
+      id: 21,
+      name: r'zBuy',
+      type: IsarType.bool,
     )
   },
   estimateSize: _tradeEstimateSize,
@@ -232,6 +237,7 @@ void _tradeSerialize(
   writer.writeString(offsets[18], object.tradeId);
   writer.writeString(offsets[19], object.type);
   writer.writeString(offsets[20], object.updatedAt);
+  writer.writeBool(offsets[21], object.zBuy);
 }
 
 Trade _tradeDeserialize(
@@ -261,6 +267,7 @@ Trade _tradeDeserialize(
     tradeId: reader.readString(offsets[18]),
     type: reader.readString(offsets[19]),
     updatedAt: reader.readStringOrNull(offsets[20]),
+    zBuy: reader.readBoolOrNull(offsets[21]),
   );
   object.id = id;
   return object;
@@ -315,6 +322,8 @@ P _tradeDeserializeProp<P>(
       return (reader.readString(offset)) as P;
     case 20:
       return (reader.readStringOrNull(offset)) as P;
+    case 21:
+      return (reader.readBoolOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
   }
@@ -3352,6 +3361,31 @@ extension TradeQueryFilter on QueryBuilder<Trade, Trade, QFilterCondition> {
       ));
     });
   }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> zBuyIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'zBuy',
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> zBuyIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'zBuy',
+      ));
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterFilterCondition> zBuyEqualTo(bool? value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'zBuy',
+        value: value,
+      ));
+    });
+  }
 }
 
 extension TradeQueryObject on QueryBuilder<Trade, Trade, QFilterCondition> {}
@@ -3608,6 +3642,18 @@ extension TradeQuerySortBy on QueryBuilder<Trade, Trade, QSortBy> {
   QueryBuilder<Trade, Trade, QAfterSortBy> sortByUpdatedAtDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'updatedAt', Sort.desc);
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterSortBy> sortByZBuy() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'zBuy', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterSortBy> sortByZBuyDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'zBuy', Sort.desc);
     });
   }
 }
@@ -3876,6 +3922,18 @@ extension TradeQuerySortThenBy on QueryBuilder<Trade, Trade, QSortThenBy> {
       return query.addSortBy(r'updatedAt', Sort.desc);
     });
   }
+
+  QueryBuilder<Trade, Trade, QAfterSortBy> thenByZBuy() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'zBuy', Sort.asc);
+    });
+  }
+
+  QueryBuilder<Trade, Trade, QAfterSortBy> thenByZBuyDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'zBuy', Sort.desc);
+    });
+  }
 }
 
 extension TradeQueryWhereDistinct on QueryBuilder<Trade, Trade, QDistinct> {
@@ -4028,6 +4086,12 @@ extension TradeQueryWhereDistinct on QueryBuilder<Trade, Trade, QDistinct> {
       return query.addDistinctBy(r'updatedAt', caseSensitive: caseSensitive);
     });
   }
+
+  QueryBuilder<Trade, Trade, QDistinct> distinctByZBuy() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'zBuy');
+    });
+  }
 }
 
 extension TradeQueryProperty on QueryBuilder<Trade, Trade, QQueryProperty> {
@@ -4160,6 +4224,12 @@ extension TradeQueryProperty on QueryBuilder<Trade, Trade, QQueryProperty> {
   QueryBuilder<Trade, String?, QQueryOperations> updatedAtProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'updatedAt');
+    });
+  }
+
+  QueryBuilder<Trade, bool?, QQueryOperations> zBuyProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'zBuy');
     });
   }
 }

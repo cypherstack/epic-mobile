@@ -1,3 +1,4 @@
+import 'package:epicpay/db/isar/isar_db.dart';
 import 'package:epicpay/models/isar/models/exchange/trade.dart';
 import 'package:epicpay/pages/buy_view/buy_with_crypto_flow/buy_with_crypto_step_1.dart';
 import 'package:epicpay/pages/buy_view/confirm_buy_view.dart';
@@ -30,6 +31,29 @@ class BuyWithCryptoStep4 extends ConsumerStatefulWidget {
 }
 
 class _BuyWithCryptoStep4State extends ConsumerState<BuyWithCryptoStep4> {
+  bool _acceptPressedLock = false;
+
+  void _acceptPressed() async {
+    if (_acceptPressedLock) {
+      return;
+    }
+    _acceptPressedLock = true;
+    try {
+      await ref.read(pIsarDB).isar.writeTxn(() async {
+        await ref.read(pIsarDB).isar.trades.put(widget.trade);
+      });
+
+      if (mounted) {
+        await Navigator.of(context).pushNamed(
+          ConfirmBuyView.routeName,
+          arguments: widget.trade,
+        );
+      }
+    } finally {
+      _acceptPressedLock = false;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
@@ -139,12 +163,7 @@ class _BuyWithCryptoStep4State extends ConsumerState<BuyWithCryptoStep4> {
                       ),
                       PrimaryButton(
                         label: "ACCEPT QUOTE",
-                        onPressed: () {
-                          Navigator.of(context).pushNamed(
-                            ConfirmBuyView.routeName,
-                            arguments: widget.trade,
-                          );
-                        },
+                        onPressed: _acceptPressed,
                       ),
                     ],
                   ),

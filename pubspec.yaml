@@ -84,7 +84,7 @@ dependencies:
   keyboard_dismisser: ^3.0.0
   tuple: ^2.0.0
   flutter_riverpod: ^1.0.3
-  qr_flutter: ^4.0.0
+  qr_flutter: 4.0.0
   share_plus: ^7.0.2
   package_info_plus: ^4.0.2
   lottie: ^2.3.2

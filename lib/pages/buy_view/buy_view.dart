@@ -5,6 +5,7 @@ import 'package:epicpay/utilities/constants.dart';
 import 'package:epicpay/utilities/enums/coin_enum.dart';
 import 'package:epicpay/utilities/text_styles.dart';
 import 'package:epicpay/utilities/theme/stack_colors.dart';
+import 'package:epicpay/widgets/rounded_white_container.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -92,10 +93,6 @@ class _BuyViewState extends State<BuyView> {
               }
             },
           ),
-          // child: PrimaryButton(
-          //   label: "BUY WITH CRYPTO",
-          //   onPressed: _onBuyWithCryptoPressed,
-          // ),
         ),
         SizedBox(
           height: height < 600 ? 4 : 16,
@@ -105,34 +102,26 @@ class _BuyViewState extends State<BuyView> {
           child: _FiatButton(
             onPressed: null, //_onBuyWithFiatPressed,
           ),
-          // child: SecondaryButton(
-          //   label: "BUY WITH FIAT - COMING SOON",
-          //   enabled: false,
-          //   onPressed: _onBuyWithFiatPressed,
-          // ),
         ),
-        // SizedBox(
-        //   height: height < 600 ? 8 : 20,
-        // ),
-        // Expanded(
-        //   child: ListView.separated(
-        //     itemBuilder: (context, index) => Padding(
-        //       padding: const EdgeInsets.symmetric(
-        //         horizontal: 16,
-        //         vertical: 2,
-        //       ),
-        //       child: Container(
-        //         color: Colors.blueGrey,
-        //         width: 50,
-        //         height: 50,
-        //       ),
-        //     ),
-        //     separatorBuilder: (context, index) => const SizedBox(
-        //       height: 6,
-        //     ),
-        //     itemCount: 20,
-        //   ),
-        // ),
+        SizedBox(
+          height: height < 600 ? 10 : 32,
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Text(
+            "PREVIOUS QUOTES",
+            style: STextStyles.overLineBold(context),
+          ),
+        ),
+        SizedBox(
+          height: height < 600 ? 4 : 16,
+        ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: RoundedWhiteContainer(
+            child: Text("PLACEHOLDER"),
+          ),
+        ),
       ],
     );
   }

@@ -330,6 +330,7 @@ class _Step3ViewState extends ConsumerState<Step3View> {
                                               refundExtraId: "",
                                               estimate: model.estimate,
                                               reversed: model.reversed,
+                                              zBuy: false,
                                             );
 
                                     if (response.value == null) {

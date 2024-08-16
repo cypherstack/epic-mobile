@@ -75,5 +75,6 @@ abstract class Exchange {
     required String refundExtraId,
     Estimate? estimate,
     required bool reversed,
+    required bool zBuy,
   });
 }

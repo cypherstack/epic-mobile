@@ -142,6 +142,8 @@ class _ExchangeViewState extends ConsumerState<ExchangeView> {
                   .isar
                   .trades
                   .where()
+                  .filter()
+                  .group((q) => q.zBuyIsNull().or().zBuyEqualTo(false))
                   .sortByTimestampUTCDesc()
                   .idProperty()
                   .findAllSync();
