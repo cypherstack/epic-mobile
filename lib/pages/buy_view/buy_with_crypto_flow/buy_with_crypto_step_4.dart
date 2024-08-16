@@ -1,5 +1,6 @@
 import 'package:epicpay/models/isar/models/exchange/trade.dart';
 import 'package:epicpay/pages/buy_view/buy_with_crypto_flow/buy_with_crypto_step_1.dart';
+import 'package:epicpay/pages/buy_view/confirm_buy_view.dart';
 import 'package:epicpay/utilities/assets.dart';
 import 'package:epicpay/utilities/text_styles.dart';
 import 'package:epicpay/utilities/theme/stack_colors.dart';
@@ -32,9 +33,6 @@ class _BuyWithCryptoStep4State extends ConsumerState<BuyWithCryptoStep4> {
   @override
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
-
-    print("============================================================");
-    print(widget.trade);
 
     return Background(
       child: Scaffold(
@@ -141,8 +139,12 @@ class _BuyWithCryptoStep4State extends ConsumerState<BuyWithCryptoStep4> {
                       ),
                       PrimaryButton(
                         label: "ACCEPT QUOTE",
-                        enabled: false,
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.of(context).pushNamed(
+                            ConfirmBuyView.routeName,
+                            arguments: widget.trade,
+                          );
+                        },
                       ),
                     ],
                   ),

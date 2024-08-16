@@ -11,6 +11,7 @@ import 'package:epicpay/pages/buy_view/buy_with_crypto_flow/buy_with_crypto_step
 import 'package:epicpay/pages/buy_view/buy_with_crypto_flow/buy_with_crypto_step_2.dart';
 import 'package:epicpay/pages/buy_view/buy_with_crypto_flow/buy_with_crypto_step_3.dart';
 import 'package:epicpay/pages/buy_view/buy_with_crypto_flow/buy_with_crypto_step_4.dart';
+import 'package:epicpay/pages/buy_view/confirm_buy_view.dart';
 import 'package:epicpay/pages/exchange_view/edit_trade_note_view.dart';
 import 'package:epicpay/pages/exchange_view/exchange_step_views/confirm_send_details_view.dart';
 import 'package:epicpay/pages/exchange_view/exchange_step_views/step_1_view.dart';
@@ -461,6 +462,20 @@ class RouteGenerator {
             builder: (_) => BuyWithCryptoStep4(
               option: args.option,
               trade: args.trade,
+            ),
+            settings: RouteSettings(
+              name: settings.name,
+            ),
+          );
+        }
+        return _routeError("${settings.name} invalid args: ${args.toString()}");
+
+      case ConfirmBuyView.routeName:
+        if (args is Trade) {
+          return getRoute(
+            shouldUseMaterialRoute: useMaterialPageRoute,
+            builder: (_) => ConfirmBuyView(
+              trade: args,
             ),
             settings: RouteSettings(
               name: settings.name,

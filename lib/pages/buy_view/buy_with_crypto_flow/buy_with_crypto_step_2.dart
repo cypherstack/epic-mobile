@@ -175,7 +175,7 @@ class _BuyWithCryptoStep2State extends ConsumerState<BuyWithCryptoStep2> {
                         height: 24,
                         color: Theme.of(context)
                             .extension<StackColors>()!
-                            .textMedium,
+                            .topNavIconPrimary,
                       ),
                     ),
                   ),
