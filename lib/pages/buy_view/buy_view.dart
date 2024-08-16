@@ -167,40 +167,40 @@ class _CryptoButton extends StatelessWidget {
             ),
           ),
           Positioned(
-            top: -12,
+            top: -2,
             right: 100,
-            child: IgnorePointer(
-              child: SizedBox(
-                width: 81.52,
-                height: 94,
-                child: SvgPicture.asset(
-                  Assets.svg.epic,
-                ),
-              ),
-            ),
-          ),
-          Positioned(
-            top: -4,
-            right: -12,
             child: IgnorePointer(
               child: SizedBox(
                 width: 101.2,
                 height: 88,
                 child: SvgPicture.asset(
-                  Assets.svg.usdt,
+                  Assets.svg.layerUsdt,
                 ),
               ),
             ),
           ),
           Positioned(
-            bottom: -10,
-            right: 40,
+            top: -10,
+            right: 0,
+            child: IgnorePointer(
+              child: SizedBox(
+                width: 90,
+                height: 90,
+                child: SvgPicture.asset(
+                  Assets.svg.layerUsdc,
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: -8,
+            right: 49,
             child: IgnorePointer(
               child: SizedBox(
                 width: 91,
                 height: 91,
                 child: SvgPicture.asset(
-                  Assets.svg.btc,
+                  Assets.svg.layerBtc,
                 ),
               ),
             ),
@@ -217,6 +217,9 @@ class _CryptoButton extends StatelessWidget {
                       height: 32,
                       child: SvgPicture.asset(
                         Assets.svg.bitcoin,
+                        color: Theme.of(context)
+                            .extension<StackColors>()!
+                            .textGold,
                       ),
                     ),
                     const Spacer(),
@@ -272,14 +275,40 @@ class _FiatButton extends StatelessWidget {
             ),
           ),
           Positioned(
-            bottom: -8,
-            right: 10,
+            top: -8,
+            right: 80,
+            child: IgnorePointer(
+              child: SizedBox(
+                width: 91,
+                height: 91,
+                child: SvgPicture.asset(
+                  Assets.svg.layerDollar,
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            top: 13,
+            right: -14,
             child: IgnorePointer(
               child: SizedBox(
                 width: 92,
                 height: 106,
                 child: SvgPicture.asset(
-                  Assets.svg.epicBG,
+                  Assets.svg.layerEpic,
+                ),
+              ),
+            ),
+          ),
+          Positioned(
+            bottom: -20,
+            right: 65,
+            child: IgnorePointer(
+              child: SizedBox(
+                width: 91,
+                height: 91,
+                child: SvgPicture.asset(
+                  Assets.svg.layerEuro,
                 ),
               ),
             ),
@@ -295,7 +324,10 @@ class _FiatButton extends StatelessWidget {
                       width: 32,
                       height: 32,
                       child: SvgPicture.asset(
-                        Assets.svg.bitcoin,
+                        Assets.svg.dollar,
+                        color: Theme.of(context)
+                            .extension<StackColors>()!
+                            .textDark,
                       ),
                     ),
                     const Spacer(),
