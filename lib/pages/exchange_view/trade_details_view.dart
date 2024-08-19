@@ -64,6 +64,7 @@ class TradeDetailsView extends ConsumerStatefulWidget {
     required this.transactionIfSentFromStack,
     required this.walletId,
     required this.walletName,
+    required this.isBuy,
     this.clipboard = const ClipboardWrapper(),
   }) : super(key: key);
 
@@ -74,6 +75,7 @@ class TradeDetailsView extends ConsumerStatefulWidget {
   final Transaction? transactionIfSentFromStack;
   final String? walletId;
   final String? walletName;
+  final bool isBuy;
 
   @override
   ConsumerState<TradeDetailsView> createState() => _TradeDetailsViewState();
@@ -252,7 +254,7 @@ class _TradeDetailsViewState extends ConsumerState<TradeDetailsView> {
           ),
           centerTitle: true,
           title: Text(
-            "Trade details",
+            widget.isBuy ? "Buy details" : "Trade details",
             style: STextStyles.titleH4(context),
           ),
           actions: [
@@ -542,7 +544,7 @@ class _TradeDetailsViewState extends ConsumerState<TradeDetailsView> {
                               height: divHeight,
                             ),
                             _DetailsItem(
-                              title: "TRADE ID",
+                              title: widget.isBuy ? "BUY ID" : "TRADE ID",
                               data: trade.tradeId,
                               isTapCopy: true,
                             ),

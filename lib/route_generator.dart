@@ -649,6 +649,7 @@ class RouteGenerator {
           Transaction? transactionIfSentFromStack,
           String? walletId,
           String? walletName,
+          bool isBuy,
         })) {
           return getRoute(
             shouldUseMaterialRoute: useMaterialPageRoute,
@@ -657,6 +658,7 @@ class RouteGenerator {
               walletName: args.walletName,
               tradeId: args.tradeId,
               transactionIfSentFromStack: args.transactionIfSentFromStack,
+              isBuy: args.isBuy,
             ),
             settings: RouteSettings(
               name: settings.name,

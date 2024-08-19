@@ -3,15 +3,14 @@ import 'dart:async';
 import 'package:epicpay/db/isar/isar_db.dart';
 import 'package:epicpay/models/isar/models/exchange/trade.dart';
 import 'package:epicpay/pages/buy_view/buy_with_crypto_flow/buy_with_crypto_step_1.dart';
-import 'package:epicpay/pages/exchange_view/trade_details_view.dart';
 import 'package:epicpay/utilities/assets.dart';
 import 'package:epicpay/utilities/clipboard_interface.dart';
 import 'package:epicpay/utilities/constants.dart';
 import 'package:epicpay/utilities/enums/coin_enum.dart';
 import 'package:epicpay/utilities/text_styles.dart';
 import 'package:epicpay/utilities/theme/stack_colors.dart';
+import 'package:epicpay/widgets/buy_card.dart';
 import 'package:epicpay/widgets/conditional_parent.dart';
-import 'package:epicpay/widgets/trade_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -59,7 +58,7 @@ class _BuyViewState extends ConsumerState<BuyView> {
     }
     _onBuyWithFiatLock = true;
     try {
-      // do stuff
+      // do stuff ion the future
     } finally {
       _onBuyWithFiatLock = false;
     }
@@ -79,7 +78,7 @@ class _BuyViewState extends ConsumerState<BuyView> {
     final height = MediaQuery.of(context).size.height;
 
     return NestedScrollView(
-      floatHeaderSlivers: true,
+      floatHeaderSlivers: false,
       headerSliverBuilder: (context, innerBoxIsScrolled) {
         return [
           SliverOverlapAbsorber(
@@ -200,22 +199,12 @@ class _BuyViewState extends ConsumerState<BuyView> {
                                 padding: const EdgeInsets.only(top: 16),
                                 child: child,
                               ),
-                              child: TradeCard(
-                                  key: Key(
-                                    "tradeCard_${trade.tradeId + trade.updatedAt.toString()}",
-                                  ),
-                                  trade: trade,
-                                  onTap: () async {
-                                    await Navigator.of(context).pushNamed(
-                                      TradeDetailsView.routeName,
-                                      arguments: (
-                                        tradeId: trade.tradeId,
-                                        transactionIfSentFromStack: null,
-                                        walletId: null,
-                                        walletName: null,
-                                      ),
-                                    );
-                                  }),
+                              child: BuyCard(
+                                key: Key(
+                                  "buyCard_${trade.tradeId + trade.updatedAt.toString()}",
+                                ),
+                                trade: trade,
+                              ),
                             );
                           },
                         );
