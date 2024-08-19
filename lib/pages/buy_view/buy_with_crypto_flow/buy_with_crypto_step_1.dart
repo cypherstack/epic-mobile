@@ -246,7 +246,7 @@ class StepIndicatorRow extends StatelessWidget {
   const StepIndicatorRow({
     super.key,
     required this.activeCount,
-  }) : assert(activeCount >= 0 && activeCount <= 4);
+  }) : assert(activeCount >= 0 && activeCount <= 3);
 
   final int activeCount;
 
@@ -282,14 +282,6 @@ class StepIndicatorRow extends StatelessWidget {
             width: 6,
             height: 6,
             color: activeCount > 2 ? on : off,
-          ),
-          const SizedBox(
-            width: 5,
-          ),
-          RoundedContainer(
-            width: 6,
-            height: 6,
-            color: activeCount > 3 ? on : off,
           ),
         ],
       ),

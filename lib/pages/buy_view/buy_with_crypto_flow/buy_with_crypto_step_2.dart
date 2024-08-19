@@ -2,20 +2,27 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:decimal/decimal.dart';
+import 'package:epicpay/db/isar/isar_db.dart';
+import 'package:epicpay/models/isar/models/exchange/currency.dart';
 import 'package:epicpay/pages/buy_view/buy_with_crypto_flow/buy_with_crypto_step_1.dart';
 import 'package:epicpay/pages/buy_view/buy_with_crypto_flow/buy_with_crypto_step_3.dart';
+import 'package:epicpay/pages/loading_view.dart';
 import 'package:epicpay/providers/global/locale_provider.dart';
+import 'package:epicpay/services/swap/change_now/change_now_exchange.dart';
+import 'package:epicpay/services/swap/exchange_response.dart';
 import 'package:epicpay/utilities/assets.dart';
 import 'package:epicpay/utilities/text_styles.dart';
 import 'package:epicpay/utilities/theme/stack_colors.dart';
 import 'package:epicpay/widgets/background.dart';
 import 'package:epicpay/widgets/custom_buttons/app_bar_icon_button.dart';
 import 'package:epicpay/widgets/desktop/primary_button.dart';
+import 'package:epicpay/widgets/ep_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
+import 'package:isar/isar.dart';
 
 class BuyWithCryptoStep2 extends ConsumerStatefulWidget {
   const BuyWithCryptoStep2({
@@ -109,14 +116,99 @@ class _BuyWithCryptoStep2State extends ConsumerState<BuyWithCryptoStep2> {
     _getAQuoteLock = true;
 
     try {
+      const timeout = Duration(seconds: 5);
+
+      final amount = Decimal.parse(_amountString);
+
+      final epic = ref
+          .read(pIsarDB)
+          .isar
+          .currencies
+          .filter()
+          .exchangeNameEqualTo(ChangeNowExchange.exchangeName)
+          .tickerEqualTo("epic")
+          .and()
+          .networkEqualTo("epic")
+          .and()
+          .nameEqualTo("EpicCash")
+          .findFirstSync();
+
+      final resultFuture = ChangeNowExchange.instance
+          .getEstimate(
+            widget.option.currency!,
+            epic!,
+            amount,
+            false,
+            false,
+          )
+          .timeout(
+            timeout,
+            onTimeout: () => ExchangeResponse(
+              value: null,
+              exception: ExchangeException("Get Quote timeout"),
+            ),
+          );
+
       if (mounted) {
-        await Navigator.of(context).pushNamed(
-          BuyWithCryptoStep3.routeName,
-          arguments: (
-            amount: Decimal.parse(_amountString),
-            option: widget.option,
-          ),
+        final result = await showLoading(
+          whileFuture: resultFuture,
+          context: context,
+          delay: const Duration(seconds: 1),
+          timeout: timeout,
         );
+
+        if (mounted) {
+          if (result == null) {
+            unawaited(
+              showDialog<void>(
+                context: context,
+                builder: (context) => const EPErrorDialog(
+                  title: "Unknown error",
+                  info: "showLoading result should never be null",
+                ),
+              ),
+            );
+            return;
+          }
+
+          if (result.exception != null) {
+            unawaited(
+              showDialog<void>(
+                context: context,
+                builder: (context) => EPErrorDialog(
+                  title: "Buy error",
+                  info: result.exception!.message,
+                ),
+              ),
+            );
+            return;
+          }
+
+          final estimates = result.value;
+
+          if (estimates != null) {
+            if (estimates.isEmpty) {
+              unawaited(
+                showDialog<void>(
+                  context: context,
+                  builder: (context) => const EPErrorDialog(
+                    title: "Buy error",
+                    info: "ChangeNOW provided no estimate",
+                  ),
+                ),
+              );
+              return;
+            }
+
+            await Navigator.of(context).pushNamed(
+              BuyWithCryptoStep3.routeName,
+              arguments: (
+                estimate: estimates.first,
+                option: widget.option,
+              ),
+            );
+          }
+        }
       }
     } finally {
       _getAQuoteLock = false;

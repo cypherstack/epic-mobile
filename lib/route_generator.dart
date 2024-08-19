@@ -1,5 +1,6 @@
 // import 'package:epicpay/models/contact_address_entry.dart';
 import 'package:decimal/decimal.dart';
+import 'package:epicpay/models/exchange/estimate.dart';
 import 'package:epicpay/models/exchange/incomplete_exchange.dart';
 import 'package:epicpay/models/isar/models/exchange/trade.dart';
 import 'package:epicpay/models/paymint/transactions_model.dart';
@@ -7,10 +8,10 @@ import 'package:epicpay/pages/add_wallet_views/create_restore_wallet_view.dart';
 import 'package:epicpay/pages/add_wallet_views/restore_wallet_view/restore_options_view/restore_options_view.dart';
 import 'package:epicpay/pages/add_wallet_views/restore_wallet_view/restore_wallet_view.dart';
 import 'package:epicpay/pages/buy_view/buy_view.dart';
+import 'package:epicpay/pages/buy_view/buy_with_crypto_flow/buy_refund_address_entry.dart';
 import 'package:epicpay/pages/buy_view/buy_with_crypto_flow/buy_with_crypto_step_1.dart';
 import 'package:epicpay/pages/buy_view/buy_with_crypto_flow/buy_with_crypto_step_2.dart';
 import 'package:epicpay/pages/buy_view/buy_with_crypto_flow/buy_with_crypto_step_3.dart';
-import 'package:epicpay/pages/buy_view/buy_with_crypto_flow/buy_with_crypto_step_4.dart';
 import 'package:epicpay/pages/buy_view/confirm_buy_view.dart';
 import 'package:epicpay/pages/exchange_view/edit_trade_note_view.dart';
 import 'package:epicpay/pages/exchange_view/exchange_step_views/confirm_send_details_view.dart';
@@ -441,12 +442,12 @@ class RouteGenerator {
         return _routeError("${settings.name} invalid args: ${args.toString()}");
 
       case BuyWithCryptoStep3.routeName:
-        if (args is ({BuyOption option, Decimal amount})) {
+        if (args is ({BuyOption option, Estimate estimate})) {
           return getRoute(
             shouldUseMaterialRoute: useMaterialPageRoute,
             builder: (_) => BuyWithCryptoStep3(
               option: args.option,
-              amount: args.amount,
+              estimate: args.estimate,
             ),
             settings: RouteSettings(
               name: settings.name,
@@ -455,13 +456,13 @@ class RouteGenerator {
         }
         return _routeError("${settings.name} invalid args: ${args.toString()}");
 
-      case BuyWithCryptoStep4.routeName:
-        if (args is ({BuyOption option, Trade trade})) {
+      case BuyRefundAddressEntry.routeName:
+        if (args is ({BuyOption option, Estimate estimate})) {
           return getRoute(
             shouldUseMaterialRoute: useMaterialPageRoute,
-            builder: (_) => BuyWithCryptoStep4(
+            builder: (_) => BuyRefundAddressEntry(
               option: args.option,
-              trade: args.trade,
+              estimate: args.estimate,
             ),
             settings: RouteSettings(
               name: settings.name,
