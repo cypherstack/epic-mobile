@@ -426,13 +426,19 @@ class RouteGenerator {
         );
 
       case BuyWithCryptoStep2.routeName:
-        if (args is ({BuyOption option, Decimal min, Decimal max})) {
+        if (args is ({
+          BuyOption option,
+          Decimal min,
+          Decimal max,
+          Decimal usdtRate
+        })) {
           return getRoute(
             shouldUseMaterialRoute: useMaterialPageRoute,
             builder: (_) => BuyWithCryptoStep2(
               option: args.option,
               min: args.min,
               max: args.max,
+              usdtRate: args.usdtRate,
             ),
             settings: RouteSettings(
               name: settings.name,

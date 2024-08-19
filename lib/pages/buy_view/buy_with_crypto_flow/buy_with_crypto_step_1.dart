@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:decimal/decimal.dart';
 import 'package:epicpay/db/isar/isar_db.dart';
+import 'package:epicpay/models/exchange/estimate.dart';
+import 'package:epicpay/models/exchange/range.dart';
 import 'package:epicpay/models/isar/models/exchange/currency.dart';
 import 'package:epicpay/pages/buy_view/buy_with_crypto_flow/buy_with_crypto_step_2.dart';
 import 'package:epicpay/pages/loading_view.dart';
@@ -56,29 +58,51 @@ class _BuyWithCryptoStep1State extends ConsumerState<BuyWithCryptoStep1> {
           .nameEqualTo("EpicCash")
           .findFirstSync();
 
-      final resultFuture = ChangeNowExchange.instance
-          .getRange(
-            option.currency!,
-            epic!,
-            false,
-          )
-          .timeout(
-            timeout,
-            onTimeout: () => ExchangeResponse(
-              value: null,
-              exception: ExchangeException("Get Range timeout"),
-            ),
-          );
+      final List<Future<dynamic>> futures = [
+        ChangeNowExchange.instance
+            .getRange(
+              option.currency!,
+              epic!,
+              false,
+            )
+            .timeout(
+              timeout,
+              onTimeout: () => ExchangeResponse(
+                value: null,
+                exception: ExchangeException("Get Range timeout"),
+              ),
+            )
+      ];
 
-      final result = await showLoading(
-        whileFuture: resultFuture,
+      if (option == BuyOption.btc) {
+        futures.add(
+          ChangeNowExchange.instance
+              .getEstimate(
+                BuyOption.usdt.currency!,
+                BuyOption.btc.currency!,
+                Decimal.fromInt(1000),
+                false,
+                false,
+              )
+              .timeout(
+                timeout,
+                onTimeout: () => ExchangeResponse(
+                  value: null,
+                  exception: ExchangeException("Get Estimate timeout"),
+                ),
+              ),
+        );
+      }
+
+      final results = await showLoading(
+        whileFuture: Future.wait(futures),
         context: context,
         delay: const Duration(seconds: 1),
         timeout: timeout,
       );
 
       if (mounted) {
-        if (result == null) {
+        if (results == null) {
           unawaited(
             showDialog<void>(
               context: context,
@@ -91,30 +115,73 @@ class _BuyWithCryptoStep1State extends ConsumerState<BuyWithCryptoStep1> {
           return;
         }
 
-        if (result.exception != null) {
+        Decimal? usdtRate;
+        if (results.length == 2) {
+          final estimateResponse =
+              results[1] as ExchangeResponse<List<Estimate>>;
+          if (estimateResponse.exception != null) {
+            unawaited(
+              showDialog<void>(
+                context: context,
+                builder: (context) => EPErrorDialog(
+                  title: "Fetch USDT rate error",
+                  info: estimateResponse.exception!.message,
+                ),
+              ),
+            );
+            return;
+          }
+
+          if (estimateResponse.value == null ||
+              estimateResponse.value!.isEmpty) {
+            unawaited(
+              showDialog<void>(
+                context: context,
+                builder: (context) => const EPErrorDialog(
+                  title: "Fetch USDT rate error",
+                  info: "ChangeNOW failed to provide rate",
+                ),
+              ),
+            );
+            return;
+          }
+
+          usdtRate = (estimateResponse.value!.first.toAmount /
+                  estimateResponse.value!.first.fromAmount)
+              .toDecimal(
+            scaleOnInfinitePrecision: 100,
+          );
+        } else {
+          usdtRate = Decimal.one;
+        }
+
+        final rangeResponse = results[0] as ExchangeResponse<Range>;
+
+        if (rangeResponse.exception != null) {
           unawaited(
             showDialog<void>(
               context: context,
               builder: (context) => EPErrorDialog(
-                title: "Buy error",
-                info: result.exception!.message,
+                title: "Fetch range error",
+                info: rangeResponse.exception!.message,
               ),
             ),
           );
           return;
         }
 
-        if (result.value != null) {
-          final max = result.value!.max;
-          final min = result.value!.min;
+        if (rangeResponse.value != null) {
+          final max = rangeResponse.value!.max ??
+              Decimal.parse("999999999999999999999999"); // insane max
+          final min = rangeResponse.value!.min ?? Decimal.zero;
 
           await Navigator.of(context).pushNamed(
             BuyWithCryptoStep2.routeName,
             arguments: (
               option: option,
-              min: min ?? Decimal.zero,
-              max: max ??
-                  Decimal.parse("999999999999999999999999"), // insane max
+              usdtRate: usdtRate,
+              min: min,
+              max: max,
             ),
           );
         }

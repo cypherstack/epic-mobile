@@ -30,11 +30,13 @@ class BuyWithCryptoStep2 extends ConsumerStatefulWidget {
     required this.option,
     required this.min,
     required this.max,
+    required this.usdtRate,
   });
 
   final BuyOption option;
   final Decimal min;
   final Decimal max;
+  final Decimal usdtRate;
 
   static const routeName = "/buyWithCryptoStep2";
 
@@ -48,17 +50,39 @@ class _BuyWithCryptoStep2State extends ConsumerState<BuyWithCryptoStep2> {
 
   bool amountIsZero(String amountString) => amountString == "0";
 
+  Decimal convertedFromUsd = Decimal.zero;
+
+  Decimal? convert(String amountString) {
+    final amount = Decimal.tryParse(amountString);
+    if (amount == null) {
+      return null;
+    }
+
+    return amount * widget.usdtRate;
+  }
+
+  String _formatRange(Decimal value) {
+    final Decimal result;
+    if (value.abs() > Decimal.zero) {
+      result =
+          (value / widget.usdtRate).toDecimal(scaleOnInfinitePrecision: 10);
+    } else {
+      result = value;
+    }
+    return result.toStringAsFixed(2);
+  }
+
   void amountChanged() {
-    final amount = Decimal.tryParse(_amountString);
+    final amount = convert(_amountString);
 
     if (amount != null) {
       if (amount < widget.min) {
         setState(() {
-          _minMax = "Minimum amount ${widget.min}";
+          _minMax = "Minimum amount ${_formatRange(widget.min)}";
         });
       } else if (amount > widget.max) {
         setState(() {
-          _minMax = "Maximum amount ${widget.max}";
+          _minMax = "Maximum amount ${_formatRange(widget.max)}";
         });
       } else {
         setState(() {
@@ -118,7 +142,7 @@ class _BuyWithCryptoStep2State extends ConsumerState<BuyWithCryptoStep2> {
     try {
       const timeout = Duration(seconds: 5);
 
-      final amount = Decimal.parse(_amountString);
+      final amount = convert(_amountString)!;
 
       final epic = ref
           .read(pIsarDB)
@@ -287,13 +311,14 @@ class _BuyWithCryptoStep2State extends ConsumerState<BuyWithCryptoStep2> {
                       return;
                     }
 
-                    final decimal = Decimal.tryParse(number.toString());
+                    final decimal = convert(number.toString());
 
                     if (mounted && decimal != null) {
                       setState(() {
-                        _amountString = Decimal.parse(
+                        _amountString = convert(
                           decimal.toStringAsFixed(widget.option.fractionDigits),
-                        ).toString();
+                        )!
+                            .toString();
                       });
 
                       amountChanged();
@@ -322,7 +347,7 @@ class _BuyWithCryptoStep2State extends ConsumerState<BuyWithCryptoStep2> {
                         height: height < 600 ? 8 : 40,
                       ),
                       Text(
-                        "$_amountString  ${widget.option.ticker}",
+                        "$_amountString  USD",
                         textAlign: TextAlign.center,
                         style: STextStyles.w600_40(context).copyWith(
                           color: amountIsZero(_amountString)
