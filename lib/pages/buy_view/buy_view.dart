@@ -1,15 +1,23 @@
+import 'dart:async';
+
+import 'package:epicpay/db/isar/isar_db.dart';
+import 'package:epicpay/models/isar/models/exchange/trade.dart';
 import 'package:epicpay/pages/buy_view/buy_with_crypto_flow/buy_with_crypto_step_1.dart';
+import 'package:epicpay/pages/exchange_view/trade_details_view.dart';
 import 'package:epicpay/utilities/assets.dart';
 import 'package:epicpay/utilities/clipboard_interface.dart';
 import 'package:epicpay/utilities/constants.dart';
 import 'package:epicpay/utilities/enums/coin_enum.dart';
 import 'package:epicpay/utilities/text_styles.dart';
 import 'package:epicpay/utilities/theme/stack_colors.dart';
-import 'package:epicpay/widgets/rounded_white_container.dart';
+import 'package:epicpay/widgets/conditional_parent.dart';
+import 'package:epicpay/widgets/trade_card.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:isar/isar.dart';
 
-class BuyView extends StatefulWidget {
+class BuyView extends ConsumerStatefulWidget {
   const BuyView({
     Key? key,
     required this.coin,
@@ -23,10 +31,10 @@ class BuyView extends StatefulWidget {
   final String walletId;
   final ClipboardInterface clipboard;
   @override
-  State<BuyView> createState() => _BuyViewState();
+  ConsumerState<BuyView> createState() => _BuyViewState();
 }
 
-class _BuyViewState extends State<BuyView> {
+class _BuyViewState extends ConsumerState<BuyView> {
   late final Coin coin;
   late final String walletId;
   late final ClipboardInterface clipboard;
@@ -70,59 +78,180 @@ class _BuyViewState extends State<BuyView> {
   Widget build(BuildContext context) {
     final height = MediaQuery.of(context).size.height;
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        SizedBox(
-          height: height < 600 ? 4 : 20,
-        ),
-        Text(
-          "Buy EPIC",
-          style: STextStyles.titleH2(context),
-          textAlign: TextAlign.center,
-        ),
-        SizedBox(
-          height: height < 600 ? 8 : 20,
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: _CryptoButton(
-            onPressed: () {
-              if (mounted) {
-                _onBuyWithCryptoPressed();
-              }
-            },
-          ),
-        ),
-        SizedBox(
-          height: height < 600 ? 4 : 16,
-        ),
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 16),
-          child: _FiatButton(
-            onPressed: null, //_onBuyWithFiatPressed,
-          ),
-        ),
-        SizedBox(
-          height: height < 600 ? 10 : 32,
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Text(
-            "PREVIOUS QUOTES",
-            style: STextStyles.overLineBold(context),
-          ),
-        ),
-        SizedBox(
-          height: height < 600 ? 4 : 16,
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: RoundedWhiteContainer(
-            child: Text("PLACEHOLDER"),
-          ),
-        ),
-      ],
+    return NestedScrollView(
+      floatHeaderSlivers: true,
+      headerSliverBuilder: (context, innerBoxIsScrolled) {
+        return [
+          SliverOverlapAbsorber(
+            handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
+            sliver: SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.only(
+                  left: 16,
+                  right: 16,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    SizedBox(
+                      height: height < 600 ? 2 : 10,
+                    ),
+                    Text(
+                      "Buy EPIC",
+                      style: STextStyles.titleH2(context),
+                      textAlign: TextAlign.center,
+                    ),
+                    SizedBox(
+                      height: height < 600 ? 8 : 20,
+                    ),
+                    _CryptoButton(
+                      onPressed: () {
+                        if (mounted) {
+                          _onBuyWithCryptoPressed();
+                        }
+                      },
+                    ),
+                    SizedBox(
+                      height: height < 600 ? 4 : 16,
+                    ),
+                    const _FiatButton(
+                      onPressed: null, //_onBuyWithFiatPressed,
+                    ),
+                    SizedBox(
+                      height: height < 600 ? 10 : 20,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          )
+        ];
+      },
+      body: StreamBuilder(
+        stream: ref.watch(pIsarDB).isar.trades.watchLazy(),
+        builder: (buildContext, snapshot) {
+          final internalTradeIds = ref
+              .watch(pIsarDB)
+              .isar
+              .trades
+              .where()
+              .filter()
+              .zBuyEqualTo(true)
+              .sortByTimestampUTCDesc()
+              .idProperty()
+              .findAllSync();
+          final hasHistory = internalTradeIds.isNotEmpty;
+
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            child: CustomScrollView(
+              slivers: [
+                SliverOverlapInjector(
+                  handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
+                    buildContext,
+                  ),
+                ),
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        const SizedBox(
+                          height: 12,
+                        ),
+                        Text(
+                          "PREVIOUS QUOTES",
+                          style: STextStyles.overLineBold(context),
+                        ),
+                        const SizedBox(
+                          height: 12,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                if (hasHistory)
+                  SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                        return StreamBuilder<Trade?>(
+                          stream: ref
+                              .watch(pIsarDB)
+                              .isar
+                              .trades
+                              .watchObject(internalTradeIds[index]),
+                          builder: (
+                            context,
+                            AsyncSnapshot<Trade?> snapshot,
+                          ) {
+                            final trade = snapshot.data ??
+                                ref
+                                    .read(pIsarDB)
+                                    .isar
+                                    .trades
+                                    .where()
+                                    .idEqualTo(internalTradeIds[index])
+                                    .findFirstSync()!;
+
+                            return ConditionalParent(
+                              condition: index > 0,
+                              builder: (child) => Padding(
+                                padding: const EdgeInsets.only(top: 16),
+                                child: child,
+                              ),
+                              child: TradeCard(
+                                  key: Key(
+                                    "tradeCard_${trade.tradeId + trade.updatedAt.toString()}",
+                                  ),
+                                  trade: trade,
+                                  onTap: () async {
+                                    await Navigator.of(context).pushNamed(
+                                      TradeDetailsView.routeName,
+                                      arguments: (
+                                        tradeId: trade.tradeId,
+                                        transactionIfSentFromStack: null,
+                                        walletId: null,
+                                        walletName: null,
+                                      ),
+                                    );
+                                  }),
+                            );
+                          },
+                        );
+                      },
+                      childCount: internalTradeIds.length,
+                    ),
+                  ),
+                if (!hasHistory)
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: Theme.of(context)
+                              .extension<StackColors>()!
+                              .popupBG,
+                          borderRadius: BorderRadius.circular(
+                            Constants.size.circularBorderRadius,
+                          ),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: Text(
+                            "Buys will appear here",
+                            textAlign: TextAlign.center,
+                            style: STextStyles.itemSubtitle(context),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 }
