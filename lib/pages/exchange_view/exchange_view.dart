@@ -142,6 +142,8 @@ class _ExchangeViewState extends ConsumerState<ExchangeView> {
                   .isar
                   .trades
                   .where()
+                  .filter()
+                  .group((q) => q.zBuyIsNull().or().zBuyEqualTo(false))
                   .sortByTimestampUTCDesc()
                   .idProperty()
                   .findAllSync();
@@ -233,7 +235,7 @@ class _ExchangeViewState extends ConsumerState<ExchangeView> {
                                                 .findTransactionWithSlateId(
                                                     slateId);
 
-                                        if (mounted) {
+                                        if (context.mounted) {
                                           unawaited(
                                             Navigator.of(context).pushNamed(
                                               TradeDetailsView.routeName,
@@ -242,6 +244,7 @@ class _ExchangeViewState extends ConsumerState<ExchangeView> {
                                                 transactionIfSentFromStack: tx,
                                                 walletId: walletIds.first,
                                                 walletName: manager.walletName,
+                                                isBuy: false,
                                               ),
                                             ),
                                           );
@@ -255,6 +258,7 @@ class _ExchangeViewState extends ConsumerState<ExchangeView> {
                                               transactionIfSentFromStack: null,
                                               walletId: walletIds?.first,
                                               walletName: null,
+                                              isBuy: false,
                                             ),
                                           ),
                                         );

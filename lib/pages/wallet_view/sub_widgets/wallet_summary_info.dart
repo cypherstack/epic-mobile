@@ -99,23 +99,24 @@ class _WalletSummaryInfoState extends State<WalletSummaryInfo> {
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      if (!_showAvailable)
-                        SvgPicture.asset(
-                          Assets.svg.lockFilled,
-                          color: Theme.of(context)
-                              .extension<StackColors>()!
-                              .textGold,
-                        ),
-                      if (!_showAvailable)
-                        const SizedBox(
-                          width: 5,
-                        ),
+                      // TODO ??
+                      // if (!_showAvailable)
+                      //   SvgPicture.asset(
+                      //     Assets.svg.lockFilled,
+                      //     color: Theme.of(context)
+                      //         .extension<StackColors>()!
+                      //         .textGold,
+                      //   ),
+                      // if (!_showAvailable)
+                      //   const SizedBox(
+                      //     width: 5,
+                      //   ),
                       Text(
-                        "EPIC",
-                        style: STextStyles.titleH3(context).copyWith(
+                        "WALLET BALANCE",
+                        style: STextStyles.overLineBold(context).copyWith(
                           color: Theme.of(context)
                               .extension<StackColors>()!
-                              .textGold,
+                              .textDark,
                         ),
                       ),
                     ],
@@ -128,35 +129,20 @@ class _WalletSummaryInfoState extends State<WalletSummaryInfo> {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          isSendView == true
-                              ? Text(
-                                  "${Format.localizedStringAsFixed(
-                                    value: balanceToShow,
-                                    locale: locale,
-                                    decimalPlaces: 3,
-                                  )} EPIC",
-                                  style: STextStyles.titleH3(context).copyWith(
-                                    fontSize: 30,
-                                    height: 1,
-                                    color: Theme.of(context)
-                                        .extension<StackColors>()!
-                                        .textGold,
-                                  ),
-                                )
-                              : Text(
-                                  Format.localizedStringAsFixed(
-                                    value: balanceToShow,
-                                    locale: locale,
-                                    decimalPlaces: 3,
-                                  ),
-                                  style: STextStyles.titleH3(context).copyWith(
-                                    fontSize: 30,
-                                    height: 1,
-                                    color: Theme.of(context)
-                                        .extension<StackColors>()!
-                                        .textGold,
-                                  ),
-                                ),
+                          Text(
+                            "${Format.localizedStringAsFixed(
+                              value: balanceToShow,
+                              locale: locale,
+                              decimalPlaces: 3,
+                            )} EPIC",
+                            style: STextStyles.titleH3(context).copyWith(
+                              fontSize: 30,
+                              height: 1,
+                              color: Theme.of(context)
+                                  .extension<StackColors>()!
+                                  .textGold,
+                            ),
+                          ),
                           const SizedBox(
                             height: 14,
                           ),

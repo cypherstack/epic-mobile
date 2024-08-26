@@ -1,5 +1,6 @@
 import 'package:epicpay/utilities/text_styles.dart';
 import 'package:epicpay/utilities/theme/stack_colors.dart';
+import 'package:epicpay/widgets/conditional_parent.dart';
 import 'package:epicpay/widgets/desktop/primary_button.dart';
 import 'package:epicpay/widgets/desktop/secondary_button.dart';
 import 'package:flutter/material.dart';
@@ -8,9 +9,11 @@ class EPDialogBase extends StatelessWidget {
   const EPDialogBase({
     super.key,
     required this.child,
+    this.expand = false,
   });
 
   final Widget child;
+  final bool expand;
 
   @override
   Widget build(BuildContext context) {
@@ -18,18 +21,23 @@ class EPDialogBase extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Material(
-          borderRadius: BorderRadius.circular(
-            20,
-          ),
-          child: Container(
-            decoration: BoxDecoration(
-              color: Theme.of(context).extension<StackColors>()!.popupBG,
-              borderRadius: BorderRadius.circular(
-                20,
-              ),
+        ConditionalParent(
+          condition: expand,
+          builder: (child) => Expanded(child: child),
+          child: Material(
+            borderRadius: BorderRadius.circular(
+              20,
             ),
-            child: child,
+            color: Colors.transparent,
+            child: Container(
+              decoration: BoxDecoration(
+                color: Theme.of(context).extension<StackColors>()!.popupBG,
+                borderRadius: BorderRadius.circular(
+                  20,
+                ),
+              ),
+              child: child,
+            ),
           ),
         ),
       ],
@@ -94,6 +102,38 @@ class EPDialog extends StatelessWidget {
               ],
             )
         ],
+      ),
+    );
+  }
+}
+
+class EPErrorDialog extends StatelessWidget {
+  const EPErrorDialog({super.key, required this.title, this.info});
+  final String title;
+  final String? info;
+
+  @override
+  Widget build(BuildContext context) {
+    return EPDialogBase(
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: [
+            Text(
+              title,
+              style: STextStyles.baseXS(context),
+            ),
+            if (info != null)
+              const SizedBox(
+                height: 16,
+              ),
+            if (info != null)
+              Text(
+                info!,
+                style: STextStyles.baseXS(context),
+              ),
+          ],
+        ),
       ),
     );
   }

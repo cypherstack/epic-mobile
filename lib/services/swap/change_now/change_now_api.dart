@@ -50,6 +50,10 @@ class ChangeNowAPI {
         },
       );
 
+      if (response.statusCode != 200) {
+        throw ExchangeException(response.body, response.statusCode);
+      }
+
       final parsed = jsonDecode(response.body);
 
       return parsed;
@@ -76,13 +80,19 @@ class ChangeNowAPI {
         body: jsonEncode(body),
       );
 
+      if (response.statusCode != 200) {
+        throw ExchangeException(response.body, response.statusCode);
+      }
+
       try {
         final parsed = jsonDecode(response.body);
 
         return parsed;
       } catch (_) {
-        Logging.instance.log("ChangeNOW api failed to parse: ${response.body}",
-            level: LogLevel.Error);
+        Logging.instance.log(
+          "ChangeNOW api failed to parse: ${response.body}",
+          level: LogLevel.Error,
+        );
         rethrow;
       }
     } catch (e, s) {
@@ -123,10 +133,13 @@ class ChangeNowAPI {
           "getCurrencies exception: $e\n$s",
           level: LogLevel.Error,
         );
+
         return ExchangeResponse(
-          exception: ExchangeException(
-            "Error: $jsonArray",
-          ),
+          exception: e is ExchangeException
+              ? e
+              : ExchangeException(
+                  "Error: $jsonArray",
+                ),
         );
       }
     } catch (e, s) {
@@ -135,9 +148,11 @@ class ChangeNowAPI {
         level: LogLevel.Error,
       );
       return ExchangeResponse(
-        exception: ExchangeException(
-          e.toString(),
-        ),
+        exception: e is ExchangeException
+            ? e
+            : ExchangeException(
+                e.toString(),
+              ),
       );
     }
   }
@@ -157,11 +172,13 @@ class ChangeNowAPI {
               ChangeNowExchange.exchangeName,
             ),
           );
-        } catch (_) {
+        } catch (e) {
           return ExchangeResponse(
-            exception: ExchangeException(
-              "Failed to serialize $json",
-            ),
+            exception: e is ExchangeException
+                ? e
+                : ExchangeException(
+                    "Failed to serialize $json",
+                  ),
           );
         }
       }
@@ -210,11 +227,13 @@ class ChangeNowAPI {
                 ChangeNowExchange.exchangeName,
               ),
             );
-          } catch (_) {
+          } catch (e) {
             return ExchangeResponse(
-              exception: ExchangeException(
-                "Failed to serialize $json",
-              ),
+              exception: e is ExchangeException
+                  ? e
+                  : ExchangeException(
+                      "Failed to serialize $json",
+                    ),
             );
           }
         }
@@ -224,9 +243,11 @@ class ChangeNowAPI {
           level: LogLevel.Error,
         );
         return ExchangeResponse(
-          exception: ExchangeException(
-            "Error: $jsonArray",
-          ),
+          exception: e is ExchangeException
+              ? e
+              : ExchangeException(
+                  "Error: $jsonArray",
+                ),
         );
       }
       return ExchangeResponse(value: pairs);
@@ -236,9 +257,11 @@ class ChangeNowAPI {
         level: LogLevel.Error,
       );
       return ExchangeResponse(
-        exception: ExchangeException(
-          e.toString(),
-        ),
+        exception: e is ExchangeException
+            ? e
+            : ExchangeException(
+                e.toString(),
+              ),
       );
     }
   }
@@ -279,9 +302,11 @@ class ChangeNowAPI {
         level: LogLevel.Error,
       );
       return ExchangeResponse(
-        exception: ExchangeException(
-          e.toString(),
-        ),
+        exception: e is ExchangeException
+            ? e
+            : ExchangeException(
+                e.toString(),
+              ),
       );
     }
   }
@@ -329,20 +354,24 @@ class ChangeNowAPI {
           exchangeProvider: ChangeNowExchange.exchangeName,
         );
         return ExchangeResponse(value: value);
-      } catch (_) {
+      } catch (e) {
         return ExchangeResponse(
-          exception: ExchangeException(
-            "Failed to serialize $json",
-          ),
+          exception: e is ExchangeException
+              ? e
+              : ExchangeException(
+                  "Failed to serialize $json",
+                ),
         );
       }
     } catch (e, s) {
       Logging.instance.log("getEstimatedExchangeAmount exception: $e\n$s",
           level: LogLevel.Error);
       return ExchangeResponse(
-        exception: ExchangeException(
-          e.toString(),
-        ),
+        exception: e is ExchangeException
+            ? e
+            : ExchangeException(
+                e.toString(),
+              ),
       );
     }
   }
@@ -406,11 +435,13 @@ class ChangeNowAPI {
           Map<String, dynamic>.from(json as Map),
         );
         return ExchangeResponse(value: value);
-      } catch (_) {
+      } catch (e) {
         return ExchangeResponse(
-          exception: ExchangeException(
-            "Failed to serialize $json",
-          ),
+          exception: e is ExchangeException
+              ? e
+              : ExchangeException(
+                  "Failed to serialize $json",
+                ),
         );
       }
     } catch (e, s) {
@@ -419,9 +450,11 @@ class ChangeNowAPI {
         level: LogLevel.Error,
       );
       return ExchangeResponse(
-        exception: ExchangeException(
-          e.toString(),
-        ),
+        exception: e is ExchangeException
+            ? e
+            : ExchangeException(
+                e.toString(),
+              ),
       );
     }
   }
@@ -445,11 +478,13 @@ class ChangeNowAPI {
           Map<String, dynamic>.from(json as Map),
         );
         return ExchangeResponse(value: value);
-      } catch (_) {
+      } catch (e) {
         return ExchangeResponse(
-          exception: ExchangeException(
-            "Failed to serialize $json",
-          ),
+          exception: e is ExchangeException
+              ? e
+              : ExchangeException(
+                  "Failed to serialize $json",
+                ),
         );
       }
     } catch (e, s) {
@@ -458,9 +493,11 @@ class ChangeNowAPI {
         level: LogLevel.Error,
       );
       return ExchangeResponse(
-        exception: ExchangeException(
-          e.toString(),
-        ),
+        exception: e is ExchangeException
+            ? e
+            : ExchangeException(
+                e.toString(),
+              ),
       );
     }
   }

@@ -12,11 +12,12 @@ class ExchangeResponse<T> {
 
 class ExchangeException implements Exception {
   final String message;
+  final int? code;
 
-  ExchangeException(this.message);
+  ExchangeException(this.message, [this.code]);
 
   @override
   String toString() {
-    return message;
+    return "[code=$code]: $message";
   }
 }

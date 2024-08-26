@@ -41,6 +41,8 @@ class Trade {
           .millisecondsSinceEpoch ~/
       1000;
 
+  final bool? zBuy;
+
   Trade({
     required this.exchangeName,
     required this.fromAmount,
@@ -62,9 +64,11 @@ class Trade {
     required this.updatedAt,
     required this.payinHash,
     required this.payoutHash,
+    required this.zBuy,
   });
 
-  factory Trade.fromJson(Map<String, dynamic> json, String exchangeName) {
+  factory Trade.fromJson(
+      Map<String, dynamic> json, String exchangeName, bool zBuy) {
     return Trade(
       exchangeName: exchangeName,
       fromAmount: json['fromAmount'].toString(),
@@ -86,6 +90,7 @@ class Trade {
       updatedAt: json['updatedAt'] as String?,
       payinHash: json['payinHash'] as String?,
       payoutHash: json['payoutHash'] as String?,
+      zBuy: zBuy,
     );
   }
 
@@ -108,6 +113,7 @@ class Trade {
     String? updatedAt,
     String? payinHash,
     String? payoutHash,
+    bool? zBuy,
   }) {
     return Trade(
       tradeId: tradeId,
@@ -130,6 +136,7 @@ class Trade {
       updatedAt: updatedAt ?? this.updatedAt,
       payinHash: payinHash ?? this.payinHash,
       payoutHash: payoutHash ?? this.payoutHash,
+      zBuy: zBuy ?? this.zBuy,
     );
   }
 
@@ -154,6 +161,7 @@ class Trade {
         'payinHash: $payinHash, '
         'payoutHash: $payoutHash, '
         'fromNetwork: $fromNetwork, '
+        'zBuy: $zBuy, '
         'toNetwork: $toNetwork)';
   }
 }

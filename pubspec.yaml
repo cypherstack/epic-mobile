@@ -84,7 +84,7 @@ dependencies:
   keyboard_dismisser: ^3.0.0
   tuple: ^2.0.0
   flutter_riverpod: ^1.0.3
-  qr_flutter: ^4.0.0
+  qr_flutter: 4.0.0
   share_plus: ^7.0.2
   package_info_plus: ^4.0.2
   lottie: ^2.3.2
@@ -162,6 +162,8 @@ flutter:
     - assets/images/epic-welcome.png
     - assets/images/splash.png
     - assets/icon/icon.png
+
+    - assets/png/
 
     - google_fonts/
     - assets/svg/circle-check.svg
@@ -261,6 +263,12 @@ flutter:
     - assets/svg/wallet.svg
     - assets/svg/change-now-logo.svg
     - assets/svg/pay.svg
+    - assets/svg/buy-credit-card.svg
+    - assets/svg/bitcoin.svg
+    - assets/svg/dollar.svg
+    - assets/svg/paste.svg
+
+    - assets/svg/layers/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

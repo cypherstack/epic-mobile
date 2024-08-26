@@ -1,9 +1,18 @@
 // import 'package:epicpay/models/contact_address_entry.dart';
+import 'package:decimal/decimal.dart';
+import 'package:epicpay/models/exchange/estimate.dart';
 import 'package:epicpay/models/exchange/incomplete_exchange.dart';
+import 'package:epicpay/models/isar/models/exchange/trade.dart';
 import 'package:epicpay/models/paymint/transactions_model.dart';
 import 'package:epicpay/pages/add_wallet_views/create_restore_wallet_view.dart';
 import 'package:epicpay/pages/add_wallet_views/restore_wallet_view/restore_options_view/restore_options_view.dart';
 import 'package:epicpay/pages/add_wallet_views/restore_wallet_view/restore_wallet_view.dart';
+import 'package:epicpay/pages/buy_view/buy_view.dart';
+import 'package:epicpay/pages/buy_view/buy_with_crypto_flow/buy_refund_address_entry.dart';
+import 'package:epicpay/pages/buy_view/buy_with_crypto_flow/buy_with_crypto_step_1.dart';
+import 'package:epicpay/pages/buy_view/buy_with_crypto_flow/buy_with_crypto_step_2.dart';
+import 'package:epicpay/pages/buy_view/buy_with_crypto_flow/buy_with_crypto_step_3.dart';
+import 'package:epicpay/pages/buy_view/confirm_buy_view.dart';
 import 'package:epicpay/pages/exchange_view/edit_trade_note_view.dart';
 import 'package:epicpay/pages/exchange_view/exchange_step_views/confirm_send_details_view.dart';
 import 'package:epicpay/pages/exchange_view/exchange_step_views/step_1_view.dart';
@@ -392,6 +401,96 @@ class RouteGenerator {
         }
         return _routeError("${settings.name} invalid args: ${args.toString()}");
 
+      case BuyView.routeName:
+        if (args is Tuple2<String, Coin>) {
+          return getRoute(
+            shouldUseMaterialRoute: useMaterialPageRoute,
+            builder: (_) => BuyView(
+              walletId: args.item1,
+              coin: args.item2,
+            ),
+            settings: RouteSettings(
+              name: settings.name,
+            ),
+          );
+        }
+        return _routeError("${settings.name} invalid args: ${args.toString()}");
+
+      case BuyWithCryptoStep1.routeName:
+        return getRoute(
+          shouldUseMaterialRoute: useMaterialPageRoute,
+          builder: (_) => const BuyWithCryptoStep1(),
+          settings: RouteSettings(
+            name: settings.name,
+          ),
+        );
+
+      case BuyWithCryptoStep2.routeName:
+        if (args is ({
+          BuyOption option,
+          Decimal min,
+          Decimal max,
+          Decimal usdtRate
+        })) {
+          return getRoute(
+            shouldUseMaterialRoute: useMaterialPageRoute,
+            builder: (_) => BuyWithCryptoStep2(
+              option: args.option,
+              min: args.min,
+              max: args.max,
+              usdtRate: args.usdtRate,
+            ),
+            settings: RouteSettings(
+              name: settings.name,
+            ),
+          );
+        }
+        return _routeError("${settings.name} invalid args: ${args.toString()}");
+
+      case BuyWithCryptoStep3.routeName:
+        if (args is ({BuyOption option, Estimate estimate})) {
+          return getRoute(
+            shouldUseMaterialRoute: useMaterialPageRoute,
+            builder: (_) => BuyWithCryptoStep3(
+              option: args.option,
+              estimate: args.estimate,
+            ),
+            settings: RouteSettings(
+              name: settings.name,
+            ),
+          );
+        }
+        return _routeError("${settings.name} invalid args: ${args.toString()}");
+
+      case BuyRefundAddressEntry.routeName:
+        if (args is ({BuyOption option, Estimate estimate})) {
+          return getRoute(
+            shouldUseMaterialRoute: useMaterialPageRoute,
+            builder: (_) => BuyRefundAddressEntry(
+              option: args.option,
+              estimate: args.estimate,
+            ),
+            settings: RouteSettings(
+              name: settings.name,
+            ),
+          );
+        }
+        return _routeError("${settings.name} invalid args: ${args.toString()}");
+
+      case ConfirmBuyView.routeName:
+        if (args is Trade) {
+          return getRoute(
+            shouldUseMaterialRoute: useMaterialPageRoute,
+            builder: (_) => ConfirmBuyView(
+              trade: args,
+            ),
+            settings: RouteSettings(
+              name: settings.name,
+            ),
+          );
+        }
+        return _routeError("${settings.name} invalid args: ${args.toString()}");
+
       case SendView.routeName:
         if (args is Tuple2<String, Coin>) {
           return getRoute(
@@ -550,6 +649,7 @@ class RouteGenerator {
           Transaction? transactionIfSentFromStack,
           String? walletId,
           String? walletName,
+          bool isBuy,
         })) {
           return getRoute(
             shouldUseMaterialRoute: useMaterialPageRoute,
@@ -558,6 +658,7 @@ class RouteGenerator {
               walletName: args.walletName,
               tradeId: args.tradeId,
               transactionIfSentFromStack: args.transactionIfSentFromStack,
+              isBuy: args.isBuy,
             ),
             settings: RouteSettings(
               name: settings.name,
