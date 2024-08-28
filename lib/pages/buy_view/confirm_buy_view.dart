@@ -121,7 +121,7 @@ class _ConfirmBuyViewState extends State<ConfirmBuyView> {
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           Text(
-                            "Send ${widget.trade.fromCurrency.toUpperCase()}",
+                            "Send ${widget.trade.fromFullTicker}",
                             style: STextStyles.titleH3(context).copyWith(
                               color: Theme.of(context)
                                   .extension<StackColors>()!
@@ -160,7 +160,7 @@ class _ConfirmBuyViewState extends State<ConfirmBuyView> {
                             height: 22,
                           ),
                           Text(
-                            "SEND ${widget.trade.fromCurrency.toUpperCase()} TO "
+                            "SEND ${widget.trade.fromFullTicker} TO "
                             "THIS ADDRESS",
                             style: STextStyles.overLineBold(context).copyWith(
                               color: Theme.of(context)
@@ -229,7 +229,7 @@ class _ConfirmBuyViewState extends State<ConfirmBuyView> {
                           _DetailsItem(
                             title: "AMOUNT TO SEND",
                             data:
-                                "${widget.trade.fromAmount} ${widget.trade.fromCurrency.toUpperCase()}",
+                                "${widget.trade.fromAmount} ${widget.trade.fromFullTicker}",
                           ),
                           const _Divider(height: 15),
                           const SizedBox(
@@ -239,7 +239,7 @@ class _ConfirmBuyViewState extends State<ConfirmBuyView> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                "REFUND BTC ADDRESS",
+                                "REFUND ${widget.trade.fromFullTicker} ADDRESS",
                                 style:
                                     STextStyles.overLineBold(context).copyWith(
                                   color: Theme.of(context)
@@ -261,7 +261,7 @@ class _ConfirmBuyViewState extends State<ConfirmBuyView> {
                             height: 16,
                           ),
                           PrimaryButton(
-                            label: "DONE",
+                            label: "I HAVE SENT",
                             onPressed: () {
                               Navigator.of(context).popUntil(
                                 ModalRoute.withName(

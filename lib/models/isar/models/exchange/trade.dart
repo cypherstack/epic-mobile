@@ -67,6 +67,16 @@ class Trade {
     required this.zBuy,
   });
 
+  @ignore
+  String get fromFullTicker => fromCurrency.toUpperCase() == "BTC"
+      ? "BTC"
+      : "$fromCurrency ($fromNetwork)".toUpperCase();
+
+  @ignore
+  String get toFullTicker => toCurrency.toUpperCase() == "BTC"
+      ? "BTC"
+      : "$toCurrency ($toNetwork)".toUpperCase();
+
   factory Trade.fromJson(
       Map<String, dynamic> json, String exchangeName, bool zBuy) {
     return Trade(

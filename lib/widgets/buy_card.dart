@@ -172,7 +172,7 @@ class BuyCard extends ConsumerWidget {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          "${Decimal.tryParse(trade.fromAmount) ?? "..."} ${trade.fromCurrency.toUpperCase()}",
+                          "${Decimal.tryParse(trade.fromAmount) ?? "..."} ${trade.fromFullTicker}",
                           style: STextStyles.bodySmall(context),
                         ),
                         Text(
