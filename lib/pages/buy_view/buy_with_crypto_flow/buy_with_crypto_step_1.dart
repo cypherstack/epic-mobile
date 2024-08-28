@@ -363,11 +363,11 @@ class StepIndicatorRow extends StatelessWidget {
 
 enum BuyOption {
   btc("Bitcoin / BTC"),
-  usdtERC20("USDT (ERC20)"),
-  usdtTRC20("USDT (TRC20)"),
+  usdtERC20("USDT (ETH)"),
+  usdtTRC20("USDT (TRX)"),
   usdtBSC("USDT (BSC)"),
   usdtSOL("USDT (SOL)"),
-  usdcERC20("USDC (ERC20)"),
+  usdcERC20("USDC (ETH)"),
   usdcBSC("USDC (BSC)"),
   usdcSOL("USDC (SOL)");
 
