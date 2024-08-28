@@ -110,10 +110,11 @@ class _HomeViewState extends ConsumerState<HomeView> {
         walletId: ref.read(walletProvider)!.walletId,
       ),
       if (Constants.enableExchange) const ExchangeView(),
-      BuyView(
-        walletId: ref.read(walletProvider)!.walletId,
-        coin: ref.read(walletProvider)!.coin,
-      ),
+      if (Constants.enableExchange)
+        BuyView(
+          walletId: ref.read(walletProvider)!.walletId,
+          coin: ref.read(walletProvider)!.coin,
+        ),
       PayView(
         walletId: ref.read(walletProvider)!.walletId,
         coin: ref.read(walletProvider)!.coin,
