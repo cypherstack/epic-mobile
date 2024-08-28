@@ -467,7 +467,7 @@ class _TransactionDetailsViewState
                                   body: GestureDetector(
                                     onTap: () async {
                                       final uri = Uri.parse(
-                                          "https://explorer3.epic.tech/blockdetail/${_transaction.txid}");
+                                          "https://explorer.epiccash.com/blockdetail/${_transaction.txid}");
                                       try {
                                         await launchUrl(
                                           uri,
