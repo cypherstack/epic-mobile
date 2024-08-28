@@ -51,7 +51,10 @@ class ChangeNowAPI {
       );
 
       if (response.statusCode != 200) {
-        throw ExchangeException(response.body, response.statusCode);
+        throw ExchangeException(
+          "ChangeNOW Response: ${response.body}",
+          response.statusCode,
+        );
       }
 
       final parsed = jsonDecode(response.body);
@@ -81,7 +84,10 @@ class ChangeNowAPI {
       );
 
       if (response.statusCode != 200) {
-        throw ExchangeException(response.body, response.statusCode);
+        throw ExchangeException(
+          "ChangeNOW Response: ${response.body}",
+          response.statusCode,
+        );
       }
 
       try {
