@@ -288,7 +288,9 @@ class _TradeDetailsViewState extends ConsumerState<TradeDetailsView> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Text(
-                                  trade.fromCurrency.toUpperCase(),
+                                  widget.isBuy
+                                      ? trade.fromFullTicker
+                                      : trade.fromCurrency.toUpperCase(),
                                   style: STextStyles.titleH3(context).copyWith(
                                     color: Theme.of(context)
                                         .extension<StackColors>()!
@@ -305,7 +307,9 @@ class _TradeDetailsViewState extends ConsumerState<TradeDetailsView> {
                                   ),
                                 ),
                                 Text(
-                                  trade.toCurrency.toUpperCase(),
+                                  widget.isBuy
+                                      ? trade.toFullTicker
+                                      : trade.toCurrency.toUpperCase(),
                                   style: STextStyles.titleH3(context).copyWith(
                                     color: Theme.of(context)
                                         .extension<StackColors>()!
@@ -339,13 +343,13 @@ class _TradeDetailsViewState extends ConsumerState<TradeDetailsView> {
                                     text: TextSpan(
                                       text: "You must send at least "
                                           "${sendAmount.toString()} "
-                                          "${trade.fromCurrency.toUpperCase()}. ",
+                                          "${widget.isBuy ? trade.fromFullTicker : trade.fromCurrency.toUpperCase()}. ",
                                       style: STextStyles.errorBold(context),
                                       children: [
                                         TextSpan(
                                           text: "If you send less than "
                                               "${sendAmount.toString()} "
-                                              "${trade.fromCurrency.toUpperCase()}"
+                                              "${widget.isBuy ? trade.fromFullTicker : trade.fromCurrency.toUpperCase()}"
                                               ", your transaction may not be "
                                               "converted and it may not be refunded.",
                                           style: STextStyles.error(context),
@@ -364,7 +368,7 @@ class _TradeDetailsViewState extends ConsumerState<TradeDetailsView> {
                             if (!sentFromStack && !hasTx)
                               _DetailsItem(
                                 title:
-                                    "SEND ${trade.fromCurrency.toUpperCase()} "
+                                    "SEND ${widget.isBuy ? trade.fromFullTicker : trade.fromCurrency.toUpperCase()} "
                                     "TO THIS ADDRESS (CHANGENOW)",
                                 data: trade.payinAddress,
                                 trailingBelow: true,
@@ -389,7 +393,7 @@ class _TradeDetailsViewState extends ConsumerState<TradeDetailsView> {
                                               children: [
                                                 Center(
                                                   child: Text(
-                                                    "Send ${trade.fromCurrency.toUpperCase()} to this address",
+                                                    "Send ${widget.isBuy ? trade.fromFullTicker : trade.fromCurrency.toUpperCase()} to this address",
                                                     style:
                                                         STextStyles.pageTitleH2(
                                                             context),
@@ -453,7 +457,7 @@ class _TradeDetailsViewState extends ConsumerState<TradeDetailsView> {
                             _DetailsItem(
                               title: "AMOUNT TO SEND",
                               data:
-                                  "${sendAmount.toString()} ${trade.fromCurrency.toUpperCase()}",
+                                  "${sendAmount.toString()} ${widget.isBuy ? trade.fromFullTicker : trade.fromCurrency.toUpperCase()}",
                               isTapCopy: true,
                             ),
 
@@ -461,7 +465,7 @@ class _TradeDetailsViewState extends ConsumerState<TradeDetailsView> {
                             _DetailsItem(
                               title: "AMOUNT TO RECEIVE",
                               data:
-                                  "${trade.toAmount} ${trade.toCurrency.toUpperCase()}",
+                                  "${trade.toAmount} ${widget.isBuy ? trade.toFullTicker : trade.toCurrency.toUpperCase()}",
                               isTapCopy: true,
                               trailing: Text(
                                 "(estimated)",
@@ -479,7 +483,7 @@ class _TradeDetailsViewState extends ConsumerState<TradeDetailsView> {
                               data:
                                   "~${(Decimal.parse(trade.toAmount) / Decimal.parse(trade.fromAmount)).toDecimal(
                                 scaleOnInfinitePrecision: 8,
-                              )} ${trade.toCurrency.toUpperCase()}",
+                              )} ${widget.isBuy ? trade.toFullTicker : trade.toCurrency.toUpperCase()}",
                               isTapCopy: true,
                             ),
 

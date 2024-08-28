@@ -75,7 +75,9 @@ class Trade {
   @ignore
   String get toFullTicker => toCurrency.toUpperCase() == "BTC"
       ? "BTC"
-      : "$toCurrency ($toNetwork)".toUpperCase();
+      : toCurrency.toUpperCase() == "EPIC"
+          ? "EPIC"
+          : "$toCurrency ($toNetwork)".toUpperCase();
 
   factory Trade.fromJson(
       Map<String, dynamic> json, String exchangeName, bool zBuy) {
