@@ -163,8 +163,6 @@ flutter:
     - assets/images/splash.png
     - assets/icon/icon.png
 
-    - assets/png/
-
     - google_fonts/
     - assets/svg/circle-check.svg
     - assets/svg/plus.svg
@@ -269,6 +267,7 @@ flutter:
     - assets/svg/paste.svg
 
     - assets/svg/layers/
+    - assets/svg/cn_icons/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

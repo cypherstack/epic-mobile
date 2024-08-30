@@ -20,6 +20,7 @@ import 'package:epicpay/widgets/rounded_container.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:isar/isar.dart';
 
 class BuyWithCryptoStep1 extends ConsumerStatefulWidget {
@@ -78,7 +79,7 @@ class _BuyWithCryptoStep1State extends ConsumerState<BuyWithCryptoStep1> {
         futures.add(
           ChangeNowExchange.instance
               .getEstimate(
-                BuyOption.usdt.currency!,
+                BuyOption.usdtERC20.currency!,
                 BuyOption.btc.currency!,
                 Decimal.fromInt(1000),
                 false,
@@ -269,10 +270,14 @@ class _BuyWithCryptoStep1State extends ConsumerState<BuyWithCryptoStep1> {
                               .popupBG,
                           child: Row(
                             children: [
-                              Image.asset(
-                                width: 40,
-                                height: 40,
-                                option.assetName,
+                              SizedBox(
+                                width: 36,
+                                height: 36,
+                                child: SvgPicture.asset(
+                                  width: 36,
+                                  height: 36,
+                                  option.assetName,
+                                ),
                               ),
                               const SizedBox(
                                 width: 12,
@@ -358,8 +363,13 @@ class StepIndicatorRow extends StatelessWidget {
 
 enum BuyOption {
   btc("Bitcoin / BTC"),
-  usdt("USDT"),
-  usdc("USDC");
+  usdtERC20("USDT (ETH)"),
+  usdtTRC20("USDT (TRX)"),
+  usdtBSC("USDT (BSC)"),
+  usdtSOL("USDT (SOL)"),
+  usdcERC20("USDC (ETH)"),
+  usdcBSC("USDC (BSC)"),
+  usdcSOL("USDC (SOL)");
 
   final String value;
   const BuyOption(this.value);
@@ -367,23 +377,38 @@ enum BuyOption {
   String get assetName {
     switch (this) {
       case BuyOption.btc:
-        return Assets.png.btc;
-      case BuyOption.usdt:
-        return Assets.png.usdt;
-      case BuyOption.usdc:
-        return Assets.png.usdc;
+        return Assets.cn.btc;
+      case BuyOption.usdtBSC:
+        return Assets.cn.usdtBSC;
+      case BuyOption.usdtERC20:
+        return Assets.cn.usdtERC20;
+      case BuyOption.usdtSOL:
+        return Assets.cn.usdtSOL;
+      case BuyOption.usdtTRC20:
+        return Assets.cn.usdtTRC20;
+      case BuyOption.usdcBSC:
+        return Assets.cn.usdcBSC;
+      case BuyOption.usdcERC20:
+        return Assets.cn.usdcERC20;
+      case BuyOption.usdcSOL:
+        return Assets.cn.usdcSOL;
     }
   }
 
   /// fragile
-  String get ticker => value.split(" / ").last;
+  String get ticker {
+    if (value.contains(" / ")) {
+      return value.split(" / ").last;
+    } else {
+      return value;
+    }
+  }
 
   int get fractionDigits {
     switch (this) {
       case BuyOption.btc:
         return 8;
-      case BuyOption.usdt:
-      case BuyOption.usdc:
+      default:
         return 6;
     }
   }
@@ -402,17 +427,47 @@ enum BuyOption {
             .and()
             .nameEqualTo("Bitcoin")
             .findFirstSync();
-      case BuyOption.usdt:
+      case BuyOption.usdtERC20:
         return filter
             .tickerEqualTo("usdt")
             .and()
             .networkEqualTo("eth")
             .findFirstSync();
-      case BuyOption.usdc:
+      case BuyOption.usdtSOL:
+        return filter
+            .tickerEqualTo("usdt")
+            .and()
+            .networkEqualTo("sol")
+            .findFirstSync();
+      case BuyOption.usdtBSC:
+        return filter
+            .tickerEqualTo("usdt")
+            .and()
+            .networkEqualTo("bsc")
+            .findFirstSync();
+      case BuyOption.usdtTRC20:
+        return filter
+            .tickerEqualTo("usdt")
+            .and()
+            .networkEqualTo("trx")
+            .findFirstSync();
+      case BuyOption.usdcBSC:
+        return filter
+            .tickerEqualTo("usdc")
+            .and()
+            .networkEqualTo("bsc")
+            .findFirstSync();
+      case BuyOption.usdcERC20:
         return filter
             .tickerEqualTo("usdc")
             .and()
             .networkEqualTo("eth")
+            .findFirstSync();
+      case BuyOption.usdcSOL:
+        return filter
+            .tickerEqualTo("usdc")
+            .and()
+            .networkEqualTo("sol")
             .findFirstSync();
     }
   }

@@ -10,6 +10,7 @@ abstract class Assets {
   static const lottie = _ANIMATIONS();
   static const socials = _SOCIALS();
   static const exchange = _EXCHANGE();
+  static const cn = _CN();
 }
 
 class _SOCIALS {
@@ -200,6 +201,21 @@ class _SVG {
   }
 }
 
+class _CN {
+  const _CN();
+
+  String get btc => "assets/svg/cn_icons/btc.svg";
+
+  String get usdcBSC => "assets/svg/cn_icons/usdcbsc.svg";
+  String get usdcERC20 => "assets/svg/cn_icons/usdcerc20.svg";
+  String get usdcSOL => "assets/svg/cn_icons/usdcsol.svg";
+
+  String get usdtBSC => "assets/svg/cn_icons/usdtbsc.svg";
+  String get usdtERC20 => "assets/svg/cn_icons/usdterc20.svg";
+  String get usdtSOL => "assets/svg/cn_icons/usdtsol.svg";
+  String get usdtTRC20 => "assets/svg/cn_icons/usdttrc20.svg";
+}
+
 class _PNG {
   const _PNG();
 
@@ -208,10 +224,6 @@ class _PNG {
   String get epicFast => "assets/images/epic-fast.png";
   String get epicClouds => "assets/images/epic-clouds.png";
   String get epicWelcome => "assets/images/epic-welcome.png";
-
-  String get btc => "assets/png/btc.png";
-  String get usdt => "assets/png/usdt.png";
-  String get usdc => "assets/png/usdc.png";
 }
 
 class _ANIMATIONS {

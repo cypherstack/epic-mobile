@@ -25,10 +25,58 @@ class ConfirmBuyView extends StatefulWidget {
 }
 
 class _ConfirmBuyViewState extends State<ConfirmBuyView> {
+  static const double maxDivHeight = 23;
+  static const double minDivHeight = 5;
+  final _key = GlobalKey();
+
+  late final int divCount;
+  double divHeight = maxDivHeight;
+  double? layoutBuilderHeight;
+  Size? size;
+
   bool _lolAndroid = false;
+
+  double _getInRange(double value) {
+    if (value < minDivHeight) {
+      return minDivHeight;
+    } else if (value > maxDivHeight) {
+      return maxDivHeight;
+    } else {
+      return value;
+    }
+  }
+
+  void _setSize() {
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+      size = _key.currentContext?.size;
+
+      if (layoutBuilderHeight != null && size != null) {
+        if (layoutBuilderHeight! < size!.height) {
+          final diff = size!.height - layoutBuilderHeight!;
+          final dDiff = diff / divCount;
+          divHeight = _getInRange(divHeight - dDiff);
+        } else {
+          final diff = layoutBuilderHeight! - size!.height;
+          final dDiff = diff / divCount;
+          divHeight = _getInRange(divHeight + dDiff);
+        }
+      }
+
+      setState(() {});
+    });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    divCount = 5;
+    _setSize();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final scaleFactor = MediaQuery.of(context).textScaleFactor * 0.85;
+
     return PopScope(
       canPop: _lolAndroid,
       onPopInvoked: (didPop) {
@@ -107,179 +155,198 @@ class _ConfirmBuyViewState extends State<ConfirmBuyView> {
               ),
             ],
           ),
-          body: LayoutBuilder(
-            builder: (builderContext, constraints) {
-              return SingleChildScrollView(
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    minHeight: constraints.maxHeight,
-                  ),
-                  child: IntrinsicHeight(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Text(
-                            "Send ${widget.trade.fromCurrency.toUpperCase()}",
-                            style: STextStyles.titleH3(context).copyWith(
-                              color: Theme.of(context)
-                                  .extension<StackColors>()!
-                                  .textLight,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(
-                            height: 22,
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Container(
-                                width: 200,
-                                height: 200,
-                                decoration: BoxDecoration(
-                                  border: Border.all(
-                                    width: 1.5,
-                                    color: Theme.of(context)
-                                        .extension<StackColors>()!
-                                        .textLight,
+          body: SafeArea(
+            child: MediaQuery(
+              data: MediaQuery.of(context).copyWith(
+                textScaleFactor: scaleFactor,
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: LayoutBuilder(
+                  builder: (builderContext, constraints) {
+                    layoutBuilderHeight = constraints.maxHeight;
+                    return Column(
+                      children: [
+                        Expanded(
+                          child: SingleChildScrollView(
+                            child: IntrinsicHeight(
+                              key: _key,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  Text(
+                                    "Send ${widget.trade.fromFullTicker}",
+                                    style:
+                                        STextStyles.titleH3(context).copyWith(
+                                      color: Theme.of(context)
+                                          .extension<StackColors>()!
+                                          .textLight,
+                                    ),
+                                    textAlign: TextAlign.center,
                                   ),
-                                ),
-                                child: QrImage(
-                                  data: widget.trade.payinAddress,
-                                  backgroundColor: Colors.transparent,
-                                  foregroundColor: Theme.of(context)
-                                      .extension<StackColors>()!
-                                      .textLight,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(
-                            height: 22,
-                          ),
-                          Text(
-                            "SEND ${widget.trade.fromCurrency.toUpperCase()} TO "
-                            "THIS ADDRESS",
-                            style: STextStyles.overLineBold(context).copyWith(
-                              color: Theme.of(context)
-                                  .extension<StackColors>()!
-                                  .textDark,
-                            ),
-                          ),
-                          const SizedBox(
-                            height: 8,
-                          ),
-                          Stack(
-                            children: [
-                              RoundedWhiteContainer(
-                                padding: EdgeInsets.zero,
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      child: Padding(
-                                        padding: const EdgeInsets.all(20),
-                                        child: Text(
-                                          widget.trade.payinAddress,
-                                          style: STextStyles.body(context),
+                                  SizedBox(
+                                    height: divHeight / 2,
+                                  ),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      Container(
+                                        width: 200,
+                                        height: 200,
+                                        decoration: BoxDecoration(
+                                          border: Border.all(
+                                            width: 1.5,
+                                            color: Theme.of(context)
+                                                .extension<StackColors>()!
+                                                .textLight,
+                                          ),
+                                        ),
+                                        child: QrImage(
+                                          data: widget.trade.payinAddress,
+                                          backgroundColor: Colors.transparent,
+                                          foregroundColor: Theme.of(context)
+                                              .extension<StackColors>()!
+                                              .textLight,
                                         ),
                                       ),
+                                    ],
+                                  ),
+                                  SizedBox(
+                                    height: divHeight / 2,
+                                  ),
+                                  Text(
+                                    "SEND ${widget.trade.fromFullTicker} TO "
+                                    "THIS ADDRESS",
+                                    style: STextStyles.overLineBold(context)
+                                        .copyWith(
+                                      color: Theme.of(context)
+                                          .extension<StackColors>()!
+                                          .textDark,
                                     ),
-                                    const SizedBox(
-                                      width: 40,
-                                    ),
-                                  ],
-                                ),
+                                  ),
+                                  _Divider(
+                                    height: divHeight,
+                                  ),
+                                  Stack(
+                                    children: [
+                                      RoundedWhiteContainer(
+                                        padding: EdgeInsets.zero,
+                                        child: Row(
+                                          children: [
+                                            Expanded(
+                                              child: Padding(
+                                                padding:
+                                                    const EdgeInsets.all(20),
+                                                child: Text(
+                                                  widget.trade.payinAddress,
+                                                  style:
+                                                      STextStyles.body(context),
+                                                ),
+                                              ),
+                                            ),
+                                            const SizedBox(
+                                              width: 40,
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      Positioned(
+                                        bottom: 7,
+                                        right: 6,
+                                        child: AppBarIconButton(
+                                          size: 50,
+                                          icon:
+                                              SvgPicture.asset(Assets.svg.copy),
+                                          onPressed: () {
+                                            Clipboard.setData(
+                                              ClipboardData(
+                                                  text: widget
+                                                      .trade.payinAddress),
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  _Divider(
+                                    height: divHeight,
+                                  ),
+                                  _DetailsItem(
+                                    title: "STATUS",
+                                    data: widget.trade.status.length > 1
+                                        ? "${widget.trade.status[0].toUpperCase()}${widget.trade.status.substring(1)}"
+                                        : widget.trade.status,
+                                    detailColor: Theme.of(context)
+                                        .extension<StackColors>()!
+                                        .colorForStatus(widget.trade.status),
+                                  ),
+                                  _Divider(
+                                    height: divHeight,
+                                  ),
+                                  _DetailsItem(
+                                    title: "TRADE ID",
+                                    data: widget.trade.tradeId,
+                                  ),
+                                  _Divider(
+                                    height: divHeight,
+                                  ),
+                                  _DetailsItem(
+                                    title: "AMOUNT TO SEND",
+                                    data:
+                                        "${widget.trade.fromAmount} ${widget.trade.fromFullTicker}",
+                                  ),
+                                  _Divider(
+                                    height: divHeight,
+                                  ),
+                                  Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        "REFUND ${widget.trade.fromFullTicker} ADDRESS",
+                                        style: STextStyles.overLineBold(context)
+                                            .copyWith(
+                                          color: Theme.of(context)
+                                              .extension<StackColors>()!
+                                              .textDark,
+                                        ),
+                                      ),
+                                      const SizedBox(
+                                        height: 8,
+                                      ),
+                                      Text(
+                                        widget.trade.refundAddress,
+                                        style: STextStyles.body(context),
+                                      ),
+                                    ],
+                                  ),
+                                  _Divider(
+                                    height: divHeight,
+                                  ),
+                                  PrimaryButton(
+                                    label: "I HAVE SENT",
+                                    onPressed: () {
+                                      Navigator.of(context).popUntil(
+                                        ModalRoute.withName(
+                                          HomeView.routeName,
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                  const SizedBox(
+                                    height: 16,
+                                  ),
+                                ],
                               ),
-                              Positioned(
-                                bottom: 7,
-                                right: 6,
-                                child: AppBarIconButton(
-                                  size: 50,
-                                  icon: SvgPicture.asset(Assets.svg.copy),
-                                  onPressed: () {
-                                    Clipboard.setData(
-                                      ClipboardData(
-                                          text: widget.trade.payinAddress),
-                                    );
-                                  },
-                                ),
-                              ),
-                            ],
+                            ),
                           ),
-                          const SizedBox(
-                            height: 16,
-                          ),
-                          _DetailsItem(
-                            title: "STATUS",
-                            data: widget.trade.status.length > 1
-                                ? "${widget.trade.status[0].toUpperCase()}${widget.trade.status.substring(1)}"
-                                : widget.trade.status,
-                            detailColor: Theme.of(context)
-                                .extension<StackColors>()!
-                                .colorForStatus(widget.trade.status),
-                          ),
-                          const _Divider(height: 15),
-                          _DetailsItem(
-                            title: "TRADE ID",
-                            data: widget.trade.tradeId,
-                          ),
-                          const _Divider(height: 15),
-                          _DetailsItem(
-                            title: "AMOUNT TO SEND",
-                            data:
-                                "${widget.trade.fromAmount} ${widget.trade.fromCurrency.toUpperCase()}",
-                          ),
-                          const _Divider(height: 15),
-                          const SizedBox(
-                            height: 16,
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "REFUND BTC ADDRESS",
-                                style:
-                                    STextStyles.overLineBold(context).copyWith(
-                                  color: Theme.of(context)
-                                      .extension<StackColors>()!
-                                      .textDark,
-                                ),
-                              ),
-                              const SizedBox(
-                                height: 8,
-                              ),
-                              Text(
-                                widget.trade.refundAddress,
-                                style: STextStyles.body(context),
-                              ),
-                            ],
-                          ),
-                          const _Divider(height: 15),
-                          const SizedBox(
-                            height: 16,
-                          ),
-                          PrimaryButton(
-                            label: "DONE",
-                            onPressed: () {
-                              Navigator.of(context).popUntil(
-                                ModalRoute.withName(
-                                  HomeView.routeName,
-                                ),
-                              );
-                            },
-                          ),
-                          const SizedBox(
-                            height: 16,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                        ),
+                      ],
+                    );
+                  },
                 ),
-              );
-            },
+              ),
+            ),
           ),
         ),
       ),
