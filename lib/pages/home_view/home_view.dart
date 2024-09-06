@@ -378,22 +378,23 @@ class _HomeViewState extends ConsumerState<HomeView> {
                           ),
                           label: 'SWAP',
                         ),
-                      BottomNavigationBarItem(
-                        icon: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: SvgPicture.asset(Assets.svg.buy),
-                        ),
-                        activeIcon: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: SvgPicture.asset(
-                            Assets.svg.buy,
-                            color: Theme.of(context)
-                                .extension<StackColors>()!
-                                .buttonBackPrimary,
+                      if (Constants.enableExchange)
+                        BottomNavigationBarItem(
+                          icon: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: SvgPicture.asset(Assets.svg.buy),
                           ),
+                          activeIcon: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: SvgPicture.asset(
+                              Assets.svg.buy,
+                              color: Theme.of(context)
+                                  .extension<StackColors>()!
+                                  .buttonBackPrimary,
+                            ),
+                          ),
+                          label: 'BUY',
                         ),
-                        label: 'BUY',
-                      ),
                       BottomNavigationBarItem(
                         icon: Padding(
                           padding: const EdgeInsets.all(8.0),
