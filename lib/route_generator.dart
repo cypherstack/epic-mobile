@@ -477,11 +477,11 @@ class RouteGenerator {
         }
         return _routeError("${settings.name} invalid args: ${args.toString()}");
 
-      case ConfirmBuyView.routeName:
+      case ConfirmCryptoBuyView.routeName:
         if (args is Trade) {
           return getRoute(
             shouldUseMaterialRoute: useMaterialPageRoute,
-            builder: (_) => ConfirmBuyView(
+            builder: (_) => ConfirmCryptoBuyView(
               trade: args,
             ),
             settings: RouteSettings(

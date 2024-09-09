@@ -1,5 +1,5 @@
 import 'package:epicpay/models/isar/models/exchange/trade.dart';
-import 'package:epicpay/pages/buy_view/confirm_buy_info_dialog.dart';
+import 'package:epicpay/pages/buy_view/confirm_crypto_buy_info_dialog.dart';
 import 'package:epicpay/pages/home_view/home_view.dart';
 import 'package:epicpay/utilities/assets.dart';
 import 'package:epicpay/utilities/text_styles.dart';
@@ -13,18 +13,18 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 
-class ConfirmBuyView extends StatefulWidget {
-  const ConfirmBuyView({super.key, required this.trade});
+class ConfirmCryptoBuyView extends StatefulWidget {
+  const ConfirmCryptoBuyView({super.key, required this.trade});
 
   final Trade trade;
 
-  static const routeName = "/confirmBuyView";
+  static const routeName = "/confirmCryptoBuyView";
 
   @override
-  State<ConfirmBuyView> createState() => _ConfirmBuyViewState();
+  State<ConfirmCryptoBuyView> createState() => _ConfirmCryptoBuyViewState();
 }
 
-class _ConfirmBuyViewState extends State<ConfirmBuyView> {
+class _ConfirmCryptoBuyViewState extends State<ConfirmCryptoBuyView> {
   static const double maxDivHeight = 23;
   static const double minDivHeight = 5;
   final _key = GlobalKey();
@@ -144,7 +144,7 @@ class _ConfirmBuyViewState extends State<ConfirmBuyView> {
                     onPressed: () {
                       showDialog<void>(
                         context: context,
-                        builder: (context) => ConfirmBuyInfoDialog(
+                        builder: (context) => ConfirmCryptoBuyInfoDialog(
                           baseCurrencyTicker:
                               widget.trade.fromCurrency.toUpperCase(),
                         ),
