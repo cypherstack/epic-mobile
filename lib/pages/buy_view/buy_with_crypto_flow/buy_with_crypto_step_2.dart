@@ -17,6 +17,7 @@ import 'package:epicpay/widgets/background.dart';
 import 'package:epicpay/widgets/custom_buttons/app_bar_icon_button.dart';
 import 'package:epicpay/widgets/desktop/primary_button.dart';
 import 'package:epicpay/widgets/ep_dialog.dart';
+import 'package:epicpay/widgets/step_progress_dots.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -33,7 +34,7 @@ class BuyWithCryptoStep2 extends ConsumerStatefulWidget {
     required this.usdtRate,
   });
 
-  final BuyOption option;
+  final CryptoBuyOption option;
   final Decimal min;
   final Decimal max;
   final Decimal usdtRate;
@@ -270,8 +271,9 @@ class _BuyWithCryptoStep2State extends ConsumerState<BuyWithCryptoStep2> {
               onPressed: Navigator.of(context).pop,
             ),
             centerTitle: true,
-            title: const StepIndicatorRow(
+            title: const StepProgressDots(
               activeCount: 2,
+              totalCount: 3,
             ),
             actions: [
               Padding(

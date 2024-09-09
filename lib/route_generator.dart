@@ -427,7 +427,7 @@ class RouteGenerator {
 
       case BuyWithCryptoStep2.routeName:
         if (args is ({
-          BuyOption option,
+          CryptoBuyOption option,
           Decimal min,
           Decimal max,
           Decimal usdtRate
@@ -448,7 +448,7 @@ class RouteGenerator {
         return _routeError("${settings.name} invalid args: ${args.toString()}");
 
       case BuyWithCryptoStep3.routeName:
-        if (args is ({BuyOption option, Estimate estimate})) {
+        if (args is ({CryptoBuyOption option, Estimate estimate})) {
           return getRoute(
             shouldUseMaterialRoute: useMaterialPageRoute,
             builder: (_) => BuyWithCryptoStep3(
@@ -463,7 +463,7 @@ class RouteGenerator {
         return _routeError("${settings.name} invalid args: ${args.toString()}");
 
       case BuyRefundAddressEntry.routeName:
-        if (args is ({BuyOption option, Estimate estimate})) {
+        if (args is ({CryptoBuyOption option, Estimate estimate})) {
           return getRoute(
             shouldUseMaterialRoute: useMaterialPageRoute,
             builder: (_) => BuyRefundAddressEntry(

@@ -17,6 +17,7 @@ import 'package:epicpay/widgets/custom_buttons/app_bar_icon_button.dart';
 import 'package:epicpay/widgets/desktop/primary_button.dart';
 import 'package:epicpay/widgets/ep_dialog.dart';
 import 'package:epicpay/widgets/rounded_container.dart';
+import 'package:epicpay/widgets/step_progress_dots.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -43,7 +44,7 @@ class _BuyWithCryptoStep1State extends ConsumerState<BuyWithCryptoStep1> {
     _onNextPressedLock = true;
 
     try {
-      final option = BuyOption.values[_selectedIndex!];
+      final option = CryptoBuyOption.values[_selectedIndex!];
       const timeout = Duration(seconds: 5);
 
       final epic = ref
@@ -75,12 +76,12 @@ class _BuyWithCryptoStep1State extends ConsumerState<BuyWithCryptoStep1> {
             )
       ];
 
-      if (option == BuyOption.btc) {
+      if (option == CryptoBuyOption.btc) {
         futures.add(
           ChangeNowExchange.instance
               .getEstimate(
-                BuyOption.usdtERC20.currency!,
-                BuyOption.btc.currency!,
+                CryptoBuyOption.usdtERC20.currency!,
+                CryptoBuyOption.btc.currency!,
                 Decimal.fromInt(1000),
                 false,
                 false,
@@ -223,8 +224,9 @@ class _BuyWithCryptoStep1State extends ConsumerState<BuyWithCryptoStep1> {
               onPressed: Navigator.of(context).pop,
             ),
             centerTitle: true,
-            title: const StepIndicatorRow(
+            title: const StepProgressDots(
               activeCount: 1,
+              totalCount: 3,
             ),
           ),
           body: Column(
@@ -241,7 +243,7 @@ class _BuyWithCryptoStep1State extends ConsumerState<BuyWithCryptoStep1> {
               Expanded(
                 child: ListView.separated(
                   itemBuilder: (context, index) {
-                    final option = BuyOption.values[index];
+                    final option = CryptoBuyOption.values[index];
 
                     return Padding(
                       padding: const EdgeInsets.symmetric(
@@ -295,7 +297,7 @@ class _BuyWithCryptoStep1State extends ConsumerState<BuyWithCryptoStep1> {
                   separatorBuilder: (context, index) => const SizedBox(
                     height: 10,
                   ),
-                  itemCount: BuyOption.values.length,
+                  itemCount: CryptoBuyOption.values.length,
                 ),
               ),
               Padding(
@@ -314,54 +316,7 @@ class _BuyWithCryptoStep1State extends ConsumerState<BuyWithCryptoStep1> {
   }
 }
 
-class StepIndicatorRow extends StatelessWidget {
-  const StepIndicatorRow({
-    super.key,
-    required this.activeCount,
-  }) : assert(activeCount >= 0 && activeCount <= 3);
-
-  final int activeCount;
-
-  @override
-  Widget build(BuildContext context) {
-    final on = Theme.of(context).extension<StackColors>()!.stepIndicatorBGCheck;
-
-    final off =
-        Theme.of(context).extension<StackColors>()!.stepIndicatorBGInactive;
-
-    return SizedBox(
-      width: 41,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          RoundedContainer(
-            width: 6,
-            height: 6,
-            color: activeCount > 0 ? on : off,
-          ),
-          const SizedBox(
-            width: 5,
-          ),
-          RoundedContainer(
-            width: 6,
-            height: 6,
-            color: activeCount > 1 ? on : off,
-          ),
-          const SizedBox(
-            width: 5,
-          ),
-          RoundedContainer(
-            width: 6,
-            height: 6,
-            color: activeCount > 2 ? on : off,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-enum BuyOption {
+enum CryptoBuyOption {
   btc("Bitcoin / BTC"),
   usdtERC20("USDT (ETH)"),
   usdtTRC20("USDT (TRX)"),
@@ -372,25 +327,25 @@ enum BuyOption {
   usdcSOL("USDC (SOL)");
 
   final String value;
-  const BuyOption(this.value);
+  const CryptoBuyOption(this.value);
 
   String get assetName {
     switch (this) {
-      case BuyOption.btc:
+      case CryptoBuyOption.btc:
         return Assets.cn.btc;
-      case BuyOption.usdtBSC:
+      case CryptoBuyOption.usdtBSC:
         return Assets.cn.usdtBSC;
-      case BuyOption.usdtERC20:
+      case CryptoBuyOption.usdtERC20:
         return Assets.cn.usdtERC20;
-      case BuyOption.usdtSOL:
+      case CryptoBuyOption.usdtSOL:
         return Assets.cn.usdtSOL;
-      case BuyOption.usdtTRC20:
+      case CryptoBuyOption.usdtTRC20:
         return Assets.cn.usdtTRC20;
-      case BuyOption.usdcBSC:
+      case CryptoBuyOption.usdcBSC:
         return Assets.cn.usdcBSC;
-      case BuyOption.usdcERC20:
+      case CryptoBuyOption.usdcERC20:
         return Assets.cn.usdcERC20;
-      case BuyOption.usdcSOL:
+      case CryptoBuyOption.usdcSOL:
         return Assets.cn.usdcSOL;
     }
   }
@@ -406,7 +361,7 @@ enum BuyOption {
 
   int get fractionDigits {
     switch (this) {
-      case BuyOption.btc:
+      case CryptoBuyOption.btc:
         return 8;
       default:
         return 6;
@@ -419,7 +374,7 @@ enum BuyOption {
         .exchangeNameEqualTo(ChangeNowExchange.exchangeName);
 
     switch (this) {
-      case BuyOption.btc:
+      case CryptoBuyOption.btc:
         return filter
             .tickerEqualTo("btc")
             .and()
@@ -427,43 +382,43 @@ enum BuyOption {
             .and()
             .nameEqualTo("Bitcoin")
             .findFirstSync();
-      case BuyOption.usdtERC20:
+      case CryptoBuyOption.usdtERC20:
         return filter
             .tickerEqualTo("usdt")
             .and()
             .networkEqualTo("eth")
             .findFirstSync();
-      case BuyOption.usdtSOL:
+      case CryptoBuyOption.usdtSOL:
         return filter
             .tickerEqualTo("usdt")
             .and()
             .networkEqualTo("sol")
             .findFirstSync();
-      case BuyOption.usdtBSC:
+      case CryptoBuyOption.usdtBSC:
         return filter
             .tickerEqualTo("usdt")
             .and()
             .networkEqualTo("bsc")
             .findFirstSync();
-      case BuyOption.usdtTRC20:
+      case CryptoBuyOption.usdtTRC20:
         return filter
             .tickerEqualTo("usdt")
             .and()
             .networkEqualTo("trx")
             .findFirstSync();
-      case BuyOption.usdcBSC:
+      case CryptoBuyOption.usdcBSC:
         return filter
             .tickerEqualTo("usdc")
             .and()
             .networkEqualTo("bsc")
             .findFirstSync();
-      case BuyOption.usdcERC20:
+      case CryptoBuyOption.usdcERC20:
         return filter
             .tickerEqualTo("usdc")
             .and()
             .networkEqualTo("eth")
             .findFirstSync();
-      case BuyOption.usdcSOL:
+      case CryptoBuyOption.usdcSOL:
         return filter
             .tickerEqualTo("usdc")
             .and()

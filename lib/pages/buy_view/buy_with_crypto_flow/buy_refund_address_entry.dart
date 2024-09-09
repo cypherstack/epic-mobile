@@ -39,7 +39,7 @@ class BuyRefundAddressEntry extends ConsumerStatefulWidget {
     required this.estimate,
   });
 
-  final BuyOption option;
+  final CryptoBuyOption option;
   final Estimate estimate;
 
   static const routeName = "/buyRefundAddressEntry";

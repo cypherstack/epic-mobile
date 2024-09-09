@@ -9,6 +9,7 @@ import 'package:epicpay/widgets/custom_buttons/app_bar_icon_button.dart';
 import 'package:epicpay/widgets/desktop/primary_button.dart';
 import 'package:epicpay/widgets/desktop/secondary_button.dart';
 import 'package:epicpay/widgets/rounded_white_container.dart';
+import 'package:epicpay/widgets/step_progress_dots.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -20,7 +21,7 @@ class BuyWithCryptoStep3 extends ConsumerStatefulWidget {
     required this.estimate,
   });
 
-  final BuyOption option;
+  final CryptoBuyOption option;
   final Estimate estimate;
 
   static const routeName = "/buyWithCryptoStep3";
@@ -80,8 +81,9 @@ class _BuyWithCryptoStep3State extends ConsumerState<BuyWithCryptoStep3> {
             onPressed: Navigator.of(context).pop,
           ),
           centerTitle: true,
-          title: const StepIndicatorRow(
+          title: const StepProgressDots(
             activeCount: 3,
+            totalCount: 3,
           ),
         ),
         body: LayoutBuilder(
