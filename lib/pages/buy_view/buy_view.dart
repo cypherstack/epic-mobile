@@ -3,14 +3,21 @@ import 'dart:async';
 import 'package:epicpay/db/isar/isar_db.dart';
 import 'package:epicpay/models/isar/models/exchange/trade.dart';
 import 'package:epicpay/pages/buy_view/buy_with_crypto_flow/buy_with_crypto_step_1.dart';
+import 'package:epicpay/pages/buy_view/buy_with_fiat_flow/buy_with_fiat_step_1.dart';
+import 'package:epicpay/pages/loading_view.dart';
+import 'package:epicpay/services/guardarian/enums.dart';
+import 'package:epicpay/services/guardarian/guardarian_api.dart';
+import 'package:epicpay/services/guardarian/response_models/g_currency.dart';
 import 'package:epicpay/utilities/assets.dart';
 import 'package:epicpay/utilities/clipboard_interface.dart';
 import 'package:epicpay/utilities/constants.dart';
 import 'package:epicpay/utilities/enums/coin_enum.dart';
+import 'package:epicpay/utilities/logger.dart';
 import 'package:epicpay/utilities/text_styles.dart';
 import 'package:epicpay/utilities/theme/stack_colors.dart';
 import 'package:epicpay/widgets/buy_card.dart';
 import 'package:epicpay/widgets/conditional_parent.dart';
+import 'package:epicpay/widgets/ep_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -51,6 +58,42 @@ class _BuyViewState extends ConsumerState<BuyView> {
     }
   }
 
+  Future<(List<GCurrency>, GCurrency)> _loading() async {
+    final countries = await GuardarianAPI.getCountries();
+    if (countries.value == null) {
+      throw countries.exception!;
+    }
+
+    // todo get country from device external ip or geolocation
+    // todo check countries and pop up warning? (throw exception in this case)
+    final epic = await GuardarianAPI.getCurrency("EPIC");
+    if (epic.value == null) {
+      throw epic.exception!;
+    }
+
+    final currencies = await GuardarianAPI.getCurrenciesFiat(true);
+    if (currencies.value == null) {
+      throw currencies.exception!;
+    }
+
+    // sort and filter
+    currencies.value!
+        .removeWhere((e) => e.enabled == false || e.isAvailable == false);
+    currencies.value!.removeWhere((e) => !e.paymentMethods
+        .any((e) => e.paymentCategory == EGPaymentCategory.VISA_MC));
+    final List<GCurrency> eurUsdGbp = [];
+    final strings = ["EUR", "USD", "GBP"];
+    for (final string in strings) {
+      final index = currencies.value!.indexWhere((e) => e.ticker == string);
+      if (index >= 0) {
+        eurUsdGbp.add(currencies.value!.removeAt(index));
+      }
+    }
+    currencies.value!.sort((a, b) => a.name.compareTo(b.name));
+    currencies.value!.insertAll(0, eurUsdGbp);
+    return (currencies.value!, epic.value!);
+  }
+
   bool _onBuyWithFiatLock = false;
   Future<void> _onBuyWithFiatPressed() async {
     if (_onBuyWithFiatLock) {
@@ -58,7 +101,34 @@ class _BuyViewState extends ConsumerState<BuyView> {
     }
     _onBuyWithFiatLock = true;
     try {
-      // do stuff ion the future
+      Exception? ex;
+      final result = await showLoading(
+        whileFuture: _loading(),
+        context: context,
+        onException: (e) => ex = e,
+      );
+
+      if (ex != null) {
+        if (mounted) {
+          await showDialog<void>(
+            context: context,
+            builder: (_) => EPErrorDialog(
+              title: "Guardarian API Error",
+              info: ex.toString(),
+            ),
+          );
+        }
+        return;
+      }
+
+      if (mounted) {
+        await Navigator.of(context).pushNamed(
+          BuyWithFiatStep1.routeName,
+          arguments: result!,
+        );
+      }
+    } catch (e, s) {
+      Logging.instance.log("$e\n$s", level: LogLevel.Error);
     } finally {
       _onBuyWithFiatLock = false;
     }
@@ -113,8 +183,12 @@ class _BuyViewState extends ConsumerState<BuyView> {
                     SizedBox(
                       height: height < 600 ? 4 : 16,
                     ),
-                    const _FiatButton(
-                      onPressed: null, //_onBuyWithFiatPressed,
+                    _FiatButton(
+                      onPressed: () {
+                        if (mounted) {
+                          _onBuyWithFiatPressed();
+                        }
+                      },
                     ),
                     SizedBox(
                       height: height < 600 ? 10 : 20,
@@ -434,17 +508,13 @@ class _FiatButton extends StatelessWidget {
                         Assets.svg.dollar,
                         color: Theme.of(context)
                             .extension<StackColors>()!
-                            .textDark,
+                            .textGold,
                       ),
                     ),
                     const Spacer(),
                     Text(
                       "Buy with fiat",
-                      style: STextStyles.bodyBold(context).copyWith(
-                        color: Theme.of(context)
-                            .extension<StackColors>()!
-                            .textDark,
-                      ),
+                      style: STextStyles.bodyBold(context),
                     ),
                     Text(
                       "Coming soon",
