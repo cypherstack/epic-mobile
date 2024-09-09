@@ -33,7 +33,7 @@ abstract final class GuardarianAPI {
   ) {
     return {
       'Content-Type': 'application/json',
-      if (requiresApiKey) "x-api-key": kDKey,
+      if (requiresApiKey) "x-api-key": kGrdrnKey,
       if (forwardCustomerIP != null) "x-forwarded-for": forwardCustomerIP,
     };
   }
@@ -82,10 +82,7 @@ abstract final class GuardarianAPI {
 
       if (response.statusCode != 200) {
         final error = jsonDecode(response.body) as Map;
-
-        // TODO: handle differently
-        assert(response.statusCode == error["statusCode"]);
-
+        error["httpStatusCode"] = response.statusCode;
         throw GException.fromMap(error);
       }
 
@@ -116,10 +113,7 @@ abstract final class GuardarianAPI {
 
       if (response.statusCode != 200) {
         final error = jsonDecode(response.body) as Map;
-
-        // TODO: handle differently
-        assert(response.statusCode == error["statusCode"]);
-
+        error["httpStatusCode"] = response.statusCode;
         throw GException.fromMap(error);
       }
 

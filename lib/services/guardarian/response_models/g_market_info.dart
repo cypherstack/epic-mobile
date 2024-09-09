@@ -1,8 +1,10 @@
+import 'package:decimal/decimal.dart';
+
 class GMarketInfo {
   final String from;
   final String to;
-  final num min;
-  final num max;
+  final Decimal min;
+  final Decimal max;
 
   const GMarketInfo({
     required this.from,
@@ -16,8 +18,8 @@ class GMarketInfo {
       return GMarketInfo(
         from: map["from"] as String,
         to: map["to"] as String,
-        min: map["min"] as num,
-        max: map["max"] as num,
+        min: Decimal.parse(map["min"].toString()),
+        max: Decimal.parse(map["max"].toString()),
       );
     } catch (_) {
       throw Exception("Invalid json \"$map\" passed to GMarketInfo.fromMap");
