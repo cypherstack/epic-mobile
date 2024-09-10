@@ -23,6 +23,7 @@ import 'package:epicpay/route_generator.dart';
 import 'package:epicpay/services/coins/epiccash/epiccash_wallet.dart';
 import 'package:epicpay/services/coins/manager.dart';
 import 'package:epicpay/services/debug_service.dart';
+import 'package:epicpay/services/geo_service.dart';
 import 'package:epicpay/services/locale_service.dart';
 import 'package:epicpay/services/node_service.dart';
 import 'package:epicpay/services/swap/swap_data_service.dart';
@@ -169,6 +170,8 @@ class _MaterialAppWithThemeState extends ConsumerState<MaterialAppWithTheme>
       }
       didLoad = true;
 
+      final geoFuture = GeoService.load();
+
       final swapDataLoadingFuture = ref.read(pSwapDataService).updateAll();
 
       await DB.instance.init();
@@ -211,6 +214,7 @@ class _MaterialAppWithThemeState extends ConsumerState<MaterialAppWithTheme>
       }
 
       await swapDataLoadingFuture;
+      await geoFuture;
 
       loadingCompleter.complete();
     } catch (e, s) {

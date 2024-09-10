@@ -5,6 +5,7 @@ import 'package:epicpay/models/isar/models/exchange/trade.dart';
 import 'package:epicpay/pages/buy_view/buy_with_crypto_flow/buy_with_crypto_step_1.dart';
 import 'package:epicpay/pages/buy_view/buy_with_fiat_flow/buy_with_fiat_step_1.dart';
 import 'package:epicpay/pages/loading_view.dart';
+import 'package:epicpay/services/geo_service.dart';
 import 'package:epicpay/services/guardarian/enums.dart';
 import 'package:epicpay/services/guardarian/guardarian_api.dart';
 import 'package:epicpay/services/guardarian/response_models/g_currency.dart';
@@ -62,6 +63,26 @@ class _BuyViewState extends ConsumerState<BuyView> {
     final countries = await GuardarianAPI.getCountries();
     if (countries.value == null) {
       throw countries.exception!;
+    }
+
+    GeoService.guardarianCountries = countries.value!;
+
+    final myCountryCode = await GeoService.externalIpCountryCode().timeout(
+      const Duration(seconds: 3),
+      onTimeout: () => null,
+    );
+    if (myCountryCode != null) {
+      final possibleCountries = GeoService.guardarianCountries.where(
+        (e) => e.codeIsoAlpha2 == myCountryCode,
+      );
+
+      if (possibleCountries.length == 1) {
+        if (!possibleCountries.first.supported) {
+          throw Exception(
+            "Guardarian does not support ${possibleCountries.first.countryName} at this time.",
+          );
+        }
+      }
     }
 
     // todo get country from device external ip or geolocation
