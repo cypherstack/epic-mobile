@@ -96,6 +96,17 @@ abstract final class GuardarianAPI {
     }
   }
 
+  static Map<String, dynamic> _cleanNulls(Map<String, dynamic> body) {
+    for (final key in body.keys) {
+      if (body[key] is Map) {
+        body[key] = _cleanNulls(body[key] as Map<String, dynamic>);
+      }
+    }
+    body.removeWhere((k, v) =>
+        v == null || (v is List && v.isEmpty) || (v is Map && v.isEmpty));
+    return body;
+  }
+
   static Future<dynamic> _post(
     String endpoint,
     Map<String, dynamic> body, {
@@ -108,7 +119,7 @@ abstract final class GuardarianAPI {
       final response = await http.post(
         uri,
         headers: _buildHeaders(true, forwardCustomerIP),
-        body: jsonEncode(body),
+        body: jsonEncode(_cleanNulls(body)),
       );
 
       if (response.statusCode != 200) {

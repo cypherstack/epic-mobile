@@ -1,12 +1,17 @@
 import 'package:country_state_city/country_state_city.dart' as csc;
 import 'package:decimal/decimal.dart';
 import 'package:epicpay/pages/buy_view/personal_info_dialog.dart';
+import 'package:epicpay/pages/loading_view.dart';
+import 'package:epicpay/providers/global/wallet_provider.dart';
 import 'package:epicpay/services/geo_service.dart';
+import 'package:epicpay/services/guardarian/enums.dart';
+import 'package:epicpay/services/guardarian/guardarian_api.dart';
 import 'package:epicpay/services/guardarian/response_models/g_currency.dart';
 import 'package:epicpay/services/guardarian/response_models/g_estimate.dart';
+import 'package:epicpay/services/guardarian/response_models/g_transaction.dart';
 import 'package:epicpay/utilities/assets.dart';
 import 'package:epicpay/utilities/constants.dart';
-import 'package:epicpay/utilities/format.dart';
+import 'package:epicpay/utilities/logger.dart';
 import 'package:epicpay/utilities/text_styles.dart';
 import 'package:epicpay/utilities/theme/stack_colors.dart';
 import 'package:epicpay/utilities/util.dart';
@@ -18,10 +23,11 @@ import 'package:epicpay/widgets/list_selection_dialog.dart';
 import 'package:epicpay/widgets/rounded_white_container.dart';
 import 'package:epicpay/widgets/step_progress_dots.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_rounded_date_picker/flutter_rounded_date_picker.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-class BuyWithFiatStep4 extends StatefulWidget {
+class BuyWithFiatStep4 extends ConsumerStatefulWidget {
   const BuyWithFiatStep4({
     super.key,
     required this.option,
@@ -38,10 +44,10 @@ class BuyWithFiatStep4 extends StatefulWidget {
   static const routeName = "/buyWithFiatStep4";
 
   @override
-  State<BuyWithFiatStep4> createState() => _BuyWithFiatStep4State();
+  ConsumerState<BuyWithFiatStep4> createState() => _BuyWithFiatStep4State();
 }
 
-class _BuyWithFiatStep4State extends State<BuyWithFiatStep4> {
+class _BuyWithFiatStep4State extends ConsumerState<BuyWithFiatStep4> {
   final formKey = GlobalKey<FormState>();
 
   late final TextEditingController nameFirstController;
@@ -63,6 +69,43 @@ class _BuyWithFiatStep4State extends State<BuyWithFiatStep4> {
   csc.Country? _country;
   csc.State? _state;
 
+  Future<GTransaction> _createBuy() async {
+    final address = await ref.read(walletProvider)!.currentReceivingAddress;
+
+    final tx = await GuardarianAPI.postTransaction(
+      fromAmount: widget.sendAmount.toDouble(),
+      fromCurrency: widget.estimate.fromCurrency,
+      fromNetwork: widget.estimate.fromNetwork,
+      toCurrency: widget.estimate.toCurrency,
+      toNetwork: widget.estimate.toNetwork,
+      skipChoosePaymentCategory: false,
+      paymentCategory: EGPaymentCategory.VISA_MC,
+      skipChoosePayoutAddress: false,
+      customerCountry: _country!.isoCode,
+      customer: Customer(
+        billingInfo: CustomerBillingInfo(
+          countryAlpha2: _country!.isoCode,
+          usRegionAlpha2: _state!.isoCode,
+          region: _state!.name,
+          city: cityController.text,
+          streetAddress: streetAddressController.text,
+          aptNumber: aptNumberController.text,
+          postIndex: codeController.text,
+          firstName: nameFirstController.text,
+          lastName: nameLastController.text,
+          dateOfBirthday: dobController.text,
+          gender: genderController.text.substring(0, 1).toUpperCase(),
+        ),
+      ),
+    );
+
+    if (tx.exception != null) {
+      throw tx.exception!;
+    }
+
+    return tx.value!;
+  }
+
   bool _onNextPressedLock = false;
   void _onNextPressed() async {
     if (_onNextPressedLock) {
@@ -71,7 +114,38 @@ class _BuyWithFiatStep4State extends State<BuyWithFiatStep4> {
     _onNextPressedLock = true;
 
     try {
-      // TODO: create buy transaction
+      Exception? ex;
+      final result = await showLoading(
+        whileFuture: _createBuy(),
+        context: context,
+        onException: (e) => ex = e,
+      );
+
+      if (ex != null) {
+        if (mounted) {
+          await Logging.uiLog(
+            ex,
+            title: "Guardarian API Error",
+            context: context,
+          );
+          // await showDialog<void>(
+          //   context: context,
+          //   builder: (_) => EPErrorDialog(
+          //     title: "Guardarian API Error",
+          //     info: ex.toString(),
+          //   ),
+          // );
+        }
+        return;
+      }
+
+      if (mounted) {
+        await Logging.uiLog(
+          result,
+          title: "Guardarian create transaction result",
+          context: context,
+        );
+      }
     } finally {
       _onNextPressedLock = false;
     }
@@ -375,7 +449,9 @@ class _BuyWithFiatStep4State extends State<BuyWithFiatStep4> {
                                   setState(() {
                                     _dob = date;
                                     dobController.text =
-                                        Format.formatDate(date);
+                                        "${date.day < 10 ? "0${date.day}" : date.day}"
+                                        ".${date.month < 10 ? "0${date.month}" : date.month}"
+                                        ".${date.year}";
                                   });
                                 }
                               }
@@ -389,7 +465,7 @@ class _BuyWithFiatStep4State extends State<BuyWithFiatStep4> {
                                   controller: dobController,
                                   validator: _notEmptyValidator,
                                   decoration: InputDecoration(
-                                    hintText: "MM/DD/YYYY",
+                                    hintText: "DD.MM.YYYY",
                                     hintStyle: formStyle,
                                   ),
                                 ),
@@ -441,20 +517,19 @@ class _BuyWithFiatStep4State extends State<BuyWithFiatStep4> {
                           SizedBox(height: height < 600 ? 7 : 16),
                           TextFormField(
                             style: formStyle,
-                            controller: aptNumberController,
-                            validator: (_) => null,
+                            controller: streetAddressController,
+                            validator: _notEmptyValidator,
                             decoration: InputDecoration(
-                              hintText: "Apt number (optional)",
+                              hintText: "Street address",
                               hintStyle: formStyle,
                             ),
                           ),
                           SizedBox(height: height < 600 ? 7 : 16),
                           TextFormField(
                             style: formStyle,
-                            controller: streetAddressController,
-                            validator: _notEmptyValidator,
+                            controller: aptNumberController,
                             decoration: InputDecoration(
-                              hintText: "Street address",
+                              hintText: "Street address line 2",
                               hintStyle: formStyle,
                             ),
                           ),
@@ -482,6 +557,11 @@ class _BuyWithFiatStep4State extends State<BuyWithFiatStep4> {
                               );
 
                               if (context.mounted && country != null) {
+                                if (_country != country) {
+                                  _state = null;
+                                  regionController.text = "";
+                                }
+
                                 setState(() {
                                   _country = country;
                                   countryController.text = country.name;
@@ -606,8 +686,8 @@ class _BuyWithFiatStep4State extends State<BuyWithFiatStep4> {
                           _state != null &&
                           _country != null &&
                           _dob != null
-                      ? null
-                      : _onNextPressed,
+                      ? _onNextPressed
+                      : null,
                 ),
               ),
             ],

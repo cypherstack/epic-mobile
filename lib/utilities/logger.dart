@@ -25,15 +25,16 @@ class Logging {
 
   late final Isar? isar;
 
-  static void uiLog(
+  static Future<void> uiLog(
     core.Object? object, {
+    required String title,
     required BuildContext context,
-  }) {
+  }) async {
     instance.log(object, level: LogLevel.Error);
-    showDialog<void>(
+    await showDialog<void>(
       context: context,
       builder: (context) => EPErrorDialog(
-        title: "Logged Error:",
+        title: title,
         info: object.toString(),
         expand: true,
       ),

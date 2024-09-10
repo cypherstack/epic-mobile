@@ -85,8 +85,6 @@ class _BuyViewState extends ConsumerState<BuyView> {
       }
     }
 
-    // todo get country from device external ip or geolocation
-    // todo check countries and pop up warning? (throw exception in this case)
     final epic = await GuardarianAPI.getCurrency("EPIC");
     if (epic.value == null) {
       throw epic.exception!;
