@@ -8,7 +8,8 @@ import 'package:epicpay/models/isar/models/exchange/trade.dart';
 import 'package:epicpay/models/isar/models/log.dart';
 import 'package:epicpay/utilities/constants.dart';
 import 'package:epicpay/utilities/enums/log_level_enum.dart';
-import 'package:flutter/foundation.dart';
+import 'package:epicpay/widgets/ep_dialog.dart';
+import 'package:flutter/material.dart';
 import 'package:isar/isar.dart';
 
 export 'enums/log_level_enum.dart';
@@ -23,6 +24,21 @@ class Logging {
   static const core.int defaultPrintLength = 1020;
 
   late final Isar? isar;
+
+  static void uiLog(
+    core.Object? object, {
+    required BuildContext context,
+  }) {
+    instance.log(object, level: LogLevel.Error);
+    showDialog<void>(
+      context: context,
+      builder: (context) => EPErrorDialog(
+        title: "Logged Error:",
+        info: object.toString(),
+        expand: true,
+      ),
+    );
+  }
 
   Future<void> init(Isar isar) async {
     this.isar = isar;
