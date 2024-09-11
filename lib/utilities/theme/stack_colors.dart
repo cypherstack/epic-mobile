@@ -1,3 +1,4 @@
+import 'package:epicpay/services/guardarian/enums.dart';
 import 'package:epicpay/utilities/enums/coin_enum.dart';
 import 'package:epicpay/utilities/theme/color_theme.dart';
 import 'package:flutter/material.dart';
@@ -1432,6 +1433,30 @@ class StackColors extends ThemeExtension<StackColors> {
         spreadRadius: 3,
         blurRadius: 4,
       );
+
+  Color colorForGStatus(EGTransactionStatus status) {
+    switch (status) {
+      case EGTransactionStatus.New:
+      case EGTransactionStatus.WaitingForCustomer:
+      case EGTransactionStatus.WaitingForDeposit:
+      case EGTransactionStatus.Exchanging:
+      case EGTransactionStatus.OnHold:
+      case EGTransactionStatus.Sending:
+        return textGold;
+
+      case EGTransactionStatus.Finished:
+        return accentColorGreen;
+
+      case EGTransactionStatus.Failed:
+        return accentColorRed;
+
+      case EGTransactionStatus.Expired:
+      case EGTransactionStatus.Cancelled:
+      case EGTransactionStatus.Refunded:
+      case EGTransactionStatus.Unknown:
+        return textDark;
+    }
+  }
 
   Color colorForStatus(String status) {
     switch (status) {

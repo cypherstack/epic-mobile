@@ -5,7 +5,7 @@ import 'package:epicpay/models/exchange/estimate.dart';
 import 'package:epicpay/models/isar/models/exchange/currency.dart';
 import 'package:epicpay/models/isar/models/exchange/trade.dart';
 import 'package:epicpay/pages/buy_view/buy_with_crypto_flow/buy_with_crypto_step_1.dart';
-import 'package:epicpay/pages/buy_view/confirm_buy_view.dart';
+import 'package:epicpay/pages/buy_view/confirm_crypto_buy_view.dart';
 import 'package:epicpay/pages/loading_view.dart';
 import 'package:epicpay/pages/send_view/send_view.dart';
 import 'package:epicpay/providers/global/wallet_provider.dart';
@@ -39,7 +39,7 @@ class BuyRefundAddressEntry extends ConsumerStatefulWidget {
     required this.estimate,
   });
 
-  final BuyOption option;
+  final CryptoBuyOption option;
   final Estimate estimate;
 
   static const routeName = "/buyRefundAddressEntry";
@@ -143,7 +143,7 @@ class _BuyRefundAddressEntryState extends ConsumerState<BuyRefundAddressEntry> {
             });
             if (mounted) {
               await Navigator.of(context).pushNamed(
-                ConfirmBuyView.routeName,
+                ConfirmCryptoBuyView.routeName,
                 arguments: result.value!,
               );
             }

@@ -10,10 +10,12 @@ class EPDialogBase extends StatelessWidget {
     super.key,
     required this.child,
     this.expand = false,
+    this.expandError = false,
   });
 
   final Widget child;
   final bool expand;
+  final bool expandError;
 
   @override
   Widget build(BuildContext context) {
@@ -21,6 +23,10 @@ class EPDialogBase extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
+        if (expandError)
+          const SizedBox(
+            height: 20,
+          ),
         ConditionalParent(
           condition: expand,
           builder: (child) => Expanded(child: child),
@@ -40,6 +46,10 @@ class EPDialogBase extends StatelessWidget {
             ),
           ),
         ),
+        if (expandError)
+          const SizedBox(
+            height: 40,
+          ),
       ],
     );
   }
@@ -108,13 +118,21 @@ class EPDialog extends StatelessWidget {
 }
 
 class EPErrorDialog extends StatelessWidget {
-  const EPErrorDialog({super.key, required this.title, this.info});
+  const EPErrorDialog({
+    super.key,
+    required this.title,
+    this.info,
+    this.expand = false,
+  });
   final String title;
   final String? info;
+  final bool expand;
 
   @override
   Widget build(BuildContext context) {
     return EPDialogBase(
+      expand: expand,
+      expandError: expand,
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -128,9 +146,17 @@ class EPErrorDialog extends StatelessWidget {
                 height: 16,
               ),
             if (info != null)
-              Text(
-                info!,
-                style: STextStyles.baseXS(context),
+              ConditionalParent(
+                condition: expand,
+                builder: (child) => Expanded(
+                  child: SingleChildScrollView(
+                    child: child,
+                  ),
+                ),
+                child: Text(
+                  info!,
+                  style: STextStyles.baseXS(context),
+                ),
               ),
           ],
         ),

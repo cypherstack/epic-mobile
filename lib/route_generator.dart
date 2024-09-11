@@ -12,7 +12,12 @@ import 'package:epicpay/pages/buy_view/buy_with_crypto_flow/buy_refund_address_e
 import 'package:epicpay/pages/buy_view/buy_with_crypto_flow/buy_with_crypto_step_1.dart';
 import 'package:epicpay/pages/buy_view/buy_with_crypto_flow/buy_with_crypto_step_2.dart';
 import 'package:epicpay/pages/buy_view/buy_with_crypto_flow/buy_with_crypto_step_3.dart';
-import 'package:epicpay/pages/buy_view/confirm_buy_view.dart';
+import 'package:epicpay/pages/buy_view/buy_with_fiat_flow/buy_with_fiat_step_1.dart';
+import 'package:epicpay/pages/buy_view/buy_with_fiat_flow/buy_with_fiat_step_2.dart';
+import 'package:epicpay/pages/buy_view/buy_with_fiat_flow/buy_with_fiat_step_3.dart';
+import 'package:epicpay/pages/buy_view/confirm_crypto_buy_view.dart';
+import 'package:epicpay/pages/buy_view/fiat_buy_details_view.dart';
+import 'package:epicpay/pages/buy_view/fiat_country_unsupported_view.dart';
 import 'package:epicpay/pages/exchange_view/edit_trade_note_view.dart';
 import 'package:epicpay/pages/exchange_view/exchange_step_views/confirm_send_details_view.dart';
 import 'package:epicpay/pages/exchange_view/exchange_step_views/step_1_view.dart';
@@ -54,6 +59,8 @@ import 'package:epicpay/pages/settings_views/wallet_settings/wallet_settings_vie
 import 'package:epicpay/pages/wallet_view/transaction_views/transaction_details_view.dart';
 import 'package:epicpay/pages/wallet_view/transaction_views/transaction_search_filter_view.dart';
 import 'package:epicpay/pages/wallet_view/wallet_view.dart';
+import 'package:epicpay/services/guardarian/response_models/g_currency.dart';
+import 'package:epicpay/services/guardarian/response_models/g_estimate.dart';
 import 'package:epicpay/utilities/enums/coin_enum.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -427,7 +434,7 @@ class RouteGenerator {
 
       case BuyWithCryptoStep2.routeName:
         if (args is ({
-          BuyOption option,
+          CryptoBuyOption option,
           Decimal min,
           Decimal max,
           Decimal usdtRate
@@ -448,7 +455,7 @@ class RouteGenerator {
         return _routeError("${settings.name} invalid args: ${args.toString()}");
 
       case BuyWithCryptoStep3.routeName:
-        if (args is ({BuyOption option, Estimate estimate})) {
+        if (args is ({CryptoBuyOption option, Estimate estimate})) {
           return getRoute(
             shouldUseMaterialRoute: useMaterialPageRoute,
             builder: (_) => BuyWithCryptoStep3(
@@ -462,8 +469,89 @@ class RouteGenerator {
         }
         return _routeError("${settings.name} invalid args: ${args.toString()}");
 
+      case BuyWithFiatStep1.routeName:
+        if (args is (List<GCurrency>, GCurrency)) {
+          return getRoute(
+            shouldUseMaterialRoute: useMaterialPageRoute,
+            builder: (_) => BuyWithFiatStep1(
+              currencies: args.$1,
+              epic: args.$2,
+            ),
+            settings: RouteSettings(
+              name: settings.name,
+            ),
+          );
+        }
+        return _routeError("${settings.name} invalid args: ${args.toString()}");
+
+      case BuyWithFiatStep2.routeName:
+        if (args is ({
+          GCurrency option,
+          GCurrency epic,
+          Decimal min,
+          Decimal max,
+        })) {
+          return getRoute(
+            shouldUseMaterialRoute: useMaterialPageRoute,
+            builder: (_) => BuyWithFiatStep2(
+              option: args.option,
+              epic: args.epic,
+              min: args.min,
+              max: args.max,
+            ),
+            settings: RouteSettings(
+              name: settings.name,
+            ),
+          );
+        }
+        return _routeError("${settings.name} invalid args: ${args.toString()}");
+
+      case BuyWithFiatStep3.routeName:
+        if (args is ({
+          GEstimate estimate,
+          GCurrency option,
+          GCurrency epic,
+          Decimal sendAmount,
+        })) {
+          return getRoute(
+            shouldUseMaterialRoute: useMaterialPageRoute,
+            builder: (_) => BuyWithFiatStep3(
+              option: args.option,
+              epic: args.epic,
+              estimate: args.estimate,
+              sendAmount: args.sendAmount,
+            ),
+            settings: RouteSettings(
+              name: settings.name,
+            ),
+          );
+        }
+        return _routeError("${settings.name} invalid args: ${args.toString()}");
+
+      // case BuyWithFiatStep4.routeName:
+      //   if (args is ({
+      //     GEstimate estimate,
+      //     GCurrency option,
+      //     GCurrency epic,
+      //     Decimal sendAmount,
+      //   })) {
+      //     return getRoute(
+      //       shouldUseMaterialRoute: useMaterialPageRoute,
+      //       builder: (_) => BuyWithFiatStep4(
+      //         option: args.option,
+      //         epic: args.epic,
+      //         estimate: args.estimate,
+      //         sendAmount: args.sendAmount,
+      //       ),
+      //       settings: RouteSettings(
+      //         name: settings.name,
+      //       ),
+      //     );
+      //   }
+      //   return _routeError("${settings.name} invalid args: ${args.toString()}");
+
       case BuyRefundAddressEntry.routeName:
-        if (args is ({BuyOption option, Estimate estimate})) {
+        if (args is ({CryptoBuyOption option, Estimate estimate})) {
           return getRoute(
             shouldUseMaterialRoute: useMaterialPageRoute,
             builder: (_) => BuyRefundAddressEntry(
@@ -477,11 +565,11 @@ class RouteGenerator {
         }
         return _routeError("${settings.name} invalid args: ${args.toString()}");
 
-      case ConfirmBuyView.routeName:
+      case ConfirmCryptoBuyView.routeName:
         if (args is Trade) {
           return getRoute(
             shouldUseMaterialRoute: useMaterialPageRoute,
-            builder: (_) => ConfirmBuyView(
+            builder: (_) => ConfirmCryptoBuyView(
               trade: args,
             ),
             settings: RouteSettings(
@@ -659,6 +747,34 @@ class RouteGenerator {
               tradeId: args.tradeId,
               transactionIfSentFromStack: args.transactionIfSentFromStack,
               isBuy: args.isBuy,
+            ),
+            settings: RouteSettings(
+              name: settings.name,
+            ),
+          );
+        }
+        return _routeError("${settings.name} invalid args: ${args.toString()}");
+
+      case FiatBuyDetailsView.routeName:
+        if (args is String) {
+          return getRoute(
+            shouldUseMaterialRoute: useMaterialPageRoute,
+            builder: (_) => FiatBuyDetailsView(
+              transactionId: args,
+            ),
+            settings: RouteSettings(
+              name: settings.name,
+            ),
+          );
+        }
+        return _routeError("${settings.name} invalid args: ${args.toString()}");
+
+      case FiatCountryUnsupportedView.routeName:
+        if (args is String) {
+          return getRoute(
+            shouldUseMaterialRoute: useMaterialPageRoute,
+            builder: (_) => FiatCountryUnsupportedView(
+              unsupportedCountry: args,
             ),
             settings: RouteSettings(
               name: settings.name,

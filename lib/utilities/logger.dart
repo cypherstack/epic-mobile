@@ -5,10 +5,12 @@ import 'dart:io';
 import 'package:epicpay/models/isar/models/exchange/currency.dart';
 import 'package:epicpay/models/isar/models/exchange/pair.dart';
 import 'package:epicpay/models/isar/models/exchange/trade.dart';
+import 'package:epicpay/models/isar/models/guardarian_transaction.dart';
 import 'package:epicpay/models/isar/models/log.dart';
 import 'package:epicpay/utilities/constants.dart';
 import 'package:epicpay/utilities/enums/log_level_enum.dart';
-import 'package:flutter/foundation.dart';
+import 'package:epicpay/widgets/ep_dialog.dart';
+import 'package:flutter/material.dart';
 import 'package:isar/isar.dart';
 
 export 'enums/log_level_enum.dart';
@@ -23,6 +25,22 @@ class Logging {
   static const core.int defaultPrintLength = 1020;
 
   late final Isar? isar;
+
+  static Future<void> uiLog(
+    core.Object? object, {
+    required String title,
+    required BuildContext context,
+  }) async {
+    instance.log(object, level: LogLevel.Error);
+    await showDialog<void>(
+      context: context,
+      builder: (context) => EPErrorDialog(
+        title: title,
+        info: object.toString(),
+        expand: true,
+      ),
+    );
+  }
 
   Future<void> init(Isar isar) async {
     this.isar = isar;
@@ -40,6 +58,7 @@ class Logging {
         TradeSchema,
         PairSchema,
         CurrencySchema,
+        GuardarianTransactionSchema,
       ],
       inspector: false,
     );

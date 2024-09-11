@@ -2,14 +2,13 @@ import 'dart:async';
 import 'dart:math';
 
 import 'package:decimal/decimal.dart';
-import 'package:epicpay/db/isar/isar_db.dart';
-import 'package:epicpay/models/isar/models/exchange/currency.dart';
-import 'package:epicpay/pages/buy_view/buy_with_crypto_flow/buy_with_crypto_step_1.dart';
-import 'package:epicpay/pages/buy_view/buy_with_crypto_flow/buy_with_crypto_step_3.dart';
+import 'package:epicpay/pages/buy_view/buy_with_fiat_flow/buy_with_fiat_step_3.dart';
 import 'package:epicpay/pages/loading_view.dart';
 import 'package:epicpay/providers/global/locale_provider.dart';
-import 'package:epicpay/services/swap/change_now/change_now_exchange.dart';
-import 'package:epicpay/services/swap/exchange_response.dart';
+import 'package:epicpay/services/guardarian/enums.dart';
+import 'package:epicpay/services/guardarian/g_response.dart';
+import 'package:epicpay/services/guardarian/guardarian_api.dart';
+import 'package:epicpay/services/guardarian/response_models/g_currency.dart';
 import 'package:epicpay/utilities/assets.dart';
 import 'package:epicpay/utilities/text_styles.dart';
 import 'package:epicpay/utilities/theme/stack_colors.dart';
@@ -23,29 +22,28 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:intl/intl.dart';
-import 'package:isar/isar.dart';
 
-class BuyWithCryptoStep2 extends ConsumerStatefulWidget {
-  const BuyWithCryptoStep2({
+class BuyWithFiatStep2 extends ConsumerStatefulWidget {
+  const BuyWithFiatStep2({
     super.key,
     required this.option,
+    required this.epic,
     required this.min,
     required this.max,
-    required this.usdtRate,
   });
 
-  final CryptoBuyOption option;
+  final GCurrency option;
+  final GCurrency epic;
   final Decimal min;
   final Decimal max;
-  final Decimal usdtRate;
 
-  static const routeName = "/buyWithCryptoStep2";
+  static const routeName = "/buyWithFiatStep2";
 
   @override
-  ConsumerState<BuyWithCryptoStep2> createState() => _BuyWithCryptoStep2State();
+  ConsumerState<BuyWithFiatStep2> createState() => _BuyWithFiatStep2State();
 }
 
-class _BuyWithCryptoStep2State extends ConsumerState<BuyWithCryptoStep2> {
+class _BuyWithFiatStep2State extends ConsumerState<BuyWithFiatStep2> {
   String _amountString = "0";
   String _minMax = "";
 
@@ -53,37 +51,17 @@ class _BuyWithCryptoStep2State extends ConsumerState<BuyWithCryptoStep2> {
 
   Decimal convertedFromUsd = Decimal.zero;
 
-  Decimal? convert(String amountString) {
-    final amount = Decimal.tryParse(amountString);
-    if (amount == null) {
-      return null;
-    }
-
-    return amount * widget.usdtRate;
-  }
-
-  String _formatRange(Decimal value) {
-    final Decimal result;
-    if (value.abs() > Decimal.zero) {
-      result =
-          (value / widget.usdtRate).toDecimal(scaleOnInfinitePrecision: 10);
-    } else {
-      result = value;
-    }
-    return result.toStringAsFixed(2);
-  }
-
   void amountChanged() {
-    final amount = convert(_amountString);
+    final amount = Decimal.tryParse(_amountString);
 
     if (amount != null) {
       if (amount < widget.min) {
         setState(() {
-          _minMax = "Minimum amount ${_formatRange(widget.min)}";
+          _minMax = "Minimum amount ${widget.min.toStringAsFixed(2)}";
         });
       } else if (amount > widget.max) {
         setState(() {
-          _minMax = "Maximum amount ${_formatRange(widget.max)}";
+          _minMax = "Maximum amount ${widget.max.toStringAsFixed(2)}";
         });
       } else {
         setState(() {
@@ -99,8 +77,7 @@ class _BuyWithCryptoStep2State extends ConsumerState<BuyWithCryptoStep2> {
     }
 
     if (_amountString.contains(".") &&
-        _amountString.length - _amountString.indexOf(".") >=
-            widget.option.fractionDigits) {
+        _amountString.length - _amountString.indexOf(".") >= 2) {
       return;
     }
 
@@ -143,36 +120,21 @@ class _BuyWithCryptoStep2State extends ConsumerState<BuyWithCryptoStep2> {
     try {
       const timeout = Duration(seconds: 5);
 
-      final amount = convert(_amountString)!;
+      final amount = Decimal.tryParse(_amountString)!;
 
-      final epic = ref
-          .read(pIsarDB)
-          .isar
-          .currencies
-          .filter()
-          .exchangeNameEqualTo(ChangeNowExchange.exchangeName)
-          .tickerEqualTo("epic")
-          .and()
-          .networkEqualTo("epic")
-          .and()
-          .nameEqualTo("EpicCash")
-          .findFirstSync();
-
-      final resultFuture = ChangeNowExchange.instance
-          .getEstimate(
-            widget.option.currency!,
-            epic!,
-            amount,
-            false,
-            false,
-          )
-          .timeout(
-            timeout,
-            onTimeout: () => ExchangeResponse(
-              value: null,
-              exception: ExchangeException("Get Quote timeout"),
-            ),
-          );
+      final resultFuture = GuardarianAPI.getEstimate(
+        fromCurrency: widget.option.ticker,
+        toCurrency: widget.epic.ticker,
+        toNetwork: "EPIC",
+        fromAmount: amount.toString(),
+        depositCategory: EGPaymentCategory.VISA_MC,
+      ).timeout(
+        timeout,
+        onTimeout: () => GResponse(
+          value: null,
+          exception: Exception("Get getEstimate timeout"),
+        ),
+      );
 
       if (mounted) {
         final result = await showLoading(
@@ -201,35 +163,22 @@ class _BuyWithCryptoStep2State extends ConsumerState<BuyWithCryptoStep2> {
               showDialog<void>(
                 context: context,
                 builder: (context) => EPErrorDialog(
-                  title: "Buy error",
-                  info: result.exception!.message,
+                  title: "Guardarian error",
+                  info: result.exception!.toString(),
                 ),
               ),
             );
             return;
           }
 
-          final estimates = result.value;
-
-          if (estimates != null) {
-            if (estimates.isEmpty) {
-              unawaited(
-                showDialog<void>(
-                  context: context,
-                  builder: (context) => const EPErrorDialog(
-                    title: "Buy error",
-                    info: "ChangeNOW provided no estimate",
-                  ),
-                ),
-              );
-              return;
-            }
-
+          if (result.value != null) {
             await Navigator.of(context).pushNamed(
-              BuyWithCryptoStep3.routeName,
+              BuyWithFiatStep3.routeName,
               arguments: (
-                estimate: estimates.first,
+                estimate: result.value!,
                 option: widget.option,
+                epic: widget.epic,
+                sendAmount: amount,
               ),
             );
           }
@@ -313,14 +262,11 @@ class _BuyWithCryptoStep2State extends ConsumerState<BuyWithCryptoStep2> {
                       return;
                     }
 
-                    final decimal = convert(number.toString());
+                    final decimal = Decimal.tryParse(number.toString());
 
                     if (mounted && decimal != null) {
                       setState(() {
-                        _amountString = convert(
-                          decimal.toStringAsFixed(widget.option.fractionDigits),
-                        )!
-                            .toString();
+                        _amountString = decimal.toStringAsFixed(2);
                       });
 
                       amountChanged();
@@ -349,7 +295,7 @@ class _BuyWithCryptoStep2State extends ConsumerState<BuyWithCryptoStep2> {
                         height: height < 600 ? 8 : 40,
                       ),
                       Text(
-                        "$_amountString  USD",
+                        "$_amountString  ${widget.option.ticker}",
                         textAlign: TextAlign.center,
                         style: STextStyles.w600_40(context).copyWith(
                           color: amountIsZero(_amountString)

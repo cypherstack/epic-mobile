@@ -1,53 +1,116 @@
-import 'package:epicpay/models/exchange/estimate.dart';
-import 'package:epicpay/pages/buy_view/buy_with_crypto_flow/buy_refund_address_entry.dart';
-import 'package:epicpay/pages/buy_view/buy_with_crypto_flow/buy_with_crypto_step_1.dart';
+import 'package:decimal/decimal.dart';
+import 'package:epicpay/db/isar/isar_db.dart';
+import 'package:epicpay/models/isar/models/guardarian_transaction.dart';
+import 'package:epicpay/pages/buy_view/buy_with_fiat_flow/buy_with_fiat_step_1.dart';
+import 'package:epicpay/pages/home_view/home_view.dart';
+import 'package:epicpay/pages/loading_view.dart';
+import 'package:epicpay/services/guardarian/enums.dart';
+import 'package:epicpay/services/guardarian/guardarian_api.dart';
+import 'package:epicpay/services/guardarian/response_models/g_currency.dart';
+import 'package:epicpay/services/guardarian/response_models/g_estimate.dart';
+import 'package:epicpay/services/guardarian/response_models/g_transaction.dart';
 import 'package:epicpay/utilities/assets.dart';
+import 'package:epicpay/utilities/logger.dart';
 import 'package:epicpay/utilities/text_styles.dart';
 import 'package:epicpay/utilities/theme/stack_colors.dart';
 import 'package:epicpay/widgets/background.dart';
 import 'package:epicpay/widgets/custom_buttons/app_bar_icon_button.dart';
 import 'package:epicpay/widgets/desktop/primary_button.dart';
 import 'package:epicpay/widgets/desktop/secondary_button.dart';
+import 'package:epicpay/widgets/ep_dialog.dart';
 import 'package:epicpay/widgets/rounded_white_container.dart';
 import 'package:epicpay/widgets/step_progress_dots.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:url_launcher/url_launcher.dart';
 
-class BuyWithCryptoStep3 extends ConsumerStatefulWidget {
-  const BuyWithCryptoStep3({
+class BuyWithFiatStep3 extends ConsumerStatefulWidget {
+  const BuyWithFiatStep3({
     super.key,
     required this.option,
+    required this.epic,
     required this.estimate,
+    required this.sendAmount,
   });
 
-  final CryptoBuyOption option;
-  final Estimate estimate;
+  final GCurrency option;
+  final GCurrency epic;
+  final GEstimate estimate;
+  final Decimal sendAmount;
 
-  static const routeName = "/buyWithCryptoStep3";
+  static const routeName = "/buyWithFiatStep3";
 
   @override
-  ConsumerState<BuyWithCryptoStep3> createState() => _BuyWithCryptoStep3State();
+  ConsumerState<BuyWithFiatStep3> createState() => _BuyWithFiatStep3State();
 }
 
-class _BuyWithCryptoStep3State extends ConsumerState<BuyWithCryptoStep3> {
-  bool _acceptPressedLock = false;
+class _BuyWithFiatStep3State extends ConsumerState<BuyWithFiatStep3> {
+  Future<GTransaction> _createBuy() async {
+    final tx = await GuardarianAPI.postTransaction(
+      fromAmount: widget.sendAmount.toDouble(),
+      fromCurrency: widget.estimate.fromCurrency,
+      fromNetwork: widget.estimate.fromNetwork,
+      toCurrency: widget.estimate.toCurrency,
+      toNetwork: widget.estimate.toNetwork,
+      skipChoosePaymentCategory: false,
+      paymentCategory: EGPaymentCategory.VISA_MC,
+      skipChoosePayoutAddress: false,
+    );
 
+    if (tx.exception != null) {
+      throw tx.exception!;
+    }
+
+    return tx.value!;
+  }
+
+  bool _acceptPressedLock = false;
   void _acceptPressed() async {
     if (_acceptPressedLock) {
       return;
     }
     _acceptPressedLock = true;
     try {
+      Exception? ex;
+      final result = await showLoading(
+        whileFuture: _createBuy(),
+        context: context,
+        onException: (e) => ex = e,
+      );
+
+      if (ex != null) {
+        if (mounted) {
+          Logging.instance.log("$ex", level: LogLevel.Error);
+          await showDialog<void>(
+            context: context,
+            builder: (_) => EPErrorDialog(
+              title: "Guardarian API Error",
+              info: ex.toString(),
+            ),
+          );
+        }
+        return;
+      }
+
+      final tx = GuardarianTransaction.fromGTransaction(result!);
+      await ref.read(pIsarDB).isar.writeTxn(() async {
+        await ref.read(pIsarDB).isar.guardarianTransactions.put(tx);
+      });
+
       if (mounted) {
-        await Navigator.of(context).pushNamed(
-          BuyRefundAddressEntry.routeName,
-          arguments: (
-            option: widget.option,
-            estimate: widget.estimate,
+        Navigator.of(context).popUntil(
+          ModalRoute.withName(
+            HomeView.routeName,
           ),
         );
+        await launchUrl(
+          Uri.parse(tx.redirectUrl!),
+          mode: LaunchMode.externalApplication,
+        );
       }
+    } catch (e, s) {
+      Logging.instance.log("$e\n$s", level: LogLevel.Error);
     } finally {
       _acceptPressedLock = false;
     }
@@ -109,7 +172,7 @@ class _BuyWithCryptoStep3State extends ConsumerState<BuyWithCryptoStep3> {
                       RoundedWhiteContainer(
                         child: Center(
                           child: Text(
-                            "${widget.estimate.fromAmount} ${widget.option.ticker.toUpperCase()}",
+                            "${widget.sendAmount} ${widget.option.ticker.toUpperCase()}",
                             style: STextStyles.titleH3(context).copyWith(
                               color: Theme.of(context)
                                   .extension<StackColors>()!
@@ -132,7 +195,7 @@ class _BuyWithCryptoStep3State extends ConsumerState<BuyWithCryptoStep3> {
                       RoundedWhiteContainer(
                         child: Center(
                           child: Text(
-                            "${widget.estimate.toAmount} EPIC",
+                            "${widget.estimate.value} ${widget.estimate.toCurrency.toUpperCase()}",
                             style: STextStyles.titleH3(context).copyWith(
                               color: Theme.of(context)
                                   .extension<StackColors>()!
@@ -147,7 +210,7 @@ class _BuyWithCryptoStep3State extends ConsumerState<BuyWithCryptoStep3> {
                       ),
                       RoundedWhiteContainer(
                         child: Text(
-                          "This quote is provided by ChangeNOW.",
+                          "This estimate is provided by Guardarian.",
                           style: STextStyles.w400_12_18h(context),
                         ),
                       ),
@@ -158,7 +221,7 @@ class _BuyWithCryptoStep3State extends ConsumerState<BuyWithCryptoStep3> {
                         label: "GET ANOTHER QUOTE",
                         onPressed: () => Navigator.of(context).popUntil(
                           ModalRoute.withName(
-                            BuyWithCryptoStep1.routeName,
+                            BuyWithFiatStep1.routeName,
                           ),
                         ),
                       ),
@@ -166,7 +229,7 @@ class _BuyWithCryptoStep3State extends ConsumerState<BuyWithCryptoStep3> {
                         height: 12,
                       ),
                       PrimaryButton(
-                        label: "ACCEPT QUOTE",
+                        label: "CONTINUE",
                         onPressed: _acceptPressed,
                       ),
                     ],
