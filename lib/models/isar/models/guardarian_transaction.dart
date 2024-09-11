@@ -1,5 +1,6 @@
 import 'package:decimal/decimal.dart';
 import 'package:epicpay/services/guardarian/enums.dart';
+import 'package:epicpay/services/guardarian/response_models/g_transaction.dart';
 import 'package:isar/isar.dart';
 
 part 'guardarian_transaction.g.dart';
@@ -9,19 +10,19 @@ class GuardarianTransaction {
   Id id = Isar.autoIncrement;
 
   @Index(unique: true, replace: true)
-  final int transactionId;
+  final String transactionId;
 
   final String statusString;
   @ignore
   EGTransactionStatus get status =>
       EGTransactionStatus.fromString(statusString);
 
-  final String email;
-  final String statusDetails;
+  final String? email;
+  final String? statusDetails;
   final String fromCurrency;
-  final String initialFromCurrency;
-  final String fromNetwork;
-  final String fromCurrencyWithNetwork;
+  final String? initialFromCurrency;
+  final String? fromNetwork;
+  final String? fromCurrencyWithNetwork;
 
   final String fromAmountString;
   @ignore
@@ -40,14 +41,14 @@ class GuardarianTransaction {
       Decimal.parse(initialExpectedFromAmountString);
 
   final String toCurrency;
-  final String toNetwork;
-  final String toCurrencyWithNetwork;
+  final String? toNetwork;
+  final String? toCurrencyWithNetwork;
 
   final String toAmountString;
   @ignore
   Decimal get toAmount => Decimal.parse(toAmountString);
 
-  final String outputHash;
+  final String? outputHash;
 
   final String expectedToAmountString;
   @ignore
@@ -56,14 +57,14 @@ class GuardarianTransaction {
   final String location;
   final String createdAt;
   final String updatedAt;
-  final int partnerId;
-  final String externalPartnerLinkId;
+  final String partnerId;
+  final String? externalPartnerLinkId;
 
   final String fromAmountInEurString;
   @ignore
   Decimal get fromAmountInEur => Decimal.parse(fromAmountInEurString);
 
-  final bool customerPayoutAddressChangeable;
+  final bool? customerPayoutAddressChangeable;
 
   final String estimateBreakdownToAmountString;
   @ignore
@@ -85,8 +86,8 @@ class GuardarianTransaction {
 
   final NetworkFeeEmbedded estimateBreakdownNetworkFee;
   final PartnerFeeEmbedded estimateBreakdownPartnerFee;
-  final String address;
-  final String extraId;
+  final String? address;
+  final String? extraId;
 
   final String depositPaymentCategoryString;
   @ignore
@@ -98,10 +99,10 @@ class GuardarianTransaction {
   EGPaymentCategory get payoutPaymentCategory =>
       EGPaymentCategory.fromString(payoutPaymentCategoryString);
 
-  final String redirectUrl;
-  final String preauthToken;
-  final bool skipChoosePayoutAddress;
-  final bool skipChoosePaymentCategory;
+  final String? redirectUrl;
+  final String? preauthToken;
+  final bool? skipChoosePayoutAddress;
+  final bool? skipChoosePaymentCategory;
 
   @Deprecated(
       "Use GuardarianTransaction.construct instead. This is for Isar compat only.")
@@ -205,6 +206,97 @@ class GuardarianTransaction {
             estimateBreakdownEstimatedExchangeRate.toString(),
         depositPaymentCategoryString = depositPaymentCategory.name,
         payoutPaymentCategoryString = payoutPaymentCategory.name;
+
+  factory GuardarianTransaction.fromGTransaction(
+    GTransaction gTransaction, {
+    GuardarianTransaction? previousToCopy,
+  }) {
+    final newTx = GuardarianTransaction.construct(
+      transactionId: gTransaction.id,
+      status: gTransaction.status,
+      email: gTransaction.email ?? previousToCopy?.email,
+      statusDetails: gTransaction.statusDetails ?? previousToCopy?.email,
+      fromCurrency: gTransaction.fromCurrency,
+      initialFromCurrency:
+          gTransaction.initialFromCurrency ?? previousToCopy?.email,
+      fromNetwork: gTransaction.fromNetwork ?? previousToCopy?.email,
+      fromCurrencyWithNetwork:
+          gTransaction.fromCurrencyWithNetwork ?? previousToCopy?.email,
+      fromAmount: Decimal.parse(gTransaction.fromAmount.toString()),
+      depositType: gTransaction.depositType,
+      payoutType: gTransaction.payoutType,
+      expectedFromAmount:
+          Decimal.parse(gTransaction.expectedFromAmount.toString()),
+      initialExpectedFromAmount:
+          Decimal.parse(gTransaction.initialExpectedFromAmount.toString()),
+      toCurrency: gTransaction.toCurrency,
+      toNetwork: gTransaction.toNetwork ?? previousToCopy?.toNetwork,
+      toCurrencyWithNetwork: gTransaction.toCurrencyWithNetwork ??
+          previousToCopy?.toCurrencyWithNetwork,
+      toAmount: Decimal.parse(gTransaction.toAmount.toString()),
+      outputHash: gTransaction.outputHash ?? previousToCopy?.outputHash,
+      expectedToAmount: Decimal.parse(gTransaction.expectedToAmount.toString()),
+      location: gTransaction.location,
+      createdAt: gTransaction.createdAt,
+      updatedAt: gTransaction.updatedAt,
+      partnerId: gTransaction.partnerId,
+      externalPartnerLinkId: gTransaction.externalPartnerLinkId ??
+          previousToCopy?.externalPartnerLinkId,
+      fromAmountInEur: Decimal.parse(gTransaction.fromAmountInEur.toString()),
+      customerPayoutAddressChangeable:
+          gTransaction.customerPayoutAddressChangeable ??
+              previousToCopy?.customerPayoutAddressChangeable,
+      estimateBreakdownToAmount:
+          Decimal.parse(gTransaction.estimateBreakdown.toAmount.toString()),
+      estimateBreakdownFromAmount:
+          Decimal.parse(gTransaction.estimateBreakdown.fromAmount.toString()),
+      estimateBreakdownServiceFees:
+          gTransaction.estimateBreakdown.serviceFees.map((e) {
+        return ServiceFeeEmbedded.construct(
+          name: e["name"] as String,
+          amount: Decimal.parse(e["amount"] as String),
+          currency: e["currency"] as String,
+        );
+      }).toList(growable: false),
+      estimateBreakdownConvertedAmount: ConvertedAmountEmbedded.construct(
+        currency: gTransaction.estimateBreakdown.convertedAmount["currency"]
+            as String,
+        amount: Decimal.parse(
+            gTransaction.estimateBreakdown.convertedAmount["amount"] as String),
+      ),
+      estimateBreakdownEstimatedExchangeRate: Decimal.parse(
+          gTransaction.estimateBreakdown.estimatedExchangeRate.toString()),
+      estimateBreakdownNetworkFee: NetworkFeeEmbedded.construct(
+        currency:
+            gTransaction.estimateBreakdown.networkFee["currency"] as String,
+        amount: Decimal.parse(
+            gTransaction.estimateBreakdown.networkFee["amount"] as String),
+      ),
+      estimateBreakdownPartnerFee: PartnerFeeEmbedded.construct(
+        currency:
+            gTransaction.estimateBreakdown.partnerFee["currency"] as String,
+        amount: Decimal.parse(
+            gTransaction.estimateBreakdown.partnerFee["amount"] as String),
+        percentage:
+            gTransaction.estimateBreakdown.partnerFee["percentage"] as String,
+      ),
+      address: gTransaction.payout?.address ?? previousToCopy?.address,
+      extraId: gTransaction.payout?.extraId ?? previousToCopy?.extraId,
+      depositPaymentCategory: gTransaction.depositPaymentCategory,
+      payoutPaymentCategory: gTransaction.payoutPaymentCategory,
+      redirectUrl: gTransaction.redirectUrl ?? previousToCopy?.redirectUrl,
+      preauthToken: gTransaction.preauthToken ?? previousToCopy?.preauthToken,
+      skipChoosePayoutAddress: gTransaction.skipChoosePayoutAddress ??
+          previousToCopy?.skipChoosePayoutAddress,
+      skipChoosePaymentCategory: gTransaction.skipChoosePaymentCategory ??
+          previousToCopy?.skipChoosePaymentCategory,
+    );
+
+    if (previousToCopy != null) {
+      newTx.id = previousToCopy.id;
+    }
+    return newTx;
+  }
 }
 
 @Embedded()

@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:epicpay/models/isar/models/exchange/currency.dart';
 import 'package:epicpay/models/isar/models/exchange/pair.dart';
 import 'package:epicpay/models/isar/models/exchange/trade.dart';
+import 'package:epicpay/models/isar/models/guardarian_transaction.dart';
 import 'package:epicpay/models/isar/models/log.dart';
 import 'package:epicpay/utilities/constants.dart';
 import 'package:epicpay/utilities/enums/log_level_enum.dart';
@@ -57,6 +58,7 @@ class Logging {
         TradeSchema,
         PairSchema,
         CurrencySchema,
+        GuardarianTransactionSchema,
       ],
       inspector: false,
     );

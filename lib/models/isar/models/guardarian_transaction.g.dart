@@ -155,7 +155,7 @@ const GuardarianTransactionSchema = CollectionSchema(
     r'partnerId': PropertySchema(
       id: 26,
       name: r'partnerId',
-      type: IsarType.long,
+      type: IsarType.string,
     ),
     r'payoutPaymentCategoryString': PropertySchema(
       id: 27,
@@ -220,7 +220,7 @@ const GuardarianTransactionSchema = CollectionSchema(
     r'transactionId': PropertySchema(
       id: 39,
       name: r'transactionId',
-      type: IsarType.long,
+      type: IsarType.string,
     ),
     r'updatedAt': PropertySchema(
       id: 40,
@@ -242,8 +242,8 @@ const GuardarianTransactionSchema = CollectionSchema(
       properties: [
         IndexPropertySchema(
           name: r'transactionId',
-          type: IndexType.value,
-          caseSensitive: false,
+          type: IndexType.hash,
+          caseSensitive: true,
         )
       ],
     )
@@ -267,11 +267,21 @@ int _guardarianTransactionEstimateSize(
   Map<Type, List<int>> allOffsets,
 ) {
   var bytesCount = offsets.last;
-  bytesCount += 3 + object.address.length * 3;
+  {
+    final value = object.address;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   bytesCount += 3 + object.createdAt.length * 3;
   bytesCount += 3 + object.depositPaymentCategoryString.length * 3;
   bytesCount += 3 + object.depositType.length * 3;
-  bytesCount += 3 + object.email.length * 3;
+  {
+    final value = object.email;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   bytesCount += 3 +
       ConvertedAmountEmbeddedSchema.estimateSize(
           object.estimateBreakdownConvertedAmount,
@@ -298,27 +308,84 @@ int _guardarianTransactionEstimateSize(
   bytesCount += 3 + object.estimateBreakdownToAmountString.length * 3;
   bytesCount += 3 + object.expectedFromAmountString.length * 3;
   bytesCount += 3 + object.expectedToAmountString.length * 3;
-  bytesCount += 3 + object.externalPartnerLinkId.length * 3;
-  bytesCount += 3 + object.extraId.length * 3;
+  {
+    final value = object.externalPartnerLinkId;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
+    final value = object.extraId;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   bytesCount += 3 + object.fromAmountInEurString.length * 3;
   bytesCount += 3 + object.fromAmountString.length * 3;
   bytesCount += 3 + object.fromCurrency.length * 3;
-  bytesCount += 3 + object.fromCurrencyWithNetwork.length * 3;
-  bytesCount += 3 + object.fromNetwork.length * 3;
+  {
+    final value = object.fromCurrencyWithNetwork;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
+    final value = object.fromNetwork;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   bytesCount += 3 + object.initialExpectedFromAmountString.length * 3;
-  bytesCount += 3 + object.initialFromCurrency.length * 3;
+  {
+    final value = object.initialFromCurrency;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   bytesCount += 3 + object.location.length * 3;
-  bytesCount += 3 + object.outputHash.length * 3;
+  {
+    final value = object.outputHash;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  bytesCount += 3 + object.partnerId.length * 3;
   bytesCount += 3 + object.payoutPaymentCategoryString.length * 3;
   bytesCount += 3 + object.payoutType.length * 3;
-  bytesCount += 3 + object.preauthToken.length * 3;
-  bytesCount += 3 + object.redirectUrl.length * 3;
-  bytesCount += 3 + object.statusDetails.length * 3;
+  {
+    final value = object.preauthToken;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
+    final value = object.redirectUrl;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
+    final value = object.statusDetails;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   bytesCount += 3 + object.statusString.length * 3;
   bytesCount += 3 + object.toAmountString.length * 3;
   bytesCount += 3 + object.toCurrency.length * 3;
-  bytesCount += 3 + object.toCurrencyWithNetwork.length * 3;
-  bytesCount += 3 + object.toNetwork.length * 3;
+  {
+    final value = object.toCurrencyWithNetwork;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
+    final value = object.toNetwork;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  bytesCount += 3 + object.transactionId.length * 3;
   bytesCount += 3 + object.updatedAt.length * 3;
   return bytesCount;
 }
@@ -376,7 +443,7 @@ void _guardarianTransactionSerialize(
   writer.writeString(offsets[23], object.initialFromCurrency);
   writer.writeString(offsets[24], object.location);
   writer.writeString(offsets[25], object.outputHash);
-  writer.writeLong(offsets[26], object.partnerId);
+  writer.writeString(offsets[26], object.partnerId);
   writer.writeString(offsets[27], object.payoutPaymentCategoryString);
   writer.writeString(offsets[28], object.payoutType);
   writer.writeString(offsets[29], object.preauthToken);
@@ -389,7 +456,7 @@ void _guardarianTransactionSerialize(
   writer.writeString(offsets[36], object.toCurrency);
   writer.writeString(offsets[37], object.toCurrencyWithNetwork);
   writer.writeString(offsets[38], object.toNetwork);
-  writer.writeLong(offsets[39], object.transactionId);
+  writer.writeString(offsets[39], object.transactionId);
   writer.writeString(offsets[40], object.updatedAt);
 }
 
@@ -400,12 +467,12 @@ GuardarianTransaction _guardarianTransactionDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = GuardarianTransaction(
-    address: reader.readString(offsets[0]),
+    address: reader.readStringOrNull(offsets[0]),
     createdAt: reader.readString(offsets[1]),
-    customerPayoutAddressChangeable: reader.readBool(offsets[2]),
+    customerPayoutAddressChangeable: reader.readBoolOrNull(offsets[2]),
     depositPaymentCategoryString: reader.readString(offsets[3]),
     depositType: reader.readString(offsets[4]),
-    email: reader.readString(offsets[5]),
+    email: reader.readStringOrNull(offsets[5]),
     estimateBreakdownConvertedAmount:
         reader.readObjectOrNull<ConvertedAmountEmbedded>(
               offsets[6],
@@ -437,31 +504,31 @@ GuardarianTransaction _guardarianTransactionDeserialize(
     estimateBreakdownToAmountString: reader.readString(offsets[12]),
     expectedFromAmountString: reader.readString(offsets[13]),
     expectedToAmountString: reader.readString(offsets[14]),
-    externalPartnerLinkId: reader.readString(offsets[15]),
-    extraId: reader.readString(offsets[16]),
+    externalPartnerLinkId: reader.readStringOrNull(offsets[15]),
+    extraId: reader.readStringOrNull(offsets[16]),
     fromAmountInEurString: reader.readString(offsets[17]),
     fromAmountString: reader.readString(offsets[18]),
     fromCurrency: reader.readString(offsets[19]),
-    fromCurrencyWithNetwork: reader.readString(offsets[20]),
-    fromNetwork: reader.readString(offsets[21]),
+    fromCurrencyWithNetwork: reader.readStringOrNull(offsets[20]),
+    fromNetwork: reader.readStringOrNull(offsets[21]),
     initialExpectedFromAmountString: reader.readString(offsets[22]),
-    initialFromCurrency: reader.readString(offsets[23]),
+    initialFromCurrency: reader.readStringOrNull(offsets[23]),
     location: reader.readString(offsets[24]),
-    outputHash: reader.readString(offsets[25]),
-    partnerId: reader.readLong(offsets[26]),
+    outputHash: reader.readStringOrNull(offsets[25]),
+    partnerId: reader.readString(offsets[26]),
     payoutPaymentCategoryString: reader.readString(offsets[27]),
     payoutType: reader.readString(offsets[28]),
-    preauthToken: reader.readString(offsets[29]),
-    redirectUrl: reader.readString(offsets[30]),
-    skipChoosePaymentCategory: reader.readBool(offsets[31]),
-    skipChoosePayoutAddress: reader.readBool(offsets[32]),
-    statusDetails: reader.readString(offsets[33]),
+    preauthToken: reader.readStringOrNull(offsets[29]),
+    redirectUrl: reader.readStringOrNull(offsets[30]),
+    skipChoosePaymentCategory: reader.readBoolOrNull(offsets[31]),
+    skipChoosePayoutAddress: reader.readBoolOrNull(offsets[32]),
+    statusDetails: reader.readStringOrNull(offsets[33]),
     statusString: reader.readString(offsets[34]),
     toAmountString: reader.readString(offsets[35]),
     toCurrency: reader.readString(offsets[36]),
-    toCurrencyWithNetwork: reader.readString(offsets[37]),
-    toNetwork: reader.readString(offsets[38]),
-    transactionId: reader.readLong(offsets[39]),
+    toCurrencyWithNetwork: reader.readStringOrNull(offsets[37]),
+    toNetwork: reader.readStringOrNull(offsets[38]),
+    transactionId: reader.readString(offsets[39]),
     updatedAt: reader.readString(offsets[40]),
   );
   object.id = id;
@@ -476,17 +543,17 @@ P _guardarianTransactionDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 1:
       return (reader.readString(offset)) as P;
     case 2:
-      return (reader.readBool(offset)) as P;
+      return (reader.readBoolOrNull(offset)) as P;
     case 3:
       return (reader.readString(offset)) as P;
     case 4:
       return (reader.readString(offset)) as P;
     case 5:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 6:
       return (reader.readObjectOrNull<ConvertedAmountEmbedded>(
             offset,
@@ -527,9 +594,9 @@ P _guardarianTransactionDeserializeProp<P>(
     case 14:
       return (reader.readString(offset)) as P;
     case 15:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 16:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 17:
       return (reader.readString(offset)) as P;
     case 18:
@@ -537,33 +604,33 @@ P _guardarianTransactionDeserializeProp<P>(
     case 19:
       return (reader.readString(offset)) as P;
     case 20:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 21:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 22:
       return (reader.readString(offset)) as P;
     case 23:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 24:
       return (reader.readString(offset)) as P;
     case 25:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 26:
-      return (reader.readLong(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 27:
       return (reader.readString(offset)) as P;
     case 28:
       return (reader.readString(offset)) as P;
     case 29:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 30:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 31:
-      return (reader.readBool(offset)) as P;
+      return (reader.readBoolOrNull(offset)) as P;
     case 32:
-      return (reader.readBool(offset)) as P;
+      return (reader.readBoolOrNull(offset)) as P;
     case 33:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 34:
       return (reader.readString(offset)) as P;
     case 35:
@@ -571,11 +638,11 @@ P _guardarianTransactionDeserializeProp<P>(
     case 36:
       return (reader.readString(offset)) as P;
     case 37:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 38:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 39:
-      return (reader.readLong(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 40:
       return (reader.readString(offset)) as P;
     default:
@@ -599,40 +666,40 @@ void _guardarianTransactionAttach(
 
 extension GuardarianTransactionByIndex
     on IsarCollection<GuardarianTransaction> {
-  Future<GuardarianTransaction?> getByTransactionId(int transactionId) {
+  Future<GuardarianTransaction?> getByTransactionId(String transactionId) {
     return getByIndex(r'transactionId', [transactionId]);
   }
 
-  GuardarianTransaction? getByTransactionIdSync(int transactionId) {
+  GuardarianTransaction? getByTransactionIdSync(String transactionId) {
     return getByIndexSync(r'transactionId', [transactionId]);
   }
 
-  Future<bool> deleteByTransactionId(int transactionId) {
+  Future<bool> deleteByTransactionId(String transactionId) {
     return deleteByIndex(r'transactionId', [transactionId]);
   }
 
-  bool deleteByTransactionIdSync(int transactionId) {
+  bool deleteByTransactionIdSync(String transactionId) {
     return deleteByIndexSync(r'transactionId', [transactionId]);
   }
 
   Future<List<GuardarianTransaction?>> getAllByTransactionId(
-      List<int> transactionIdValues) {
+      List<String> transactionIdValues) {
     final values = transactionIdValues.map((e) => [e]).toList();
     return getAllByIndex(r'transactionId', values);
   }
 
   List<GuardarianTransaction?> getAllByTransactionIdSync(
-      List<int> transactionIdValues) {
+      List<String> transactionIdValues) {
     final values = transactionIdValues.map((e) => [e]).toList();
     return getAllByIndexSync(r'transactionId', values);
   }
 
-  Future<int> deleteAllByTransactionId(List<int> transactionIdValues) {
+  Future<int> deleteAllByTransactionId(List<String> transactionIdValues) {
     final values = transactionIdValues.map((e) => [e]).toList();
     return deleteAllByIndex(r'transactionId', values);
   }
 
-  int deleteAllByTransactionIdSync(List<int> transactionIdValues) {
+  int deleteAllByTransactionIdSync(List<String> transactionIdValues) {
     final values = transactionIdValues.map((e) => [e]).toList();
     return deleteAllByIndexSync(r'transactionId', values);
   }
@@ -662,15 +729,6 @@ extension GuardarianTransactionQueryWhereSort
       anyId() {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(const IdWhereClause.any());
-    });
-  }
-
-  QueryBuilder<GuardarianTransaction, GuardarianTransaction, QAfterWhere>
-      anyTransactionId() {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(
-        const IndexWhereClause.any(indexName: r'transactionId'),
-      );
     });
   }
 }
@@ -746,7 +804,7 @@ extension GuardarianTransactionQueryWhere on QueryBuilder<GuardarianTransaction,
   }
 
   QueryBuilder<GuardarianTransaction, GuardarianTransaction, QAfterWhereClause>
-      transactionIdEqualTo(int transactionId) {
+      transactionIdEqualTo(String transactionId) {
     return QueryBuilder.apply(this, (query) {
       return query.addWhereClause(IndexWhereClause.equalTo(
         indexName: r'transactionId',
@@ -756,7 +814,7 @@ extension GuardarianTransactionQueryWhere on QueryBuilder<GuardarianTransaction,
   }
 
   QueryBuilder<GuardarianTransaction, GuardarianTransaction, QAfterWhereClause>
-      transactionIdNotEqualTo(int transactionId) {
+      transactionIdNotEqualTo(String transactionId) {
     return QueryBuilder.apply(this, (query) {
       if (query.whereSort == Sort.asc) {
         return query
@@ -789,61 +847,31 @@ extension GuardarianTransactionQueryWhere on QueryBuilder<GuardarianTransaction,
       }
     });
   }
-
-  QueryBuilder<GuardarianTransaction, GuardarianTransaction, QAfterWhereClause>
-      transactionIdGreaterThan(
-    int transactionId, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'transactionId',
-        lower: [transactionId],
-        includeLower: include,
-        upper: [],
-      ));
-    });
-  }
-
-  QueryBuilder<GuardarianTransaction, GuardarianTransaction, QAfterWhereClause>
-      transactionIdLessThan(
-    int transactionId, {
-    bool include = false,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'transactionId',
-        lower: [],
-        upper: [transactionId],
-        includeUpper: include,
-      ));
-    });
-  }
-
-  QueryBuilder<GuardarianTransaction, GuardarianTransaction, QAfterWhereClause>
-      transactionIdBetween(
-    int lowerTransactionId,
-    int upperTransactionId, {
-    bool includeLower = true,
-    bool includeUpper = true,
-  }) {
-    return QueryBuilder.apply(this, (query) {
-      return query.addWhereClause(IndexWhereClause.between(
-        indexName: r'transactionId',
-        lower: [lowerTransactionId],
-        includeLower: includeLower,
-        upper: [upperTransactionId],
-        includeUpper: includeUpper,
-      ));
-    });
-  }
 }
 
 extension GuardarianTransactionQueryFilter on QueryBuilder<
     GuardarianTransaction, GuardarianTransaction, QFilterCondition> {
   QueryBuilder<GuardarianTransaction, GuardarianTransaction,
+      QAfterFilterCondition> addressIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'address',
+      ));
+    });
+  }
+
+  QueryBuilder<GuardarianTransaction, GuardarianTransaction,
+      QAfterFilterCondition> addressIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'address',
+      ));
+    });
+  }
+
+  QueryBuilder<GuardarianTransaction, GuardarianTransaction,
       QAfterFilterCondition> addressEqualTo(
-    String value, {
+    String? value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -857,7 +885,7 @@ extension GuardarianTransactionQueryFilter on QueryBuilder<
 
   QueryBuilder<GuardarianTransaction, GuardarianTransaction,
       QAfterFilterCondition> addressGreaterThan(
-    String value, {
+    String? value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
@@ -873,7 +901,7 @@ extension GuardarianTransactionQueryFilter on QueryBuilder<
 
   QueryBuilder<GuardarianTransaction, GuardarianTransaction,
       QAfterFilterCondition> addressLessThan(
-    String value, {
+    String? value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
@@ -889,8 +917,8 @@ extension GuardarianTransactionQueryFilter on QueryBuilder<
 
   QueryBuilder<GuardarianTransaction, GuardarianTransaction,
       QAfterFilterCondition> addressBetween(
-    String lower,
-    String upper, {
+    String? lower,
+    String? upper, {
     bool includeLower = true,
     bool includeUpper = true,
     bool caseSensitive = true,
@@ -1118,8 +1146,26 @@ extension GuardarianTransactionQueryFilter on QueryBuilder<
   }
 
   QueryBuilder<GuardarianTransaction, GuardarianTransaction,
+      QAfterFilterCondition> customerPayoutAddressChangeableIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'customerPayoutAddressChangeable',
+      ));
+    });
+  }
+
+  QueryBuilder<GuardarianTransaction, GuardarianTransaction,
+      QAfterFilterCondition> customerPayoutAddressChangeableIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'customerPayoutAddressChangeable',
+      ));
+    });
+  }
+
+  QueryBuilder<GuardarianTransaction, GuardarianTransaction,
           QAfterFilterCondition>
-      customerPayoutAddressChangeableEqualTo(bool value) {
+      customerPayoutAddressChangeableEqualTo(bool? value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'customerPayoutAddressChangeable',
@@ -1407,8 +1453,26 @@ extension GuardarianTransactionQueryFilter on QueryBuilder<
   }
 
   QueryBuilder<GuardarianTransaction, GuardarianTransaction,
+      QAfterFilterCondition> emailIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'email',
+      ));
+    });
+  }
+
+  QueryBuilder<GuardarianTransaction, GuardarianTransaction,
+      QAfterFilterCondition> emailIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'email',
+      ));
+    });
+  }
+
+  QueryBuilder<GuardarianTransaction, GuardarianTransaction,
       QAfterFilterCondition> emailEqualTo(
-    String value, {
+    String? value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -1422,7 +1486,7 @@ extension GuardarianTransactionQueryFilter on QueryBuilder<
 
   QueryBuilder<GuardarianTransaction, GuardarianTransaction,
       QAfterFilterCondition> emailGreaterThan(
-    String value, {
+    String? value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
@@ -1438,7 +1502,7 @@ extension GuardarianTransactionQueryFilter on QueryBuilder<
 
   QueryBuilder<GuardarianTransaction, GuardarianTransaction,
       QAfterFilterCondition> emailLessThan(
-    String value, {
+    String? value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
@@ -1454,8 +1518,8 @@ extension GuardarianTransactionQueryFilter on QueryBuilder<
 
   QueryBuilder<GuardarianTransaction, GuardarianTransaction,
       QAfterFilterCondition> emailBetween(
-    String lower,
-    String upper, {
+    String? lower,
+    String? upper, {
     bool includeLower = true,
     bool includeUpper = true,
     bool caseSensitive = true,
@@ -2343,8 +2407,26 @@ extension GuardarianTransactionQueryFilter on QueryBuilder<
   }
 
   QueryBuilder<GuardarianTransaction, GuardarianTransaction,
+      QAfterFilterCondition> externalPartnerLinkIdIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'externalPartnerLinkId',
+      ));
+    });
+  }
+
+  QueryBuilder<GuardarianTransaction, GuardarianTransaction,
+      QAfterFilterCondition> externalPartnerLinkIdIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'externalPartnerLinkId',
+      ));
+    });
+  }
+
+  QueryBuilder<GuardarianTransaction, GuardarianTransaction,
       QAfterFilterCondition> externalPartnerLinkIdEqualTo(
-    String value, {
+    String? value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -2358,7 +2440,7 @@ extension GuardarianTransactionQueryFilter on QueryBuilder<
 
   QueryBuilder<GuardarianTransaction, GuardarianTransaction,
       QAfterFilterCondition> externalPartnerLinkIdGreaterThan(
-    String value, {
+    String? value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
@@ -2374,7 +2456,7 @@ extension GuardarianTransactionQueryFilter on QueryBuilder<
 
   QueryBuilder<GuardarianTransaction, GuardarianTransaction,
       QAfterFilterCondition> externalPartnerLinkIdLessThan(
-    String value, {
+    String? value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
@@ -2390,8 +2472,8 @@ extension GuardarianTransactionQueryFilter on QueryBuilder<
 
   QueryBuilder<GuardarianTransaction, GuardarianTransaction,
       QAfterFilterCondition> externalPartnerLinkIdBetween(
-    String lower,
-    String upper, {
+    String? lower,
+    String? upper, {
     bool includeLower = true,
     bool includeUpper = true,
     bool caseSensitive = true,
@@ -2482,8 +2564,26 @@ extension GuardarianTransactionQueryFilter on QueryBuilder<
   }
 
   QueryBuilder<GuardarianTransaction, GuardarianTransaction,
+      QAfterFilterCondition> extraIdIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'extraId',
+      ));
+    });
+  }
+
+  QueryBuilder<GuardarianTransaction, GuardarianTransaction,
+      QAfterFilterCondition> extraIdIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'extraId',
+      ));
+    });
+  }
+
+  QueryBuilder<GuardarianTransaction, GuardarianTransaction,
       QAfterFilterCondition> extraIdEqualTo(
-    String value, {
+    String? value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -2497,7 +2597,7 @@ extension GuardarianTransactionQueryFilter on QueryBuilder<
 
   QueryBuilder<GuardarianTransaction, GuardarianTransaction,
       QAfterFilterCondition> extraIdGreaterThan(
-    String value, {
+    String? value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
@@ -2513,7 +2613,7 @@ extension GuardarianTransactionQueryFilter on QueryBuilder<
 
   QueryBuilder<GuardarianTransaction, GuardarianTransaction,
       QAfterFilterCondition> extraIdLessThan(
-    String value, {
+    String? value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
@@ -2529,8 +2629,8 @@ extension GuardarianTransactionQueryFilter on QueryBuilder<
 
   QueryBuilder<GuardarianTransaction, GuardarianTransaction,
       QAfterFilterCondition> extraIdBetween(
-    String lower,
-    String upper, {
+    String? lower,
+    String? upper, {
     bool includeLower = true,
     bool includeUpper = true,
     bool caseSensitive = true,
@@ -3035,8 +3135,26 @@ extension GuardarianTransactionQueryFilter on QueryBuilder<
   }
 
   QueryBuilder<GuardarianTransaction, GuardarianTransaction,
+      QAfterFilterCondition> fromCurrencyWithNetworkIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'fromCurrencyWithNetwork',
+      ));
+    });
+  }
+
+  QueryBuilder<GuardarianTransaction, GuardarianTransaction,
+      QAfterFilterCondition> fromCurrencyWithNetworkIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'fromCurrencyWithNetwork',
+      ));
+    });
+  }
+
+  QueryBuilder<GuardarianTransaction, GuardarianTransaction,
       QAfterFilterCondition> fromCurrencyWithNetworkEqualTo(
-    String value, {
+    String? value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -3050,7 +3168,7 @@ extension GuardarianTransactionQueryFilter on QueryBuilder<
 
   QueryBuilder<GuardarianTransaction, GuardarianTransaction,
       QAfterFilterCondition> fromCurrencyWithNetworkGreaterThan(
-    String value, {
+    String? value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
@@ -3066,7 +3184,7 @@ extension GuardarianTransactionQueryFilter on QueryBuilder<
 
   QueryBuilder<GuardarianTransaction, GuardarianTransaction,
       QAfterFilterCondition> fromCurrencyWithNetworkLessThan(
-    String value, {
+    String? value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
@@ -3082,8 +3200,8 @@ extension GuardarianTransactionQueryFilter on QueryBuilder<
 
   QueryBuilder<GuardarianTransaction, GuardarianTransaction,
       QAfterFilterCondition> fromCurrencyWithNetworkBetween(
-    String lower,
-    String upper, {
+    String? lower,
+    String? upper, {
     bool includeLower = true,
     bool includeUpper = true,
     bool caseSensitive = true,
@@ -3175,8 +3293,26 @@ extension GuardarianTransactionQueryFilter on QueryBuilder<
   }
 
   QueryBuilder<GuardarianTransaction, GuardarianTransaction,
+      QAfterFilterCondition> fromNetworkIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'fromNetwork',
+      ));
+    });
+  }
+
+  QueryBuilder<GuardarianTransaction, GuardarianTransaction,
+      QAfterFilterCondition> fromNetworkIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'fromNetwork',
+      ));
+    });
+  }
+
+  QueryBuilder<GuardarianTransaction, GuardarianTransaction,
       QAfterFilterCondition> fromNetworkEqualTo(
-    String value, {
+    String? value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -3190,7 +3326,7 @@ extension GuardarianTransactionQueryFilter on QueryBuilder<
 
   QueryBuilder<GuardarianTransaction, GuardarianTransaction,
       QAfterFilterCondition> fromNetworkGreaterThan(
-    String value, {
+    String? value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
@@ -3206,7 +3342,7 @@ extension GuardarianTransactionQueryFilter on QueryBuilder<
 
   QueryBuilder<GuardarianTransaction, GuardarianTransaction,
       QAfterFilterCondition> fromNetworkLessThan(
-    String value, {
+    String? value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
@@ -3222,8 +3358,8 @@ extension GuardarianTransactionQueryFilter on QueryBuilder<
 
   QueryBuilder<GuardarianTransaction, GuardarianTransaction,
       QAfterFilterCondition> fromNetworkBetween(
-    String lower,
-    String upper, {
+    String? lower,
+    String? upper, {
     bool includeLower = true,
     bool includeUpper = true,
     bool caseSensitive = true,
@@ -3509,8 +3645,26 @@ extension GuardarianTransactionQueryFilter on QueryBuilder<
   }
 
   QueryBuilder<GuardarianTransaction, GuardarianTransaction,
+      QAfterFilterCondition> initialFromCurrencyIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'initialFromCurrency',
+      ));
+    });
+  }
+
+  QueryBuilder<GuardarianTransaction, GuardarianTransaction,
+      QAfterFilterCondition> initialFromCurrencyIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'initialFromCurrency',
+      ));
+    });
+  }
+
+  QueryBuilder<GuardarianTransaction, GuardarianTransaction,
       QAfterFilterCondition> initialFromCurrencyEqualTo(
-    String value, {
+    String? value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -3524,7 +3678,7 @@ extension GuardarianTransactionQueryFilter on QueryBuilder<
 
   QueryBuilder<GuardarianTransaction, GuardarianTransaction,
       QAfterFilterCondition> initialFromCurrencyGreaterThan(
-    String value, {
+    String? value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
@@ -3540,7 +3694,7 @@ extension GuardarianTransactionQueryFilter on QueryBuilder<
 
   QueryBuilder<GuardarianTransaction, GuardarianTransaction,
       QAfterFilterCondition> initialFromCurrencyLessThan(
-    String value, {
+    String? value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
@@ -3556,8 +3710,8 @@ extension GuardarianTransactionQueryFilter on QueryBuilder<
 
   QueryBuilder<GuardarianTransaction, GuardarianTransaction,
       QAfterFilterCondition> initialFromCurrencyBetween(
-    String lower,
-    String upper, {
+    String? lower,
+    String? upper, {
     bool includeLower = true,
     bool includeUpper = true,
     bool caseSensitive = true,
@@ -3785,8 +3939,26 @@ extension GuardarianTransactionQueryFilter on QueryBuilder<
   }
 
   QueryBuilder<GuardarianTransaction, GuardarianTransaction,
+      QAfterFilterCondition> outputHashIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'outputHash',
+      ));
+    });
+  }
+
+  QueryBuilder<GuardarianTransaction, GuardarianTransaction,
+      QAfterFilterCondition> outputHashIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'outputHash',
+      ));
+    });
+  }
+
+  QueryBuilder<GuardarianTransaction, GuardarianTransaction,
       QAfterFilterCondition> outputHashEqualTo(
-    String value, {
+    String? value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -3800,7 +3972,7 @@ extension GuardarianTransactionQueryFilter on QueryBuilder<
 
   QueryBuilder<GuardarianTransaction, GuardarianTransaction,
       QAfterFilterCondition> outputHashGreaterThan(
-    String value, {
+    String? value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
@@ -3816,7 +3988,7 @@ extension GuardarianTransactionQueryFilter on QueryBuilder<
 
   QueryBuilder<GuardarianTransaction, GuardarianTransaction,
       QAfterFilterCondition> outputHashLessThan(
-    String value, {
+    String? value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
@@ -3832,8 +4004,8 @@ extension GuardarianTransactionQueryFilter on QueryBuilder<
 
   QueryBuilder<GuardarianTransaction, GuardarianTransaction,
       QAfterFilterCondition> outputHashBetween(
-    String lower,
-    String upper, {
+    String? lower,
+    String? upper, {
     bool includeLower = true,
     bool includeUpper = true,
     bool caseSensitive = true,
@@ -3923,49 +4095,58 @@ extension GuardarianTransactionQueryFilter on QueryBuilder<
   }
 
   QueryBuilder<GuardarianTransaction, GuardarianTransaction,
-      QAfterFilterCondition> partnerIdEqualTo(int value) {
+      QAfterFilterCondition> partnerIdEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'partnerId',
         value: value,
+        caseSensitive: caseSensitive,
       ));
     });
   }
 
   QueryBuilder<GuardarianTransaction, GuardarianTransaction,
       QAfterFilterCondition> partnerIdGreaterThan(
-    int value, {
+    String value, {
     bool include = false,
+    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
         property: r'partnerId',
         value: value,
+        caseSensitive: caseSensitive,
       ));
     });
   }
 
   QueryBuilder<GuardarianTransaction, GuardarianTransaction,
       QAfterFilterCondition> partnerIdLessThan(
-    int value, {
+    String value, {
     bool include = false,
+    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
         property: r'partnerId',
         value: value,
+        caseSensitive: caseSensitive,
       ));
     });
   }
 
   QueryBuilder<GuardarianTransaction, GuardarianTransaction,
       QAfterFilterCondition> partnerIdBetween(
-    int lower,
-    int upper, {
+    String lower,
+    String upper, {
     bool includeLower = true,
     bool includeUpper = true,
+    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
@@ -3974,6 +4155,79 @@ extension GuardarianTransactionQueryFilter on QueryBuilder<
         includeLower: includeLower,
         upper: upper,
         includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<GuardarianTransaction, GuardarianTransaction,
+      QAfterFilterCondition> partnerIdStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'partnerId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<GuardarianTransaction, GuardarianTransaction,
+      QAfterFilterCondition> partnerIdEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'partnerId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<GuardarianTransaction, GuardarianTransaction,
+          QAfterFilterCondition>
+      partnerIdContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'partnerId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<GuardarianTransaction, GuardarianTransaction,
+          QAfterFilterCondition>
+      partnerIdMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'partnerId',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<GuardarianTransaction, GuardarianTransaction,
+      QAfterFilterCondition> partnerIdIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'partnerId',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<GuardarianTransaction, GuardarianTransaction,
+      QAfterFilterCondition> partnerIdIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'partnerId',
+        value: '',
       ));
     });
   }
@@ -4257,8 +4511,26 @@ extension GuardarianTransactionQueryFilter on QueryBuilder<
   }
 
   QueryBuilder<GuardarianTransaction, GuardarianTransaction,
+      QAfterFilterCondition> preauthTokenIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'preauthToken',
+      ));
+    });
+  }
+
+  QueryBuilder<GuardarianTransaction, GuardarianTransaction,
+      QAfterFilterCondition> preauthTokenIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'preauthToken',
+      ));
+    });
+  }
+
+  QueryBuilder<GuardarianTransaction, GuardarianTransaction,
       QAfterFilterCondition> preauthTokenEqualTo(
-    String value, {
+    String? value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -4272,7 +4544,7 @@ extension GuardarianTransactionQueryFilter on QueryBuilder<
 
   QueryBuilder<GuardarianTransaction, GuardarianTransaction,
       QAfterFilterCondition> preauthTokenGreaterThan(
-    String value, {
+    String? value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
@@ -4288,7 +4560,7 @@ extension GuardarianTransactionQueryFilter on QueryBuilder<
 
   QueryBuilder<GuardarianTransaction, GuardarianTransaction,
       QAfterFilterCondition> preauthTokenLessThan(
-    String value, {
+    String? value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
@@ -4304,8 +4576,8 @@ extension GuardarianTransactionQueryFilter on QueryBuilder<
 
   QueryBuilder<GuardarianTransaction, GuardarianTransaction,
       QAfterFilterCondition> preauthTokenBetween(
-    String lower,
-    String upper, {
+    String? lower,
+    String? upper, {
     bool includeLower = true,
     bool includeUpper = true,
     bool caseSensitive = true,
@@ -4395,8 +4667,26 @@ extension GuardarianTransactionQueryFilter on QueryBuilder<
   }
 
   QueryBuilder<GuardarianTransaction, GuardarianTransaction,
+      QAfterFilterCondition> redirectUrlIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'redirectUrl',
+      ));
+    });
+  }
+
+  QueryBuilder<GuardarianTransaction, GuardarianTransaction,
+      QAfterFilterCondition> redirectUrlIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'redirectUrl',
+      ));
+    });
+  }
+
+  QueryBuilder<GuardarianTransaction, GuardarianTransaction,
       QAfterFilterCondition> redirectUrlEqualTo(
-    String value, {
+    String? value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -4410,7 +4700,7 @@ extension GuardarianTransactionQueryFilter on QueryBuilder<
 
   QueryBuilder<GuardarianTransaction, GuardarianTransaction,
       QAfterFilterCondition> redirectUrlGreaterThan(
-    String value, {
+    String? value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
@@ -4426,7 +4716,7 @@ extension GuardarianTransactionQueryFilter on QueryBuilder<
 
   QueryBuilder<GuardarianTransaction, GuardarianTransaction,
       QAfterFilterCondition> redirectUrlLessThan(
-    String value, {
+    String? value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
@@ -4442,8 +4732,8 @@ extension GuardarianTransactionQueryFilter on QueryBuilder<
 
   QueryBuilder<GuardarianTransaction, GuardarianTransaction,
       QAfterFilterCondition> redirectUrlBetween(
-    String lower,
-    String upper, {
+    String? lower,
+    String? upper, {
     bool includeLower = true,
     bool includeUpper = true,
     bool caseSensitive = true,
@@ -4533,7 +4823,25 @@ extension GuardarianTransactionQueryFilter on QueryBuilder<
   }
 
   QueryBuilder<GuardarianTransaction, GuardarianTransaction,
-      QAfterFilterCondition> skipChoosePaymentCategoryEqualTo(bool value) {
+      QAfterFilterCondition> skipChoosePaymentCategoryIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'skipChoosePaymentCategory',
+      ));
+    });
+  }
+
+  QueryBuilder<GuardarianTransaction, GuardarianTransaction,
+      QAfterFilterCondition> skipChoosePaymentCategoryIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'skipChoosePaymentCategory',
+      ));
+    });
+  }
+
+  QueryBuilder<GuardarianTransaction, GuardarianTransaction,
+      QAfterFilterCondition> skipChoosePaymentCategoryEqualTo(bool? value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'skipChoosePaymentCategory',
@@ -4543,7 +4851,25 @@ extension GuardarianTransactionQueryFilter on QueryBuilder<
   }
 
   QueryBuilder<GuardarianTransaction, GuardarianTransaction,
-      QAfterFilterCondition> skipChoosePayoutAddressEqualTo(bool value) {
+      QAfterFilterCondition> skipChoosePayoutAddressIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'skipChoosePayoutAddress',
+      ));
+    });
+  }
+
+  QueryBuilder<GuardarianTransaction, GuardarianTransaction,
+      QAfterFilterCondition> skipChoosePayoutAddressIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'skipChoosePayoutAddress',
+      ));
+    });
+  }
+
+  QueryBuilder<GuardarianTransaction, GuardarianTransaction,
+      QAfterFilterCondition> skipChoosePayoutAddressEqualTo(bool? value) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'skipChoosePayoutAddress',
@@ -4553,8 +4879,26 @@ extension GuardarianTransactionQueryFilter on QueryBuilder<
   }
 
   QueryBuilder<GuardarianTransaction, GuardarianTransaction,
+      QAfterFilterCondition> statusDetailsIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'statusDetails',
+      ));
+    });
+  }
+
+  QueryBuilder<GuardarianTransaction, GuardarianTransaction,
+      QAfterFilterCondition> statusDetailsIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'statusDetails',
+      ));
+    });
+  }
+
+  QueryBuilder<GuardarianTransaction, GuardarianTransaction,
       QAfterFilterCondition> statusDetailsEqualTo(
-    String value, {
+    String? value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -4568,7 +4912,7 @@ extension GuardarianTransactionQueryFilter on QueryBuilder<
 
   QueryBuilder<GuardarianTransaction, GuardarianTransaction,
       QAfterFilterCondition> statusDetailsGreaterThan(
-    String value, {
+    String? value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
@@ -4584,7 +4928,7 @@ extension GuardarianTransactionQueryFilter on QueryBuilder<
 
   QueryBuilder<GuardarianTransaction, GuardarianTransaction,
       QAfterFilterCondition> statusDetailsLessThan(
-    String value, {
+    String? value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
@@ -4600,8 +4944,8 @@ extension GuardarianTransactionQueryFilter on QueryBuilder<
 
   QueryBuilder<GuardarianTransaction, GuardarianTransaction,
       QAfterFilterCondition> statusDetailsBetween(
-    String lower,
-    String upper, {
+    String? lower,
+    String? upper, {
     bool includeLower = true,
     bool includeUpper = true,
     bool caseSensitive = true,
@@ -5105,8 +5449,26 @@ extension GuardarianTransactionQueryFilter on QueryBuilder<
   }
 
   QueryBuilder<GuardarianTransaction, GuardarianTransaction,
+      QAfterFilterCondition> toCurrencyWithNetworkIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'toCurrencyWithNetwork',
+      ));
+    });
+  }
+
+  QueryBuilder<GuardarianTransaction, GuardarianTransaction,
+      QAfterFilterCondition> toCurrencyWithNetworkIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'toCurrencyWithNetwork',
+      ));
+    });
+  }
+
+  QueryBuilder<GuardarianTransaction, GuardarianTransaction,
       QAfterFilterCondition> toCurrencyWithNetworkEqualTo(
-    String value, {
+    String? value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -5120,7 +5482,7 @@ extension GuardarianTransactionQueryFilter on QueryBuilder<
 
   QueryBuilder<GuardarianTransaction, GuardarianTransaction,
       QAfterFilterCondition> toCurrencyWithNetworkGreaterThan(
-    String value, {
+    String? value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
@@ -5136,7 +5498,7 @@ extension GuardarianTransactionQueryFilter on QueryBuilder<
 
   QueryBuilder<GuardarianTransaction, GuardarianTransaction,
       QAfterFilterCondition> toCurrencyWithNetworkLessThan(
-    String value, {
+    String? value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
@@ -5152,8 +5514,8 @@ extension GuardarianTransactionQueryFilter on QueryBuilder<
 
   QueryBuilder<GuardarianTransaction, GuardarianTransaction,
       QAfterFilterCondition> toCurrencyWithNetworkBetween(
-    String lower,
-    String upper, {
+    String? lower,
+    String? upper, {
     bool includeLower = true,
     bool includeUpper = true,
     bool caseSensitive = true,
@@ -5244,8 +5606,26 @@ extension GuardarianTransactionQueryFilter on QueryBuilder<
   }
 
   QueryBuilder<GuardarianTransaction, GuardarianTransaction,
+      QAfterFilterCondition> toNetworkIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'toNetwork',
+      ));
+    });
+  }
+
+  QueryBuilder<GuardarianTransaction, GuardarianTransaction,
+      QAfterFilterCondition> toNetworkIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'toNetwork',
+      ));
+    });
+  }
+
+  QueryBuilder<GuardarianTransaction, GuardarianTransaction,
       QAfterFilterCondition> toNetworkEqualTo(
-    String value, {
+    String? value, {
     bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
@@ -5259,7 +5639,7 @@ extension GuardarianTransactionQueryFilter on QueryBuilder<
 
   QueryBuilder<GuardarianTransaction, GuardarianTransaction,
       QAfterFilterCondition> toNetworkGreaterThan(
-    String value, {
+    String? value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
@@ -5275,7 +5655,7 @@ extension GuardarianTransactionQueryFilter on QueryBuilder<
 
   QueryBuilder<GuardarianTransaction, GuardarianTransaction,
       QAfterFilterCondition> toNetworkLessThan(
-    String value, {
+    String? value, {
     bool include = false,
     bool caseSensitive = true,
   }) {
@@ -5291,8 +5671,8 @@ extension GuardarianTransactionQueryFilter on QueryBuilder<
 
   QueryBuilder<GuardarianTransaction, GuardarianTransaction,
       QAfterFilterCondition> toNetworkBetween(
-    String lower,
-    String upper, {
+    String? lower,
+    String? upper, {
     bool includeLower = true,
     bool includeUpper = true,
     bool caseSensitive = true,
@@ -5382,49 +5762,58 @@ extension GuardarianTransactionQueryFilter on QueryBuilder<
   }
 
   QueryBuilder<GuardarianTransaction, GuardarianTransaction,
-      QAfterFilterCondition> transactionIdEqualTo(int value) {
+      QAfterFilterCondition> transactionIdEqualTo(
+    String value, {
+    bool caseSensitive = true,
+  }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.equalTo(
         property: r'transactionId',
         value: value,
+        caseSensitive: caseSensitive,
       ));
     });
   }
 
   QueryBuilder<GuardarianTransaction, GuardarianTransaction,
       QAfterFilterCondition> transactionIdGreaterThan(
-    int value, {
+    String value, {
     bool include = false,
+    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.greaterThan(
         include: include,
         property: r'transactionId',
         value: value,
+        caseSensitive: caseSensitive,
       ));
     });
   }
 
   QueryBuilder<GuardarianTransaction, GuardarianTransaction,
       QAfterFilterCondition> transactionIdLessThan(
-    int value, {
+    String value, {
     bool include = false,
+    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.lessThan(
         include: include,
         property: r'transactionId',
         value: value,
+        caseSensitive: caseSensitive,
       ));
     });
   }
 
   QueryBuilder<GuardarianTransaction, GuardarianTransaction,
       QAfterFilterCondition> transactionIdBetween(
-    int lower,
-    int upper, {
+    String lower,
+    String upper, {
     bool includeLower = true,
     bool includeUpper = true,
+    bool caseSensitive = true,
   }) {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(FilterCondition.between(
@@ -5433,6 +5822,79 @@ extension GuardarianTransactionQueryFilter on QueryBuilder<
         includeLower: includeLower,
         upper: upper,
         includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<GuardarianTransaction, GuardarianTransaction,
+      QAfterFilterCondition> transactionIdStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'transactionId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<GuardarianTransaction, GuardarianTransaction,
+      QAfterFilterCondition> transactionIdEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'transactionId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<GuardarianTransaction, GuardarianTransaction,
+          QAfterFilterCondition>
+      transactionIdContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'transactionId',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<GuardarianTransaction, GuardarianTransaction,
+          QAfterFilterCondition>
+      transactionIdMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'transactionId',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<GuardarianTransaction, GuardarianTransaction,
+      QAfterFilterCondition> transactionIdIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'transactionId',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<GuardarianTransaction, GuardarianTransaction,
+      QAfterFilterCondition> transactionIdIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'transactionId',
+        value: '',
       ));
     });
   }
@@ -6845,9 +7307,9 @@ extension GuardarianTransactionQueryWhereDistinct
   }
 
   QueryBuilder<GuardarianTransaction, GuardarianTransaction, QDistinct>
-      distinctByPartnerId() {
+      distinctByPartnerId({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'partnerId');
+      return query.addDistinctBy(r'partnerId', caseSensitive: caseSensitive);
     });
   }
 
@@ -6940,9 +7402,10 @@ extension GuardarianTransactionQueryWhereDistinct
   }
 
   QueryBuilder<GuardarianTransaction, GuardarianTransaction, QDistinct>
-      distinctByTransactionId() {
+      distinctByTransactionId({bool caseSensitive = true}) {
     return QueryBuilder.apply(this, (query) {
-      return query.addDistinctBy(r'transactionId');
+      return query.addDistinctBy(r'transactionId',
+          caseSensitive: caseSensitive);
     });
   }
 
@@ -6962,7 +7425,7 @@ extension GuardarianTransactionQueryProperty on QueryBuilder<
     });
   }
 
-  QueryBuilder<GuardarianTransaction, String, QQueryOperations>
+  QueryBuilder<GuardarianTransaction, String?, QQueryOperations>
       addressProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'address');
@@ -6976,7 +7439,7 @@ extension GuardarianTransactionQueryProperty on QueryBuilder<
     });
   }
 
-  QueryBuilder<GuardarianTransaction, bool, QQueryOperations>
+  QueryBuilder<GuardarianTransaction, bool?, QQueryOperations>
       customerPayoutAddressChangeableProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'customerPayoutAddressChangeable');
@@ -6997,7 +7460,7 @@ extension GuardarianTransactionQueryProperty on QueryBuilder<
     });
   }
 
-  QueryBuilder<GuardarianTransaction, String, QQueryOperations>
+  QueryBuilder<GuardarianTransaction, String?, QQueryOperations>
       emailProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'email');
@@ -7068,14 +7531,14 @@ extension GuardarianTransactionQueryProperty on QueryBuilder<
     });
   }
 
-  QueryBuilder<GuardarianTransaction, String, QQueryOperations>
+  QueryBuilder<GuardarianTransaction, String?, QQueryOperations>
       externalPartnerLinkIdProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'externalPartnerLinkId');
     });
   }
 
-  QueryBuilder<GuardarianTransaction, String, QQueryOperations>
+  QueryBuilder<GuardarianTransaction, String?, QQueryOperations>
       extraIdProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'extraId');
@@ -7103,14 +7566,14 @@ extension GuardarianTransactionQueryProperty on QueryBuilder<
     });
   }
 
-  QueryBuilder<GuardarianTransaction, String, QQueryOperations>
+  QueryBuilder<GuardarianTransaction, String?, QQueryOperations>
       fromCurrencyWithNetworkProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'fromCurrencyWithNetwork');
     });
   }
 
-  QueryBuilder<GuardarianTransaction, String, QQueryOperations>
+  QueryBuilder<GuardarianTransaction, String?, QQueryOperations>
       fromNetworkProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'fromNetwork');
@@ -7124,7 +7587,7 @@ extension GuardarianTransactionQueryProperty on QueryBuilder<
     });
   }
 
-  QueryBuilder<GuardarianTransaction, String, QQueryOperations>
+  QueryBuilder<GuardarianTransaction, String?, QQueryOperations>
       initialFromCurrencyProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'initialFromCurrency');
@@ -7138,14 +7601,14 @@ extension GuardarianTransactionQueryProperty on QueryBuilder<
     });
   }
 
-  QueryBuilder<GuardarianTransaction, String, QQueryOperations>
+  QueryBuilder<GuardarianTransaction, String?, QQueryOperations>
       outputHashProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'outputHash');
     });
   }
 
-  QueryBuilder<GuardarianTransaction, int, QQueryOperations>
+  QueryBuilder<GuardarianTransaction, String, QQueryOperations>
       partnerIdProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'partnerId');
@@ -7166,35 +7629,35 @@ extension GuardarianTransactionQueryProperty on QueryBuilder<
     });
   }
 
-  QueryBuilder<GuardarianTransaction, String, QQueryOperations>
+  QueryBuilder<GuardarianTransaction, String?, QQueryOperations>
       preauthTokenProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'preauthToken');
     });
   }
 
-  QueryBuilder<GuardarianTransaction, String, QQueryOperations>
+  QueryBuilder<GuardarianTransaction, String?, QQueryOperations>
       redirectUrlProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'redirectUrl');
     });
   }
 
-  QueryBuilder<GuardarianTransaction, bool, QQueryOperations>
+  QueryBuilder<GuardarianTransaction, bool?, QQueryOperations>
       skipChoosePaymentCategoryProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'skipChoosePaymentCategory');
     });
   }
 
-  QueryBuilder<GuardarianTransaction, bool, QQueryOperations>
+  QueryBuilder<GuardarianTransaction, bool?, QQueryOperations>
       skipChoosePayoutAddressProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'skipChoosePayoutAddress');
     });
   }
 
-  QueryBuilder<GuardarianTransaction, String, QQueryOperations>
+  QueryBuilder<GuardarianTransaction, String?, QQueryOperations>
       statusDetailsProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'statusDetails');
@@ -7222,21 +7685,21 @@ extension GuardarianTransactionQueryProperty on QueryBuilder<
     });
   }
 
-  QueryBuilder<GuardarianTransaction, String, QQueryOperations>
+  QueryBuilder<GuardarianTransaction, String?, QQueryOperations>
       toCurrencyWithNetworkProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'toCurrencyWithNetwork');
     });
   }
 
-  QueryBuilder<GuardarianTransaction, String, QQueryOperations>
+  QueryBuilder<GuardarianTransaction, String?, QQueryOperations>
       toNetworkProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'toNetwork');
     });
   }
 
-  QueryBuilder<GuardarianTransaction, int, QQueryOperations>
+  QueryBuilder<GuardarianTransaction, String, QQueryOperations>
       transactionIdProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'transactionId');

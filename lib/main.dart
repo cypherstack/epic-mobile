@@ -7,6 +7,7 @@ import 'package:epicpay/models/epicbox_server_model.dart';
 import 'package:epicpay/models/isar/models/exchange/currency.dart';
 import 'package:epicpay/models/isar/models/exchange/pair.dart';
 import 'package:epicpay/models/isar/models/exchange/trade.dart';
+import 'package:epicpay/models/isar/models/guardarian_transaction.dart';
 import 'package:epicpay/models/isar/models/log.dart';
 import 'package:epicpay/models/models.dart';
 import 'package:epicpay/models/node_model.dart';
@@ -68,6 +69,7 @@ void main() async {
         TradeSchema,
         PairSchema,
         CurrencySchema,
+        GuardarianTransactionSchema,
       ],
       directory: appDirectory.path,
       inspector: false,
