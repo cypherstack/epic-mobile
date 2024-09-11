@@ -16,6 +16,8 @@ import 'package:epicpay/pages/buy_view/buy_with_fiat_flow/buy_with_fiat_step_1.d
 import 'package:epicpay/pages/buy_view/buy_with_fiat_flow/buy_with_fiat_step_2.dart';
 import 'package:epicpay/pages/buy_view/buy_with_fiat_flow/buy_with_fiat_step_3.dart';
 import 'package:epicpay/pages/buy_view/confirm_crypto_buy_view.dart';
+import 'package:epicpay/pages/buy_view/fiat_buy_details_view.dart';
+import 'package:epicpay/pages/buy_view/fiat_country_unsupported_view.dart';
 import 'package:epicpay/pages/exchange_view/edit_trade_note_view.dart';
 import 'package:epicpay/pages/exchange_view/exchange_step_views/confirm_send_details_view.dart';
 import 'package:epicpay/pages/exchange_view/exchange_step_views/step_1_view.dart';
@@ -745,6 +747,34 @@ class RouteGenerator {
               tradeId: args.tradeId,
               transactionIfSentFromStack: args.transactionIfSentFromStack,
               isBuy: args.isBuy,
+            ),
+            settings: RouteSettings(
+              name: settings.name,
+            ),
+          );
+        }
+        return _routeError("${settings.name} invalid args: ${args.toString()}");
+
+      case FiatBuyDetailsView.routeName:
+        if (args is String) {
+          return getRoute(
+            shouldUseMaterialRoute: useMaterialPageRoute,
+            builder: (_) => FiatBuyDetailsView(
+              transactionId: args,
+            ),
+            settings: RouteSettings(
+              name: settings.name,
+            ),
+          );
+        }
+        return _routeError("${settings.name} invalid args: ${args.toString()}");
+
+      case FiatCountryUnsupportedView.routeName:
+        if (args is String) {
+          return getRoute(
+            shouldUseMaterialRoute: useMaterialPageRoute,
+            builder: (_) => FiatCountryUnsupportedView(
+              unsupportedCountry: args,
             ),
             settings: RouteSettings(
               name: settings.name,

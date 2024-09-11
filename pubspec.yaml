@@ -96,6 +96,7 @@ dependencies:
   string_validator: ^0.3.0
   web_socket_channel: ^2.4.5
   country_state_city: ^0.1.6
+  async: ^2.11.0
 
 dev_dependencies:
   flutter_test:

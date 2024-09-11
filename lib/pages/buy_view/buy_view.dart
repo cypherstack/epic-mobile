@@ -1,9 +1,12 @@
 import 'dart:async';
 
+import 'package:async/async.dart';
 import 'package:epicpay/db/isar/isar_db.dart';
 import 'package:epicpay/models/isar/models/exchange/trade.dart';
+import 'package:epicpay/models/isar/models/guardarian_transaction.dart';
 import 'package:epicpay/pages/buy_view/buy_with_crypto_flow/buy_with_crypto_step_1.dart';
 import 'package:epicpay/pages/buy_view/buy_with_fiat_flow/buy_with_fiat_step_1.dart';
+import 'package:epicpay/pages/buy_view/fiat_country_unsupported_view.dart';
 import 'package:epicpay/pages/loading_view.dart';
 import 'package:epicpay/services/geo_service.dart';
 import 'package:epicpay/services/guardarian/enums.dart';
@@ -42,6 +45,9 @@ class BuyView extends ConsumerStatefulWidget {
 }
 
 class _BuyViewState extends ConsumerState<BuyView> {
+  static const _kPrefixErrorCountry =
+      "Exception: Guardarian does not currently support ";
+
   late final Coin coin;
   late final String walletId;
   late final ClipboardInterface clipboard;
@@ -79,7 +85,7 @@ class _BuyViewState extends ConsumerState<BuyView> {
       if (possibleCountries.length == 1) {
         if (!possibleCountries.first.supported) {
           throw Exception(
-            "Guardarian does not support ${possibleCountries.first.countryName} at this time.",
+            "${_kPrefixErrorCountry.replaceFirst("Exception: ", "")}${possibleCountries.first.countryName}",
           );
         }
       }
@@ -128,14 +134,22 @@ class _BuyViewState extends ConsumerState<BuyView> {
       );
 
       if (ex != null) {
+        Logging.instance.log(ex, level: LogLevel.Error);
         if (mounted) {
-          await showDialog<void>(
-            context: context,
-            builder: (_) => EPErrorDialog(
-              title: "Guardarian API Error",
-              info: ex.toString(),
-            ),
-          );
+          if (ex.toString().startsWith(_kPrefixErrorCountry)) {
+            await Navigator.of(context).pushNamed(
+              FiatCountryUnsupportedView.routeName,
+              arguments: ex.toString().replaceFirst(_kPrefixErrorCountry, ""),
+            );
+          } else {
+            await showDialog<void>(
+              context: context,
+              builder: (_) => EPErrorDialog(
+                title: "Guardarian API Error",
+                info: ex.toString(),
+              ),
+            );
+          }
         }
         return;
       }
@@ -220,9 +234,12 @@ class _BuyViewState extends ConsumerState<BuyView> {
         ];
       },
       body: StreamBuilder(
-        stream: ref.watch(pIsarDB).isar.trades.watchLazy(),
+        stream: StreamGroup.merge([
+          ref.watch(pIsarDB).isar.trades.watchLazy(),
+          ref.watch(pIsarDB).isar.guardarianTransactions.watchLazy()
+        ]),
         builder: (buildContext, snapshot) {
-          final internalTradeIds = ref
+          final internalTrades = ref
               .watch(pIsarDB)
               .isar
               .trades
@@ -230,9 +247,30 @@ class _BuyViewState extends ConsumerState<BuyView> {
               .filter()
               .zBuyEqualTo(true)
               .sortByTimestampUTCDesc()
-              .idProperty()
               .findAllSync();
-          final hasHistory = internalTradeIds.isNotEmpty;
+
+          final gBuys = ref
+              .watch(pIsarDB)
+              .isar
+              .guardarianTransactions
+              .where()
+              .sortByCreatedAtTimestampDesc()
+              .findAllSync();
+
+          final List<dynamic> all = [...gBuys, ...internalTrades];
+
+          all.sort((a, b) {
+            final at = a is GuardarianTransaction
+                ? a.createdAtTimestamp
+                : (a as Trade).timestampUTC;
+            final bt = b is GuardarianTransaction
+                ? b.createdAtTimestamp
+                : (b as Trade).timestampUTC;
+
+            return bt.compareTo(at);
+          });
+
+          final hasHistory = all.isNotEmpty;
 
           return Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -267,24 +305,25 @@ class _BuyViewState extends ConsumerState<BuyView> {
                   SliverList(
                     delegate: SliverChildBuilderDelegate(
                       (context, index) {
-                        return StreamBuilder<Trade?>(
-                          stream: ref
-                              .watch(pIsarDB)
-                              .isar
-                              .trades
-                              .watchObject(internalTradeIds[index]),
+                        final item = all[index];
+
+                        return StreamBuilder<Object?>(
+                          stream: item is GuardarianTransaction
+                              ? ref
+                                  .watch(pIsarDB)
+                                  .isar
+                                  .guardarianTransactions
+                                  .watchObject(item.id)
+                              : ref
+                                  .watch(pIsarDB)
+                                  .isar
+                                  .trades
+                                  .watchObject((item as Trade).id),
                           builder: (
                             context,
-                            AsyncSnapshot<Trade?> snapshot,
+                            AsyncSnapshot<Object?> snapshot,
                           ) {
-                            final trade = snapshot.data ??
-                                ref
-                                    .read(pIsarDB)
-                                    .isar
-                                    .trades
-                                    .where()
-                                    .idEqualTo(internalTradeIds[index])
-                                    .findFirstSync()!;
+                            final trade = snapshot.data ?? all[index];
 
                             return ConditionalParent(
                               condition: index > 0,
@@ -292,17 +331,24 @@ class _BuyViewState extends ConsumerState<BuyView> {
                                 padding: const EdgeInsets.only(top: 16),
                                 child: child,
                               ),
-                              child: BuyCard(
-                                key: Key(
-                                  "buyCard_${trade.tradeId + trade.updatedAt.toString()}",
-                                ),
-                                trade: trade,
-                              ),
+                              child: trade is GuardarianTransaction
+                                  ? FiatBuyCard(
+                                      key: Key(
+                                        "fiatBuyCard_${trade.transactionId}",
+                                      ),
+                                      transaction: trade,
+                                    )
+                                  : BuyCard(
+                                      key: Key(
+                                        "buyCard_${trade.tradeId + trade.updatedAt.toString()}",
+                                      ),
+                                      trade: trade as Trade,
+                                    ),
                             );
                           },
                         );
                       },
-                      childCount: internalTradeIds.length,
+                      childCount: all.length,
                     ),
                   ),
                 if (!hasHistory)
@@ -536,7 +582,7 @@ class _FiatButton extends StatelessWidget {
                       style: STextStyles.bodyBold(context),
                     ),
                     Text(
-                      "Coming soon",
+                      "Buy EPIC with USD, EUR, and more",
                       style: STextStyles.label(context).copyWith(
                         color: Theme.of(context)
                             .extension<StackColors>()!

@@ -1,5 +1,8 @@
 import 'package:decimal/decimal.dart';
+import 'package:epicpay/db/isar/isar_db.dart';
+import 'package:epicpay/models/isar/models/guardarian_transaction.dart';
 import 'package:epicpay/pages/buy_view/buy_with_fiat_flow/buy_with_fiat_step_1.dart';
+import 'package:epicpay/pages/home_view/home_view.dart';
 import 'package:epicpay/pages/loading_view.dart';
 import 'package:epicpay/services/guardarian/enums.dart';
 import 'package:epicpay/services/guardarian/guardarian_api.dart';
@@ -14,11 +17,13 @@ import 'package:epicpay/widgets/background.dart';
 import 'package:epicpay/widgets/custom_buttons/app_bar_icon_button.dart';
 import 'package:epicpay/widgets/desktop/primary_button.dart';
 import 'package:epicpay/widgets/desktop/secondary_button.dart';
+import 'package:epicpay/widgets/ep_dialog.dart';
 import 'package:epicpay/widgets/rounded_white_container.dart';
 import 'package:epicpay/widgets/step_progress_dots.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class BuyWithFiatStep3 extends ConsumerStatefulWidget {
   const BuyWithFiatStep3({
@@ -76,29 +81,36 @@ class _BuyWithFiatStep3State extends ConsumerState<BuyWithFiatStep3> {
 
       if (ex != null) {
         if (mounted) {
-          await Logging.uiLog(
-            ex,
-            title: "Guardarian API Error",
+          Logging.instance.log("$ex", level: LogLevel.Error);
+          await showDialog<void>(
             context: context,
+            builder: (_) => EPErrorDialog(
+              title: "Guardarian API Error",
+              info: ex.toString(),
+            ),
           );
-          // await showDialog<void>(
-          //   context: context,
-          //   builder: (_) => EPErrorDialog(
-          //     title: "Guardarian API Error",
-          //     info: ex.toString(),
-          //   ),
-          // );
         }
         return;
       }
 
+      final tx = GuardarianTransaction.fromGTransaction(result!);
+      await ref.read(pIsarDB).isar.writeTxn(() async {
+        await ref.read(pIsarDB).isar.guardarianTransactions.put(tx);
+      });
+
       if (mounted) {
-        await Logging.uiLog(
-          result,
-          title: "Guardarian create transaction result",
-          context: context,
+        Navigator.of(context).popUntil(
+          ModalRoute.withName(
+            HomeView.routeName,
+          ),
+        );
+        await launchUrl(
+          Uri.parse(tx.redirectUrl!),
+          mode: LaunchMode.externalApplication,
         );
       }
+    } catch (e, s) {
+      Logging.instance.log("$e\n$s", level: LogLevel.Error);
     } finally {
       _acceptPressedLock = false;
     }
