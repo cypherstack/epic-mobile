@@ -222,34 +222,35 @@ class GuardarianTransaction {
       fromNetwork: gTransaction.fromNetwork ?? previousToCopy?.email,
       fromCurrencyWithNetwork:
           gTransaction.fromCurrencyWithNetwork ?? previousToCopy?.email,
-      fromAmount: Decimal.parse(gTransaction.fromAmount.toString()),
+      fromAmount: Decimal.parse(gTransaction.fromAmount),
       depositType: gTransaction.depositType,
       payoutType: gTransaction.payoutType,
-      expectedFromAmount:
-          Decimal.parse(gTransaction.expectedFromAmount.toString()),
-      initialExpectedFromAmount:
-          Decimal.parse(gTransaction.initialExpectedFromAmount.toString()),
+      expectedFromAmount: Decimal.parse(gTransaction.expectedFromAmount),
+      initialExpectedFromAmount: Decimal.parse(
+          gTransaction.initialExpectedFromAmount ??
+              gTransaction.expectedFromAmount),
       toCurrency: gTransaction.toCurrency,
       toNetwork: gTransaction.toNetwork ?? previousToCopy?.toNetwork,
       toCurrencyWithNetwork: gTransaction.toCurrencyWithNetwork ??
           previousToCopy?.toCurrencyWithNetwork,
-      toAmount: Decimal.parse(gTransaction.toAmount.toString()),
+      toAmount:
+          Decimal.parse(gTransaction.toAmount ?? gTransaction.expectedToAmount),
       outputHash: gTransaction.outputHash ?? previousToCopy?.outputHash,
-      expectedToAmount: Decimal.parse(gTransaction.expectedToAmount.toString()),
+      expectedToAmount: Decimal.parse(gTransaction.expectedToAmount),
       location: gTransaction.location,
       createdAt: gTransaction.createdAt,
       updatedAt: gTransaction.updatedAt,
       partnerId: gTransaction.partnerId,
       externalPartnerLinkId: gTransaction.externalPartnerLinkId ??
           previousToCopy?.externalPartnerLinkId,
-      fromAmountInEur: Decimal.parse(gTransaction.fromAmountInEur.toString()),
+      fromAmountInEur: Decimal.parse(gTransaction.fromAmountInEur ?? "0"),
       customerPayoutAddressChangeable:
           gTransaction.customerPayoutAddressChangeable ??
               previousToCopy?.customerPayoutAddressChangeable,
       estimateBreakdownToAmount:
-          Decimal.parse(gTransaction.estimateBreakdown.toAmount.toString()),
+          Decimal.parse(gTransaction.estimateBreakdown.toAmount),
       estimateBreakdownFromAmount:
-          Decimal.parse(gTransaction.estimateBreakdown.fromAmount.toString()),
+          Decimal.parse(gTransaction.estimateBreakdown.fromAmount),
       estimateBreakdownServiceFees:
           gTransaction.estimateBreakdown.serviceFees.map((e) {
         return ServiceFeeEmbedded.construct(
@@ -264,8 +265,8 @@ class GuardarianTransaction {
         amount: Decimal.parse(
             gTransaction.estimateBreakdown.convertedAmount["amount"] as String),
       ),
-      estimateBreakdownEstimatedExchangeRate: Decimal.parse(
-          gTransaction.estimateBreakdown.estimatedExchangeRate.toString()),
+      estimateBreakdownEstimatedExchangeRate:
+          Decimal.parse(gTransaction.estimateBreakdown.estimatedExchangeRate),
       estimateBreakdownNetworkFee: NetworkFeeEmbedded.construct(
         currency:
             gTransaction.estimateBreakdown.networkFee["currency"] as String,
