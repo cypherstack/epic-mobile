@@ -122,7 +122,7 @@ abstract final class GuardarianAPI {
         body: jsonEncode(_cleanNulls(body)),
       );
 
-      if (response.statusCode != 200) {
+      if (response.statusCode != 200 && response.statusCode != 201) {
         final error = jsonDecode(response.body) as Map;
         error["httpStatusCode"] = response.statusCode;
         throw GException.fromMap(error);
@@ -230,7 +230,7 @@ abstract final class GuardarianAPI {
     bool? skipChoosePayoutAddress,
     String? payoutAddress,
     String? extraId,
-    required Customer customer,
+    Customer? customer,
     EGPaymentCategory? paymentCategory,
     bool? skipChoosePaymentCategory,
     String? customerCountry,
@@ -258,20 +258,20 @@ abstract final class GuardarianAPI {
         },
         "customer": {
           "contact_info": {
-            "email": customer.contactInfo?.email,
+            "email": customer?.contactInfo?.email,
           },
           "billing_info": {
-            "country_alpha_2": customer.billingInfo.countryAlpha2,
-            "us_region_alpha_2": customer.billingInfo.usRegionAlpha2,
-            "region": customer.billingInfo.region,
-            "city": customer.billingInfo.city,
-            "street_address": customer.billingInfo.streetAddress,
-            "apt_number": customer.billingInfo.aptNumber,
-            "post_index": customer.billingInfo.postIndex,
-            "first_name": customer.billingInfo.firstName,
-            "last_name": customer.billingInfo.lastName,
-            "date_of_birthday": customer.billingInfo.dateOfBirthday,
-            "gender": customer.billingInfo.gender,
+            "country_alpha_2": customer?.billingInfo.countryAlpha2,
+            "us_region_alpha_2": customer?.billingInfo.usRegionAlpha2,
+            "region": customer?.billingInfo.region,
+            "city": customer?.billingInfo.city,
+            "street_address": customer?.billingInfo.streetAddress,
+            "apt_number": customer?.billingInfo.aptNumber,
+            "post_index": customer?.billingInfo.postIndex,
+            "first_name": customer?.billingInfo.firstName,
+            "last_name": customer?.billingInfo.lastName,
+            "date_of_birthday": customer?.billingInfo.dateOfBirthday,
+            "gender": customer?.billingInfo.gender,
           }
         },
         "deposit": {
