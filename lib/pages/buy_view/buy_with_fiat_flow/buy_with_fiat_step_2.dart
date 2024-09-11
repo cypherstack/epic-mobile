@@ -222,7 +222,7 @@ class _BuyWithFiatStep2State extends ConsumerState<BuyWithFiatStep2> {
             centerTitle: true,
             title: const StepProgressDots(
               activeCount: 2,
-              totalCount: 4,
+              totalCount: 3,
             ),
             actions: [
               Padding(

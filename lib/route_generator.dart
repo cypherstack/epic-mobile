@@ -15,7 +15,6 @@ import 'package:epicpay/pages/buy_view/buy_with_crypto_flow/buy_with_crypto_step
 import 'package:epicpay/pages/buy_view/buy_with_fiat_flow/buy_with_fiat_step_1.dart';
 import 'package:epicpay/pages/buy_view/buy_with_fiat_flow/buy_with_fiat_step_2.dart';
 import 'package:epicpay/pages/buy_view/buy_with_fiat_flow/buy_with_fiat_step_3.dart';
-import 'package:epicpay/pages/buy_view/buy_with_fiat_flow/buy_with_fiat_step_4.dart';
 import 'package:epicpay/pages/buy_view/confirm_crypto_buy_view.dart';
 import 'package:epicpay/pages/exchange_view/edit_trade_note_view.dart';
 import 'package:epicpay/pages/exchange_view/exchange_step_views/confirm_send_details_view.dart';
@@ -527,27 +526,27 @@ class RouteGenerator {
         }
         return _routeError("${settings.name} invalid args: ${args.toString()}");
 
-      case BuyWithFiatStep4.routeName:
-        if (args is ({
-          GEstimate estimate,
-          GCurrency option,
-          GCurrency epic,
-          Decimal sendAmount,
-        })) {
-          return getRoute(
-            shouldUseMaterialRoute: useMaterialPageRoute,
-            builder: (_) => BuyWithFiatStep4(
-              option: args.option,
-              epic: args.epic,
-              estimate: args.estimate,
-              sendAmount: args.sendAmount,
-            ),
-            settings: RouteSettings(
-              name: settings.name,
-            ),
-          );
-        }
-        return _routeError("${settings.name} invalid args: ${args.toString()}");
+      // case BuyWithFiatStep4.routeName:
+      //   if (args is ({
+      //     GEstimate estimate,
+      //     GCurrency option,
+      //     GCurrency epic,
+      //     Decimal sendAmount,
+      //   })) {
+      //     return getRoute(
+      //       shouldUseMaterialRoute: useMaterialPageRoute,
+      //       builder: (_) => BuyWithFiatStep4(
+      //         option: args.option,
+      //         epic: args.epic,
+      //         estimate: args.estimate,
+      //         sendAmount: args.sendAmount,
+      //       ),
+      //       settings: RouteSettings(
+      //         name: settings.name,
+      //       ),
+      //     );
+      //   }
+      //   return _routeError("${settings.name} invalid args: ${args.toString()}");
 
       case BuyRefundAddressEntry.routeName:
         if (args is ({CryptoBuyOption option, Estimate estimate})) {

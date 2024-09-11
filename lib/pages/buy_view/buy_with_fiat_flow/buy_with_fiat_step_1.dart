@@ -147,7 +147,7 @@ class _BuyWithFiatStep1State extends ConsumerState<BuyWithFiatStep1> {
             centerTitle: true,
             title: const StepProgressDots(
               activeCount: 1,
-              totalCount: 4,
+              totalCount: 3,
             ),
           ),
           body: Column(
