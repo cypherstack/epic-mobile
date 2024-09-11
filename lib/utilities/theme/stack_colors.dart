@@ -1442,7 +1442,7 @@ class StackColors extends ThemeExtension<StackColors> {
       case EGTransactionStatus.Exchanging:
       case EGTransactionStatus.OnHold:
       case EGTransactionStatus.Sending:
-        return const Color(0xFFD3A90F);
+        return textGold;
 
       case EGTransactionStatus.Finished:
         return accentColorGreen;
@@ -1454,7 +1454,7 @@ class StackColors extends ThemeExtension<StackColors> {
       case EGTransactionStatus.Cancelled:
       case EGTransactionStatus.Refunded:
       case EGTransactionStatus.Unknown:
-        return textSubtitle2;
+        return textDark;
     }
   }
 
