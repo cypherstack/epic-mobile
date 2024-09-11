@@ -28,202 +28,207 @@ const GuardarianTransactionSchema = CollectionSchema(
       name: r'createdAt',
       type: IsarType.string,
     ),
-    r'customerPayoutAddressChangeable': PropertySchema(
+    r'createdAtTimestamp': PropertySchema(
       id: 2,
+      name: r'createdAtTimestamp',
+      type: IsarType.long,
+    ),
+    r'customerPayoutAddressChangeable': PropertySchema(
+      id: 3,
       name: r'customerPayoutAddressChangeable',
       type: IsarType.bool,
     ),
     r'depositPaymentCategoryString': PropertySchema(
-      id: 3,
+      id: 4,
       name: r'depositPaymentCategoryString',
       type: IsarType.string,
     ),
     r'depositType': PropertySchema(
-      id: 4,
+      id: 5,
       name: r'depositType',
       type: IsarType.string,
     ),
     r'email': PropertySchema(
-      id: 5,
+      id: 6,
       name: r'email',
       type: IsarType.string,
     ),
     r'estimateBreakdownConvertedAmount': PropertySchema(
-      id: 6,
+      id: 7,
       name: r'estimateBreakdownConvertedAmount',
       type: IsarType.object,
       target: r'ConvertedAmountEmbedded',
     ),
     r'estimateBreakdownEstimatedExchangeRateString': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'estimateBreakdownEstimatedExchangeRateString',
       type: IsarType.string,
     ),
     r'estimateBreakdownFromAmountString': PropertySchema(
-      id: 8,
+      id: 9,
       name: r'estimateBreakdownFromAmountString',
       type: IsarType.string,
     ),
     r'estimateBreakdownNetworkFee': PropertySchema(
-      id: 9,
+      id: 10,
       name: r'estimateBreakdownNetworkFee',
       type: IsarType.object,
       target: r'NetworkFeeEmbedded',
     ),
     r'estimateBreakdownPartnerFee': PropertySchema(
-      id: 10,
+      id: 11,
       name: r'estimateBreakdownPartnerFee',
       type: IsarType.object,
       target: r'PartnerFeeEmbedded',
     ),
     r'estimateBreakdownServiceFees': PropertySchema(
-      id: 11,
+      id: 12,
       name: r'estimateBreakdownServiceFees',
       type: IsarType.objectList,
       target: r'ServiceFeeEmbedded',
     ),
     r'estimateBreakdownToAmountString': PropertySchema(
-      id: 12,
+      id: 13,
       name: r'estimateBreakdownToAmountString',
       type: IsarType.string,
     ),
     r'expectedFromAmountString': PropertySchema(
-      id: 13,
+      id: 14,
       name: r'expectedFromAmountString',
       type: IsarType.string,
     ),
     r'expectedToAmountString': PropertySchema(
-      id: 14,
+      id: 15,
       name: r'expectedToAmountString',
       type: IsarType.string,
     ),
     r'externalPartnerLinkId': PropertySchema(
-      id: 15,
+      id: 16,
       name: r'externalPartnerLinkId',
       type: IsarType.string,
     ),
     r'extraId': PropertySchema(
-      id: 16,
+      id: 17,
       name: r'extraId',
       type: IsarType.string,
     ),
     r'fromAmountInEurString': PropertySchema(
-      id: 17,
+      id: 18,
       name: r'fromAmountInEurString',
       type: IsarType.string,
     ),
     r'fromAmountString': PropertySchema(
-      id: 18,
+      id: 19,
       name: r'fromAmountString',
       type: IsarType.string,
     ),
     r'fromCurrency': PropertySchema(
-      id: 19,
+      id: 20,
       name: r'fromCurrency',
       type: IsarType.string,
     ),
     r'fromCurrencyWithNetwork': PropertySchema(
-      id: 20,
+      id: 21,
       name: r'fromCurrencyWithNetwork',
       type: IsarType.string,
     ),
     r'fromNetwork': PropertySchema(
-      id: 21,
+      id: 22,
       name: r'fromNetwork',
       type: IsarType.string,
     ),
     r'initialExpectedFromAmountString': PropertySchema(
-      id: 22,
+      id: 23,
       name: r'initialExpectedFromAmountString',
       type: IsarType.string,
     ),
     r'initialFromCurrency': PropertySchema(
-      id: 23,
+      id: 24,
       name: r'initialFromCurrency',
       type: IsarType.string,
     ),
     r'location': PropertySchema(
-      id: 24,
+      id: 25,
       name: r'location',
       type: IsarType.string,
     ),
     r'outputHash': PropertySchema(
-      id: 25,
+      id: 26,
       name: r'outputHash',
       type: IsarType.string,
     ),
     r'partnerId': PropertySchema(
-      id: 26,
+      id: 27,
       name: r'partnerId',
       type: IsarType.string,
     ),
     r'payoutPaymentCategoryString': PropertySchema(
-      id: 27,
+      id: 28,
       name: r'payoutPaymentCategoryString',
       type: IsarType.string,
     ),
     r'payoutType': PropertySchema(
-      id: 28,
+      id: 29,
       name: r'payoutType',
       type: IsarType.string,
     ),
     r'preauthToken': PropertySchema(
-      id: 29,
+      id: 30,
       name: r'preauthToken',
       type: IsarType.string,
     ),
     r'redirectUrl': PropertySchema(
-      id: 30,
+      id: 31,
       name: r'redirectUrl',
       type: IsarType.string,
     ),
     r'skipChoosePaymentCategory': PropertySchema(
-      id: 31,
+      id: 32,
       name: r'skipChoosePaymentCategory',
       type: IsarType.bool,
     ),
     r'skipChoosePayoutAddress': PropertySchema(
-      id: 32,
+      id: 33,
       name: r'skipChoosePayoutAddress',
       type: IsarType.bool,
     ),
     r'statusDetails': PropertySchema(
-      id: 33,
+      id: 34,
       name: r'statusDetails',
       type: IsarType.string,
     ),
     r'statusString': PropertySchema(
-      id: 34,
+      id: 35,
       name: r'statusString',
       type: IsarType.string,
     ),
     r'toAmountString': PropertySchema(
-      id: 35,
+      id: 36,
       name: r'toAmountString',
       type: IsarType.string,
     ),
     r'toCurrency': PropertySchema(
-      id: 36,
+      id: 37,
       name: r'toCurrency',
       type: IsarType.string,
     ),
     r'toCurrencyWithNetwork': PropertySchema(
-      id: 37,
+      id: 38,
       name: r'toCurrencyWithNetwork',
       type: IsarType.string,
     ),
     r'toNetwork': PropertySchema(
-      id: 38,
+      id: 39,
       name: r'toNetwork',
       type: IsarType.string,
     ),
     r'transactionId': PropertySchema(
-      id: 39,
+      id: 40,
       name: r'transactionId',
       type: IsarType.string,
     ),
     r'updatedAt': PropertySchema(
-      id: 40,
+      id: 41,
       name: r'updatedAt',
       type: IsarType.string,
     )
@@ -398,66 +403,67 @@ void _guardarianTransactionSerialize(
 ) {
   writer.writeString(offsets[0], object.address);
   writer.writeString(offsets[1], object.createdAt);
-  writer.writeBool(offsets[2], object.customerPayoutAddressChangeable);
-  writer.writeString(offsets[3], object.depositPaymentCategoryString);
-  writer.writeString(offsets[4], object.depositType);
-  writer.writeString(offsets[5], object.email);
+  writer.writeLong(offsets[2], object.createdAtTimestamp);
+  writer.writeBool(offsets[3], object.customerPayoutAddressChangeable);
+  writer.writeString(offsets[4], object.depositPaymentCategoryString);
+  writer.writeString(offsets[5], object.depositType);
+  writer.writeString(offsets[6], object.email);
   writer.writeObject<ConvertedAmountEmbedded>(
-    offsets[6],
+    offsets[7],
     allOffsets,
     ConvertedAmountEmbeddedSchema.serialize,
     object.estimateBreakdownConvertedAmount,
   );
   writer.writeString(
-      offsets[7], object.estimateBreakdownEstimatedExchangeRateString);
-  writer.writeString(offsets[8], object.estimateBreakdownFromAmountString);
+      offsets[8], object.estimateBreakdownEstimatedExchangeRateString);
+  writer.writeString(offsets[9], object.estimateBreakdownFromAmountString);
   writer.writeObject<NetworkFeeEmbedded>(
-    offsets[9],
+    offsets[10],
     allOffsets,
     NetworkFeeEmbeddedSchema.serialize,
     object.estimateBreakdownNetworkFee,
   );
   writer.writeObject<PartnerFeeEmbedded>(
-    offsets[10],
+    offsets[11],
     allOffsets,
     PartnerFeeEmbeddedSchema.serialize,
     object.estimateBreakdownPartnerFee,
   );
   writer.writeObjectList<ServiceFeeEmbedded>(
-    offsets[11],
+    offsets[12],
     allOffsets,
     ServiceFeeEmbeddedSchema.serialize,
     object.estimateBreakdownServiceFees,
   );
-  writer.writeString(offsets[12], object.estimateBreakdownToAmountString);
-  writer.writeString(offsets[13], object.expectedFromAmountString);
-  writer.writeString(offsets[14], object.expectedToAmountString);
-  writer.writeString(offsets[15], object.externalPartnerLinkId);
-  writer.writeString(offsets[16], object.extraId);
-  writer.writeString(offsets[17], object.fromAmountInEurString);
-  writer.writeString(offsets[18], object.fromAmountString);
-  writer.writeString(offsets[19], object.fromCurrency);
-  writer.writeString(offsets[20], object.fromCurrencyWithNetwork);
-  writer.writeString(offsets[21], object.fromNetwork);
-  writer.writeString(offsets[22], object.initialExpectedFromAmountString);
-  writer.writeString(offsets[23], object.initialFromCurrency);
-  writer.writeString(offsets[24], object.location);
-  writer.writeString(offsets[25], object.outputHash);
-  writer.writeString(offsets[26], object.partnerId);
-  writer.writeString(offsets[27], object.payoutPaymentCategoryString);
-  writer.writeString(offsets[28], object.payoutType);
-  writer.writeString(offsets[29], object.preauthToken);
-  writer.writeString(offsets[30], object.redirectUrl);
-  writer.writeBool(offsets[31], object.skipChoosePaymentCategory);
-  writer.writeBool(offsets[32], object.skipChoosePayoutAddress);
-  writer.writeString(offsets[33], object.statusDetails);
-  writer.writeString(offsets[34], object.statusString);
-  writer.writeString(offsets[35], object.toAmountString);
-  writer.writeString(offsets[36], object.toCurrency);
-  writer.writeString(offsets[37], object.toCurrencyWithNetwork);
-  writer.writeString(offsets[38], object.toNetwork);
-  writer.writeString(offsets[39], object.transactionId);
-  writer.writeString(offsets[40], object.updatedAt);
+  writer.writeString(offsets[13], object.estimateBreakdownToAmountString);
+  writer.writeString(offsets[14], object.expectedFromAmountString);
+  writer.writeString(offsets[15], object.expectedToAmountString);
+  writer.writeString(offsets[16], object.externalPartnerLinkId);
+  writer.writeString(offsets[17], object.extraId);
+  writer.writeString(offsets[18], object.fromAmountInEurString);
+  writer.writeString(offsets[19], object.fromAmountString);
+  writer.writeString(offsets[20], object.fromCurrency);
+  writer.writeString(offsets[21], object.fromCurrencyWithNetwork);
+  writer.writeString(offsets[22], object.fromNetwork);
+  writer.writeString(offsets[23], object.initialExpectedFromAmountString);
+  writer.writeString(offsets[24], object.initialFromCurrency);
+  writer.writeString(offsets[25], object.location);
+  writer.writeString(offsets[26], object.outputHash);
+  writer.writeString(offsets[27], object.partnerId);
+  writer.writeString(offsets[28], object.payoutPaymentCategoryString);
+  writer.writeString(offsets[29], object.payoutType);
+  writer.writeString(offsets[30], object.preauthToken);
+  writer.writeString(offsets[31], object.redirectUrl);
+  writer.writeBool(offsets[32], object.skipChoosePaymentCategory);
+  writer.writeBool(offsets[33], object.skipChoosePayoutAddress);
+  writer.writeString(offsets[34], object.statusDetails);
+  writer.writeString(offsets[35], object.statusString);
+  writer.writeString(offsets[36], object.toAmountString);
+  writer.writeString(offsets[37], object.toCurrency);
+  writer.writeString(offsets[38], object.toCurrencyWithNetwork);
+  writer.writeString(offsets[39], object.toNetwork);
+  writer.writeString(offsets[40], object.transactionId);
+  writer.writeString(offsets[41], object.updatedAt);
 }
 
 GuardarianTransaction _guardarianTransactionDeserialize(
@@ -469,67 +475,67 @@ GuardarianTransaction _guardarianTransactionDeserialize(
   final object = GuardarianTransaction(
     address: reader.readStringOrNull(offsets[0]),
     createdAt: reader.readString(offsets[1]),
-    customerPayoutAddressChangeable: reader.readBoolOrNull(offsets[2]),
-    depositPaymentCategoryString: reader.readString(offsets[3]),
-    depositType: reader.readString(offsets[4]),
-    email: reader.readStringOrNull(offsets[5]),
+    customerPayoutAddressChangeable: reader.readBoolOrNull(offsets[3]),
+    depositPaymentCategoryString: reader.readString(offsets[4]),
+    depositType: reader.readString(offsets[5]),
+    email: reader.readStringOrNull(offsets[6]),
     estimateBreakdownConvertedAmount:
         reader.readObjectOrNull<ConvertedAmountEmbedded>(
-              offsets[6],
+              offsets[7],
               ConvertedAmountEmbeddedSchema.deserialize,
               allOffsets,
             ) ??
             ConvertedAmountEmbedded(),
-    estimateBreakdownEstimatedExchangeRateString: reader.readString(offsets[7]),
-    estimateBreakdownFromAmountString: reader.readString(offsets[8]),
+    estimateBreakdownEstimatedExchangeRateString: reader.readString(offsets[8]),
+    estimateBreakdownFromAmountString: reader.readString(offsets[9]),
     estimateBreakdownNetworkFee: reader.readObjectOrNull<NetworkFeeEmbedded>(
-          offsets[9],
+          offsets[10],
           NetworkFeeEmbeddedSchema.deserialize,
           allOffsets,
         ) ??
         NetworkFeeEmbedded(),
     estimateBreakdownPartnerFee: reader.readObjectOrNull<PartnerFeeEmbedded>(
-          offsets[10],
+          offsets[11],
           PartnerFeeEmbeddedSchema.deserialize,
           allOffsets,
         ) ??
         PartnerFeeEmbedded(),
     estimateBreakdownServiceFees: reader.readObjectList<ServiceFeeEmbedded>(
-          offsets[11],
+          offsets[12],
           ServiceFeeEmbeddedSchema.deserialize,
           allOffsets,
           ServiceFeeEmbedded(),
         ) ??
         [],
-    estimateBreakdownToAmountString: reader.readString(offsets[12]),
-    expectedFromAmountString: reader.readString(offsets[13]),
-    expectedToAmountString: reader.readString(offsets[14]),
-    externalPartnerLinkId: reader.readStringOrNull(offsets[15]),
-    extraId: reader.readStringOrNull(offsets[16]),
-    fromAmountInEurString: reader.readString(offsets[17]),
-    fromAmountString: reader.readString(offsets[18]),
-    fromCurrency: reader.readString(offsets[19]),
-    fromCurrencyWithNetwork: reader.readStringOrNull(offsets[20]),
-    fromNetwork: reader.readStringOrNull(offsets[21]),
-    initialExpectedFromAmountString: reader.readString(offsets[22]),
-    initialFromCurrency: reader.readStringOrNull(offsets[23]),
-    location: reader.readString(offsets[24]),
-    outputHash: reader.readStringOrNull(offsets[25]),
-    partnerId: reader.readString(offsets[26]),
-    payoutPaymentCategoryString: reader.readString(offsets[27]),
-    payoutType: reader.readString(offsets[28]),
-    preauthToken: reader.readStringOrNull(offsets[29]),
-    redirectUrl: reader.readStringOrNull(offsets[30]),
-    skipChoosePaymentCategory: reader.readBoolOrNull(offsets[31]),
-    skipChoosePayoutAddress: reader.readBoolOrNull(offsets[32]),
-    statusDetails: reader.readStringOrNull(offsets[33]),
-    statusString: reader.readString(offsets[34]),
-    toAmountString: reader.readString(offsets[35]),
-    toCurrency: reader.readString(offsets[36]),
-    toCurrencyWithNetwork: reader.readStringOrNull(offsets[37]),
-    toNetwork: reader.readStringOrNull(offsets[38]),
-    transactionId: reader.readString(offsets[39]),
-    updatedAt: reader.readString(offsets[40]),
+    estimateBreakdownToAmountString: reader.readString(offsets[13]),
+    expectedFromAmountString: reader.readString(offsets[14]),
+    expectedToAmountString: reader.readString(offsets[15]),
+    externalPartnerLinkId: reader.readStringOrNull(offsets[16]),
+    extraId: reader.readStringOrNull(offsets[17]),
+    fromAmountInEurString: reader.readString(offsets[18]),
+    fromAmountString: reader.readString(offsets[19]),
+    fromCurrency: reader.readString(offsets[20]),
+    fromCurrencyWithNetwork: reader.readStringOrNull(offsets[21]),
+    fromNetwork: reader.readStringOrNull(offsets[22]),
+    initialExpectedFromAmountString: reader.readString(offsets[23]),
+    initialFromCurrency: reader.readStringOrNull(offsets[24]),
+    location: reader.readString(offsets[25]),
+    outputHash: reader.readStringOrNull(offsets[26]),
+    partnerId: reader.readString(offsets[27]),
+    payoutPaymentCategoryString: reader.readString(offsets[28]),
+    payoutType: reader.readString(offsets[29]),
+    preauthToken: reader.readStringOrNull(offsets[30]),
+    redirectUrl: reader.readStringOrNull(offsets[31]),
+    skipChoosePaymentCategory: reader.readBoolOrNull(offsets[32]),
+    skipChoosePayoutAddress: reader.readBoolOrNull(offsets[33]),
+    statusDetails: reader.readStringOrNull(offsets[34]),
+    statusString: reader.readString(offsets[35]),
+    toAmountString: reader.readString(offsets[36]),
+    toCurrency: reader.readString(offsets[37]),
+    toCurrencyWithNetwork: reader.readStringOrNull(offsets[38]),
+    toNetwork: reader.readStringOrNull(offsets[39]),
+    transactionId: reader.readString(offsets[40]),
+    updatedAt: reader.readString(offsets[41]),
   );
   object.id = id;
   return object;
@@ -547,39 +553,41 @@ P _guardarianTransactionDeserializeProp<P>(
     case 1:
       return (reader.readString(offset)) as P;
     case 2:
-      return (reader.readBoolOrNull(offset)) as P;
+      return (reader.readLong(offset)) as P;
     case 3:
-      return (reader.readString(offset)) as P;
+      return (reader.readBoolOrNull(offset)) as P;
     case 4:
       return (reader.readString(offset)) as P;
     case 5:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 6:
+      return (reader.readStringOrNull(offset)) as P;
+    case 7:
       return (reader.readObjectOrNull<ConvertedAmountEmbedded>(
             offset,
             ConvertedAmountEmbeddedSchema.deserialize,
             allOffsets,
           ) ??
           ConvertedAmountEmbedded()) as P;
-    case 7:
-      return (reader.readString(offset)) as P;
     case 8:
       return (reader.readString(offset)) as P;
     case 9:
+      return (reader.readString(offset)) as P;
+    case 10:
       return (reader.readObjectOrNull<NetworkFeeEmbedded>(
             offset,
             NetworkFeeEmbeddedSchema.deserialize,
             allOffsets,
           ) ??
           NetworkFeeEmbedded()) as P;
-    case 10:
+    case 11:
       return (reader.readObjectOrNull<PartnerFeeEmbedded>(
             offset,
             PartnerFeeEmbeddedSchema.deserialize,
             allOffsets,
           ) ??
           PartnerFeeEmbedded()) as P;
-    case 11:
+    case 12:
       return (reader.readObjectList<ServiceFeeEmbedded>(
             offset,
             ServiceFeeEmbeddedSchema.deserialize,
@@ -587,63 +595,63 @@ P _guardarianTransactionDeserializeProp<P>(
             ServiceFeeEmbedded(),
           ) ??
           []) as P;
-    case 12:
-      return (reader.readString(offset)) as P;
     case 13:
       return (reader.readString(offset)) as P;
     case 14:
       return (reader.readString(offset)) as P;
     case 15:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 16:
       return (reader.readStringOrNull(offset)) as P;
     case 17:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 18:
       return (reader.readString(offset)) as P;
     case 19:
       return (reader.readString(offset)) as P;
     case 20:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 21:
       return (reader.readStringOrNull(offset)) as P;
     case 22:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 23:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 24:
-      return (reader.readString(offset)) as P;
-    case 25:
       return (reader.readStringOrNull(offset)) as P;
-    case 26:
+    case 25:
       return (reader.readString(offset)) as P;
+    case 26:
+      return (reader.readStringOrNull(offset)) as P;
     case 27:
       return (reader.readString(offset)) as P;
     case 28:
       return (reader.readString(offset)) as P;
     case 29:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 30:
       return (reader.readStringOrNull(offset)) as P;
     case 31:
-      return (reader.readBoolOrNull(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 32:
       return (reader.readBoolOrNull(offset)) as P;
     case 33:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readBoolOrNull(offset)) as P;
     case 34:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 35:
       return (reader.readString(offset)) as P;
     case 36:
       return (reader.readString(offset)) as P;
     case 37:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 38:
       return (reader.readStringOrNull(offset)) as P;
     case 39:
-      return (reader.readString(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 40:
+      return (reader.readString(offset)) as P;
+    case 41:
       return (reader.readString(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -1141,6 +1149,62 @@ extension GuardarianTransactionQueryFilter on QueryBuilder<
       return query.addFilterCondition(FilterCondition.greaterThan(
         property: r'createdAt',
         value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<GuardarianTransaction, GuardarianTransaction,
+      QAfterFilterCondition> createdAtTimestampEqualTo(int value) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'createdAtTimestamp',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<GuardarianTransaction, GuardarianTransaction,
+      QAfterFilterCondition> createdAtTimestampGreaterThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'createdAtTimestamp',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<GuardarianTransaction, GuardarianTransaction,
+      QAfterFilterCondition> createdAtTimestampLessThan(
+    int value, {
+    bool include = false,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'createdAtTimestamp',
+        value: value,
+      ));
+    });
+  }
+
+  QueryBuilder<GuardarianTransaction, GuardarianTransaction,
+      QAfterFilterCondition> createdAtTimestampBetween(
+    int lower,
+    int upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'createdAtTimestamp',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
       ));
     });
   }
@@ -6107,6 +6171,20 @@ extension GuardarianTransactionQuerySortBy
   }
 
   QueryBuilder<GuardarianTransaction, GuardarianTransaction, QAfterSortBy>
+      sortByCreatedAtTimestamp() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'createdAtTimestamp', Sort.asc);
+    });
+  }
+
+  QueryBuilder<GuardarianTransaction, GuardarianTransaction, QAfterSortBy>
+      sortByCreatedAtTimestampDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'createdAtTimestamp', Sort.desc);
+    });
+  }
+
+  QueryBuilder<GuardarianTransaction, GuardarianTransaction, QAfterSortBy>
       sortByCustomerPayoutAddressChangeable() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'customerPayoutAddressChangeable', Sort.asc);
@@ -6626,6 +6704,20 @@ extension GuardarianTransactionQuerySortThenBy
       thenByCreatedAtDesc() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'createdAt', Sort.desc);
+    });
+  }
+
+  QueryBuilder<GuardarianTransaction, GuardarianTransaction, QAfterSortBy>
+      thenByCreatedAtTimestamp() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'createdAtTimestamp', Sort.asc);
+    });
+  }
+
+  QueryBuilder<GuardarianTransaction, GuardarianTransaction, QAfterSortBy>
+      thenByCreatedAtTimestampDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'createdAtTimestamp', Sort.desc);
     });
   }
 
@@ -7153,6 +7245,13 @@ extension GuardarianTransactionQueryWhereDistinct
   }
 
   QueryBuilder<GuardarianTransaction, GuardarianTransaction, QDistinct>
+      distinctByCreatedAtTimestamp() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'createdAtTimestamp');
+    });
+  }
+
+  QueryBuilder<GuardarianTransaction, GuardarianTransaction, QDistinct>
       distinctByCustomerPayoutAddressChangeable() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'customerPayoutAddressChangeable');
@@ -7436,6 +7535,13 @@ extension GuardarianTransactionQueryProperty on QueryBuilder<
       createdAtProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'createdAt');
+    });
+  }
+
+  QueryBuilder<GuardarianTransaction, int, QQueryOperations>
+      createdAtTimestampProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'createdAtTimestamp');
     });
   }
 

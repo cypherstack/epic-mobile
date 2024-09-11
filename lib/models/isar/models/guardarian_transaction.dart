@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:decimal/decimal.dart';
 import 'package:epicpay/services/guardarian/enums.dart';
 import 'package:epicpay/services/guardarian/response_models/g_transaction.dart';
@@ -56,6 +58,10 @@ class GuardarianTransaction {
 
   final String location;
   final String createdAt;
+
+  int get createdAtTimestamp =>
+      DateTime.parse(createdAt).millisecondsSinceEpoch ~/ 1000;
+
   final String updatedAt;
   final String partnerId;
   final String? externalPartnerLinkId;
@@ -297,6 +303,59 @@ class GuardarianTransaction {
       newTx.id = previousToCopy.id;
     }
     return newTx;
+  }
+
+  @override
+  String toString() {
+    final jsonMap = {
+      "transactionId": transactionId.toString(),
+      "statusString": statusString.toString(),
+      "email": email.toString(),
+      "statusDetails": statusDetails.toString(),
+      "fromCurrency": fromCurrency.toString(),
+      "initialFromCurrency": initialFromCurrency.toString(),
+      "fromNetwork": fromNetwork.toString(),
+      "fromCurrencyWithNetwork": fromCurrencyWithNetwork.toString(),
+      "fromAmountString": fromAmountString.toString(),
+      "depositType": depositType.toString(),
+      "payoutType": payoutType.toString(),
+      "expectedFromAmountString": expectedFromAmountString.toString(),
+      "initialExpectedFromAmountString":
+          initialExpectedFromAmountString.toString(),
+      "toCurrency": toCurrency.toString(),
+      "toNetwork": toNetwork.toString(),
+      "toCurrencyWithNetwork": toCurrencyWithNetwork.toString(),
+      "toAmountString": toAmountString.toString(),
+      "outputHash": outputHash.toString(),
+      "expectedToAmountString": expectedToAmountString.toString(),
+      "location": location.toString(),
+      "createdAt": createdAt.toString(),
+      "updatedAt": updatedAt.toString(),
+      "partnerId": partnerId.toString(),
+      "externalPartnerLinkId": externalPartnerLinkId.toString(),
+      "fromAmountInEurString": fromAmountInEurString.toString(),
+      "customerPayoutAddressChangeable":
+          customerPayoutAddressChangeable.toString(),
+      "estimateBreakdown": {
+        "toAmountString": estimateBreakdownToAmountString.toString(),
+        "fromAmountString": estimateBreakdownFromAmountString.toString(),
+        "serviceFees": estimateBreakdownServiceFees.toString(),
+        "convertedAmount": estimateBreakdownConvertedAmount.toString(),
+        "estimatedExchangeRateString":
+            estimateBreakdownEstimatedExchangeRateString.toString(),
+        "networkFee": estimateBreakdownNetworkFee.toString(),
+        "partnerFee": estimateBreakdownPartnerFee.toString(),
+      }.toString(),
+      "address": address.toString(),
+      "extraId": extraId.toString(),
+      "depositPaymentCategoryString": depositPaymentCategoryString.toString(),
+      "payoutPaymentCategoryString": payoutPaymentCategoryString.toString(),
+      "redirectUrl": redirectUrl.toString(),
+      "preauthToken": preauthToken.toString(),
+      "skipChoosePayoutAddress": skipChoosePayoutAddress.toString(),
+      "skipChoosePaymentCategory": skipChoosePaymentCategory.toString(),
+    };
+    return const JsonEncoder.withIndent('  ').convert(jsonMap);
   }
 }
 
