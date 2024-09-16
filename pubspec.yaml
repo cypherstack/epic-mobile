@@ -13,6 +13,8 @@ description: Epic Pay
 # https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
 version: 0.14.0+47
 
+isar_version: &isar_version 3.1.8
+
 environment:
   sdk: ">=3.5.3 <4.0.0"
   flutter: ^3.24.3
@@ -40,7 +42,7 @@ dependencies:
   stack_wallet_backup:
     git:
       url: https://github.com/cypherstack/stack_wallet_backup.git
-      ref: ee1da8a9ba1cbeb50c5b354ea1fd5a25b7c5a3ed
+      ref: 5efe8f8f259317d32b6f037cf91f62e06125c040
 
   bip47:
     git:
@@ -49,7 +51,7 @@ dependencies:
 
   # Utility plugins
   http: ^0.13.0
-  local_auth: ^1.1.10
+  local_auth: ^2.3.0
   permission_handler: ^10.0.0
   dart_numerics: ^0.0.6
 
@@ -66,7 +68,7 @@ dependencies:
   path_provider: ^2.0.15
 
   # UI/Component plugins
-  flutter_native_splash: ^2.2.4
+  flutter_native_splash: ^2.4.1
   google_fonts: ^4.0.4
   url_launcher: ^6.0.5
   flutter_svg: ^1.0.1
@@ -77,24 +79,28 @@ dependencies:
   flutter_rounded_date_picker: ^3.0.4
   crypto: ^3.0.2
   barcode_scan2: ^4.2.3
-  wakelock: ^0.6.2
+  wakelock_plus: ^1.2.8
   intl: ^0.17.0
-  devicelocale: ^0.6.0
+  devicelocale: ^0.8.1
   device_info_plus: ^9.0.2
   keyboard_dismisser: ^3.0.0
   tuple: ^2.0.0
   flutter_riverpod: ^1.0.3
   qr_flutter: 4.0.0
   share_plus: ^7.0.2
-  package_info_plus: ^4.0.2
+  package_info_plus: ^8.0.2
   lottie: ^2.3.2
   file_picker: ^5.3.1
   connectivity_plus: ^4.0.1
-  isar: 3.0.5
-  isar_flutter_libs: 3.0.5 # contains the binaries
+  isar:
+    version: *isar_version
+    hosted: https://pub.isar-community.dev/
+  isar_flutter_libs: # contains Isar Core
+    version: *isar_version
+    hosted: https://pub.isar-community.dev/
   dropdown_button2: ^2.1.3
   string_validator: ^0.3.0
-  web_socket_channel: ^2.4.5
+  web_socket_channel: ^2.4.0
   country_state_city: ^0.1.6
   async: ^2.11.0
 
@@ -104,7 +110,7 @@ dev_dependencies:
   integration_test:
       sdk: flutter
   build_runner: ^2.1.7
-  flutter_launcher_icons: ^0.11.0
+  flutter_launcher_icons: ^0.13.1
   hive_generator: ^2.0.0
   dependency_validator: ^3.1.2
   hive_test: ^1.0.1
@@ -114,7 +120,9 @@ dev_dependencies:
   analyzer: ^5.13.0
   import_sorter: ^4.6.0
   flutter_lints: ^2.0.1
-  isar_generator: 3.0.5
+  isar_generator:
+    version: *isar_version
+    hosted: https://pub.isar-community.dev/
 
 flutter_icons:
   android: true

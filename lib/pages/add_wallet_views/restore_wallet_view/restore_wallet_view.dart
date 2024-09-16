@@ -31,7 +31,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:wakelock/wakelock.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 
 class RestoreWalletView extends ConsumerStatefulWidget {
   const RestoreWalletView({
@@ -165,7 +165,7 @@ class _RestoreWalletViewState extends ConsumerState<RestoreWalletView> {
         //   context: context,
         // ));
       } else {
-        if (!Platform.isLinux) await Wakelock.enable();
+        if (!Platform.isLinux) await WakelockPlus.enable();
         final walletsService = ref.read(walletsServiceChangeNotifierProvider);
 
         final walletId = await walletsService.addNewWallet(
@@ -260,12 +260,12 @@ class _RestoreWalletViewState extends ConsumerState<RestoreWalletView> {
               ),
             );
             if (!Platform.isLinux && !isDesktop) {
-              await Wakelock.disable();
+              await WakelockPlus.disable();
             }
           }
         } catch (e) {
           if (!Platform.isLinux && !isDesktop) {
-            await Wakelock.disable();
+            await WakelockPlus.disable();
           }
 
           // if (e is HiveError &&
@@ -296,7 +296,7 @@ class _RestoreWalletViewState extends ConsumerState<RestoreWalletView> {
         }
 
         if (!Platform.isLinux && !isDesktop) {
-          await Wakelock.disable();
+          await WakelockPlus.disable();
         }
       }
     }
