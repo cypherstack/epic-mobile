@@ -16,7 +16,8 @@ if (keystorePropertiesFile.exists()) {
 android {
     namespace "com.cypherstack.epicpay"
     compileSdk flutter.compileSdkVersion
-    ndkVersion flutter.ndkVersion
+//    ndkVersion flutter.ndkVersion
+    ndkVersion = "26.1.10909125"
 
 
     defaultConfig {
@@ -76,6 +77,7 @@ android {
             task.doFirst {
                 println "The compileSdkVersion is $flutter.compileSdkVersion"
                 println "The targetSdkVersion is $flutter.targetSdkVersion"
+                println "The flutter.ndkVersion is $flutter.ndkVersion"
             }
         }
     }
