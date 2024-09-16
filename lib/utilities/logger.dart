@@ -46,7 +46,7 @@ class Logging {
     this.isar = isar;
   }
 
-  Future<void> initInIsolate() async {
+  Future<void> initInIsolate(String dbDir) async {
     if (isTestEnv || isArmLinux) {
       // do this for now until we mock Isar properly for testing
       isar = null;
@@ -60,6 +60,7 @@ class Logging {
         CurrencySchema,
         GuardarianTransactionSchema,
       ],
+      directory: dbDir,
       inspector: false,
     );
   }

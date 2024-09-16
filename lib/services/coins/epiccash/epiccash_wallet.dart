@@ -66,11 +66,26 @@ abstract class ListenerManager {
 
 Map<ReceivePort, Isolate> isolates = {};
 
+String? _dir;
+Future<String> _getDir() async {
+  Directory appDirectory = (await getApplicationDocumentsDirectory());
+  if (Platform.isIOS) {
+    appDirectory = (await getLibraryDirectory());
+  }
+  if (Platform.isLinux || Logging.isArmLinux) {
+    appDirectory = Directory("${appDirectory.path}/.epicmobile");
+    await appDirectory.create();
+  }
+  return appDirectory.path;
+}
+
 Future<ReceivePort> getIsolate(Map<String, dynamic> arguments,
     {String name = ""}) async {
   ReceivePort receivePort =
       ReceivePort(); //port for isolate to receive messages.
   arguments['sendPort'] = receivePort.sendPort;
+  _dir ??= await _getDir();
+  arguments['isar_db_dir_path'] = _dir;
   Logging.instance.log("starting isolate ${arguments['function']} name: $name",
       level: LogLevel.Info);
   Isolate isolate = await Isolate.spawn(executeNative, arguments);
@@ -79,7 +94,7 @@ Future<ReceivePort> getIsolate(Map<String, dynamic> arguments,
 }
 
 Future<void> executeNative(Map<String, dynamic> arguments) async {
-  await Logging.instance.initInIsolate();
+  await Logging.instance.initInIsolate(arguments['isar_db_dir_path'] as String);
   final SendPort sendPort = arguments['sendPort'] as SendPort;
   final function = arguments['function'] as String;
   try {

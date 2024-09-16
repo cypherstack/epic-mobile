@@ -1,5 +1,6 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.cypherstack.epicpay">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+<!--    package="com.cypherstack.epicpay">-->
     <!-- io.flutter.app.FlutterApplication is an android.app.Application that
          calls FlutterMain.startInitialization(this); in its onCreate method.
          In most cases you can leave this as-is, but you if you want to provide
@@ -51,5 +52,15 @@
         <!--                android:name="android.support.FILE_PROVIDER_PATHS"-->
         <!--                android:resource="@xml/provider_paths" />-->
         <!--        </provider>-->
-    </application>
+    </application><!-- Required to query activities that can process text, see:
+         https://developer.android.com/training/package-visibility and
+         https://developer.android.com/reference/android/content/Intent#ACTION_PROCESS_TEXT.
+
+         In particular, this is used by the Flutter engine in io.flutter.plugin.text.ProcessTextPlugin. -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.PROCESS_TEXT"/>
+            <data android:mimeType="text/plain"/>
+        </intent>
+    </queries>
 </manifest>
