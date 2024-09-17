@@ -19,8 +19,8 @@ Highlights include:
 
 The following prerequisities can be installed with the setup script `scripts/setup.sh` or manually as described below:
 
-- Flutter 3.22.2 [(install manually or with git, do not install with snap)](https://docs.flutter.dev/get-started/install)
-- Dart SDK Requirement (>=3.4.2, up until <4.0.0)
+- Flutter 3.24.3 [(install manually or with git, do not install with snap)](https://docs.flutter.dev/get-started/install)
+- Dart SDK Requirement (>=3.5.3, up until <4.0.0)
 - Android setup ([Android Studio](https://developer.android.com/studio) and subsequent dependencies)
 
 ### Scripted setup
@@ -94,7 +94,7 @@ sudo apt install -y openjdk-11-jdk
 sudo snap install android-studio --classic
 ```
 
-Use Tools > SDK Manager to install the SDK Tools > Android SDK (API 30), SDK Tools > NDK, SDK Tools > Android SDK command line tools, and SDK Tools > CMake
+Use Tools > SDK Manager to install the SDK Tools > Android SDK (API 34), SDK Tools > NDK, SDK Tools > Android SDK command line tools, and SDK Tools > CMake
 
 Then install the Flutter plugin and restart the IDE.  In Android Studio's options for the Flutter language, enable auto format on save to match the project's code style.  If you have problems with the Dart SDK, make sure to run `flutter` in a terminal to download it (use `source ~/.bashrc` to update your environment variables if you're still using the same terminal from which you ran `setup.sh`)
 
