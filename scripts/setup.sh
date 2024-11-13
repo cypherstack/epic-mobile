@@ -20,12 +20,25 @@ echo 'export PATH="$PATH:'${FLUTTER_DIR}'"' >> ~/.bashrc
 source ~/.bashrc
 flutter doctor
 
-# # setup epic-mobile github
-# cd $PROJECTS
-# git clone https://github.com/cypherstack/epic-mobile.git
-# cd epic-mobile
-# export EPIC_MOBILE=$(pwd)
-# git submodule update --init --recursive
+# Setup epic-mobile GitHub project if it doesn't already exist.
+EPIC_MOBILE_DIR="$PROJECTS/epic-mobile"
+if [[ $(pwd) == */epic-mobile/scripts* ]]; then
+    echo "Script is already in the epic-mobile/scripts directory. Using current project setup."
+    cd ../..  # Go back to epic-mobile root
+    export EPIC_MOBILE=$(pwd)
+else
+    if [ ! -d "$EPIC_MOBILE_DIR" ]; then
+        cd $PROJECTS
+        git clone https://github.com/cypherstack/epic-mobile.git
+        cd epic-mobile
+        export EPIC_MOBILE=$(pwd)
+        git submodule update --init --recursive
+    else
+        cd $EPIC_MOBILE_DIR
+        export EPIC_MOBILE=$(pwd)
+    fi
+fi
+
 
 #install stack wallet dependencies
 sudo apt-get install -y unzip automake build-essential file pkg-config git python libtool libtinfo5 cmake openjdk-8-jre-headless libgit2-dev clang libncurses5-dev libncursesw5-dev zlib1g-dev llvm 
