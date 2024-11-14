@@ -172,7 +172,18 @@ class _TransactionsListState extends ConsumerState<TransactionsList> {
           );
         }
         if (_transactions.isEmpty) {
-          return const NoTransActionsFound();
+          return RefreshIndicator(
+            onRefresh: () async {
+              if (!ref.read(walletProvider)!.isRefreshing) {
+                unawaited(ref.read(walletProvider)!.refresh());
+              }
+            },
+            child: ListView(
+              children: const [
+                NoTransActionsFound(),
+              ],
+            ),
+          );
         } else {
           final list = _transactions.values.toList(growable: false);
           list.sort((a, b) => b.timestamp - a.timestamp);
