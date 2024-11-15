@@ -474,17 +474,19 @@ class _TransactionDetailsViewState
                                           mode: LaunchMode.externalApplication,
                                         );
                                       } catch (_) {
-                                        unawaited(
-                                          showDialog<void>(
-                                            context: context,
-                                            builder: (_) => OkDialog(
-                                              title:
-                                                  "Could not open in block explorer",
-                                              message:
-                                                  "Failed to open \"${uri.toString()}\"",
+                                        if (context.mounted) {
+                                          unawaited(
+                                            showDialog<void>(
+                                              context: context,
+                                              builder: (_) => OkDialog(
+                                                title:
+                                                    "Could not open in block explorer",
+                                                message:
+                                                    "Failed to open \"${uri.toString()}\"",
+                                              ),
                                             ),
-                                          ),
-                                        );
+                                          );
+                                        }
                                       }
                                     },
                                     child: Container(
@@ -520,8 +522,7 @@ class _TransactionDetailsViewState
                                 const SizedBox(
                                   height: 16,
                                 ),
-                                if (isSent &&
-                                    _transaction.confirmations < 1 &&
+                                if (!_transaction.confirmedStatus &&
                                     _transaction.isCancelled == false)
                                   TextButton(
                                     style: ButtonStyle(
