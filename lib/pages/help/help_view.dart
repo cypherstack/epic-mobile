@@ -1,4 +1,5 @@
 import 'package:epicpay/utilities/assets.dart';
+import 'package:epicpay/utilities/constants.dart';
 import 'package:epicpay/utilities/text_styles.dart';
 import 'package:epicpay/utilities/theme/stack_colors.dart';
 import 'package:epicpay/widgets/animated_text.dart';
@@ -9,10 +10,33 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class HelpView extends StatelessWidget {
+class HelpView extends StatefulWidget {
   const HelpView({Key? key}) : super(key: key);
 
   static const String routeName = "/help";
+
+  @override
+  State<HelpView> createState() => _HelpViewState();
+}
+
+class _HelpViewState extends State<HelpView> {
+  DateTime _lastTapTime = DateTime.now();
+  int _tapCount = 0;
+
+  void _tapped() {
+    final tapTime = DateTime.now();
+    if (tapTime.difference(_lastTapTime).inSeconds < 2) {
+      _tapCount++;
+    } else {
+      _tapCount = 0;
+    }
+    _lastTapTime = tapTime;
+
+    if (_tapCount > 4) {
+      _tapCount = 0;
+      Constants.exchangeForExperiencedUsers(10);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -21,9 +45,21 @@ class HelpView extends StatelessWidget {
         backgroundColor: Theme.of(context).extension<StackColors>()!.background,
         appBar: AppBar(
           centerTitle: true,
-          title: Text(
-            "Help",
-            style: STextStyles.titleH4(context),
+          title: GestureDetector(
+            onTap: _tapped,
+            child: Container(
+              color: Colors.transparent,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                child: Text(
+                  "Help",
+                  style: STextStyles.titleH4(context),
+                ),
+              ),
+            ),
           ),
           leading: const AppBarBackButton(),
         ),
