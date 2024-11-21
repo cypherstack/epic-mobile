@@ -43,15 +43,19 @@ class PriceAPI {
       }
     }
 
-    await DB.instance
-        .put<dynamic>(boxName: DB.boxNamePriceCache, key: 'cache', value: map);
+    await DB.instance.put<dynamic>(
+      boxName: DB.boxNamePriceCache,
+      key: 'cache',
+      value: map,
+    );
   }
 
   Map<Coin, Tuple2<Decimal, double>> get _cachedPrices {
-    final map =
-        DB.instance.get<dynamic>(boxName: DB.boxNamePriceCache, key: 'cache')
-                as Map? ??
-            {};
+    final map = DB.instance.get<dynamic>(
+          boxName: DB.boxNamePriceCache,
+          key: 'cache',
+        ) as Map? ??
+        {};
     // init with 0
     final result = {
       for (final coin in Coin.values) coin: Tuple2(Decimal.zero, 0.0)
@@ -59,7 +63,9 @@ class PriceAPI {
 
     for (final entry in map.entries) {
       result[coinFromPrettyName(entry.key as String)] = Tuple2(
-          Decimal.parse(entry.value[0] as String), entry.value[1] as double);
+        Decimal.parse(entry.value[0] as String),
+        entry.value[1] as double,
+      );
     }
 
     return result;
@@ -79,9 +85,14 @@ class PriceAPI {
     Map<Coin, Tuple2<Decimal, double>> result = {};
     try {
       final uri = Uri.parse(
-          "https://api.coingecko.com/api/v3/coins/markets?vs_currency=${baseCurrency.toLowerCase()}&ids=epic-cash&order=market_cap_desc&per_page=10&page=1&sparkline=false");
-      // final uri = Uri.parse(
-      //     "https://api.coingecko.com/api/v3/coins/markets?vs_currency=${baseCurrency.toLowerCase()}&ids=monero%2Cbitcoin%2Cepic-cash%2Czcoin%2Cdogecoin&order=market_cap_desc&per_page=10&page=1&sparkline=false");
+        "https://api.coingecko.com/api/v3/coins/markets?"
+        "vs_currency=${baseCurrency.toLowerCase()}"
+        "&ids=epic-cash"
+        "&order=market_cap_desc"
+        "&per_page=10"
+        "&page=1"
+        "&sparkline=false",
+      );
 
       final coinGeckoResponse = await client.get(
         uri,
@@ -89,6 +100,11 @@ class PriceAPI {
       );
 
       final coinGeckoData = jsonDecode(coinGeckoResponse.body) as List<dynamic>;
+
+      Logging.instance.log(
+        "coinGeckoData: $coinGeckoData",
+        level: LogLevel.Info,
+      );
 
       for (final map in coinGeckoData) {
         final String coinName = map["name"] as String;
@@ -106,8 +122,10 @@ class PriceAPI {
 
       return _cachedPrices;
     } catch (e, s) {
-      Logging.instance.log("getPricesAnd24hChange($baseCurrency): $e\n$s",
-          level: LogLevel.Error);
+      Logging.instance.log(
+        "getPricesAnd24hChange($baseCurrency): $e\n$s",
+        level: LogLevel.Error,
+      );
       // return previous cached values
       return _cachedPrices;
     }
@@ -126,8 +144,10 @@ class PriceAPI {
       final json = jsonDecode(response.body) as List<dynamic>;
       return List<String>.from(json);
     } catch (e, s) {
-      Logging.instance.log("availableBaseCurrencies() using $uriString: $e\n$s",
-          level: LogLevel.Error);
+      Logging.instance.log(
+        "availableBaseCurrencies() using $uriString: $e\n$s",
+        level: LogLevel.Error,
+      );
       return null;
     }
   }

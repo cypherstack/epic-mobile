@@ -50,7 +50,7 @@ sudo apt-get install -y unzip automake build-essential file pkg-config git pytho
 sudo apt install -y libc6-dev-i386
 
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh  -s -- -y
-rustup install 1.68
+rustup install 1.67.1
 cargo install cargo-ndk
 rustup target add aarch64-linux-android armv7-linux-androideabi i686-linux-android x86_64-linux-android
 
