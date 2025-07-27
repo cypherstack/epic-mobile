@@ -8,9 +8,9 @@ final homeViewPageIndexStateProvider = StateProvider<int>((_) {
     _count++;
   }
 
-  return 0;
+  return 1;
 });
 
 final prevHomeViewPageIndexStateProvider = StateProvider<int>((_) {
-  return 0;
+  return 1;
 });

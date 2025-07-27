@@ -1,10 +1,9 @@
 import 'dart:async';
 
-import 'package:epicpay/pages/buy_view/buy_view.dart';
-import 'package:epicpay/pages/exchange_view/exchange_view.dart';
 import 'package:epicpay/pages/help/help_view.dart';
 import 'package:epicpay/pages/home_view/sub_widgets/connection_status_bar.dart';
-import 'package:epicpay/pages/pay_view/pay_qr.dart';
+import 'package:epicpay/pages/receive_view/receive_view.dart';
+import 'package:epicpay/pages/send_view/send_view.dart';
 import 'package:epicpay/pages/settings_views/epicbox_settings_view/epicbox_settings_view.dart';
 import 'package:epicpay/pages/settings_views/network_settings_view/network_settings_view.dart';
 import 'package:epicpay/pages/settings_views/settings_view.dart';
@@ -16,7 +15,6 @@ import 'package:epicpay/services/event_bus/events/global/refresh_percent_changed
 import 'package:epicpay/services/event_bus/events/global/wallet_sync_status_changed_event.dart';
 import 'package:epicpay/services/event_bus/global_event_bus.dart';
 import 'package:epicpay/utilities/assets.dart';
-import 'package:epicpay/utilities/constants.dart';
 import 'package:epicpay/utilities/text_styles.dart';
 import 'package:epicpay/utilities/theme/stack_colors.dart';
 import 'package:epicpay/widgets/background.dart';
@@ -104,18 +102,16 @@ class _HomeViewState extends ConsumerState<HomeView> {
 
   @override
   void initState() {
-    _pageController = PageController(initialPage: 0);
+    _pageController = PageController(initialPage: 1);
     _children = [
+      SendView(
+        walletId: ref.read(walletProvider)!.walletId,
+        coin: ref.read(walletProvider)!.coin,
+      ),
       WalletView(
         walletId: ref.read(walletProvider)!.walletId,
       ),
-      if (Constants.enableExchange) const ExchangeView(),
-      if (Constants.enableExchange)
-        BuyView(
-          walletId: ref.read(walletProvider)!.walletId,
-          coin: ref.read(walletProvider)!.coin,
-        ),
-      PayView(
+      ReceiveView(
         walletId: ref.read(walletProvider)!.walletId,
         coin: ref.read(walletProvider)!.coin,
       ),
@@ -348,6 +344,22 @@ class _HomeViewState extends ConsumerState<HomeView> {
                       BottomNavigationBarItem(
                         icon: Padding(
                           padding: const EdgeInsets.all(8.0),
+                          child: SvgPicture.asset(Assets.svg.upload),
+                        ),
+                        activeIcon: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: SvgPicture.asset(
+                            Assets.svg.upload,
+                            color: Theme.of(context)
+                                .extension<StackColors>()!
+                                .buttonBackPrimary,
+                          ),
+                        ),
+                        label: 'SEND',
+                      ),
+                      BottomNavigationBarItem(
+                        icon: Padding(
+                          padding: const EdgeInsets.all(8.0),
                           child: SvgPicture.asset(Assets.svg.walletHome),
                         ),
                         activeIcon: Padding(
@@ -361,57 +373,21 @@ class _HomeViewState extends ConsumerState<HomeView> {
                         ),
                         label: 'WALLET',
                       ),
-                      if (Constants.enableExchange)
-                        BottomNavigationBarItem(
-                          icon: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: SvgPicture.asset(Assets.svg.swapArrows),
-                          ),
-                          activeIcon: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: SvgPicture.asset(
-                              Assets.svg.swapArrows,
-                              color: Theme.of(context)
-                                  .extension<StackColors>()!
-                                  .buttonBackPrimary,
-                            ),
-                          ),
-                          label: 'SWAP',
-                        ),
-                      if (Constants.enableExchange)
-                        BottomNavigationBarItem(
-                          icon: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: SvgPicture.asset(Assets.svg.buy),
-                          ),
-                          activeIcon: Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: SvgPicture.asset(
-                              Assets.svg.buy,
-                              color: Theme.of(context)
-                                  .extension<StackColors>()!
-                                  .buttonBackPrimary,
-                            ),
-                          ),
-                          label: 'BUY',
-                        ),
                       BottomNavigationBarItem(
                         icon: Padding(
                           padding: const EdgeInsets.all(8.0),
-                          child: SvgPicture.asset(
-                            Assets.svg.pay,
-                          ),
+                          child: SvgPicture.asset(Assets.svg.download),
                         ),
                         activeIcon: Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: SvgPicture.asset(
-                            Assets.svg.pay,
+                            Assets.svg.download,
                             color: Theme.of(context)
                                 .extension<StackColors>()!
                                 .buttonBackPrimary,
                           ),
                         ),
-                        label: 'PAY',
+                        label: 'RECEIVE',
                       ),
                     ],
                     onTap: (value) => ref
