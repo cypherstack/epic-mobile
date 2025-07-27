@@ -8,6 +8,7 @@ import 'package:epicpay/utilities/assets.dart';
 import 'package:epicpay/utilities/enums/coin_enum.dart';
 import 'package:epicpay/utilities/text_styles.dart';
 import 'package:epicpay/utilities/theme/stack_colors.dart';
+import 'package:epicpay/utilities/util.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -37,9 +38,7 @@ class _WalletViewState extends ConsumerState<WalletView> {
     ref.read(walletProvider)!.isActiveWallet = true;
     ref.read(walletProvider)!.shouldAutoSync = true;
 
-    if (!ref.read(walletProvider)!.isRefreshing) {
-      ref.read(walletProvider)!.refresh();
-    }
+    Util.refreshChain(ref.read(walletProvider)!.wallet);
 
     super.initState();
   }
