@@ -4,10 +4,6 @@ import 'dart:io';
 import 'package:epicpay/db/hive/db.dart';
 import 'package:epicpay/db/isar/isar_db.dart';
 import 'package:epicpay/models/epicbox_server_model.dart';
-import 'package:epicpay/models/isar/models/exchange/currency.dart';
-import 'package:epicpay/models/isar/models/exchange/pair.dart';
-import 'package:epicpay/models/isar/models/exchange/trade.dart';
-import 'package:epicpay/models/isar/models/guardarian_transaction.dart';
 import 'package:epicpay/models/isar/models/log.dart';
 import 'package:epicpay/models/models.dart';
 import 'package:epicpay/models/node_model.dart';
@@ -24,10 +20,8 @@ import 'package:epicpay/route_generator.dart';
 import 'package:epicpay/services/coins/epiccash/epiccash_wallet.dart';
 import 'package:epicpay/services/coins/manager.dart';
 import 'package:epicpay/services/debug_service.dart';
-import 'package:epicpay/services/geo_service.dart';
 import 'package:epicpay/services/locale_service.dart';
 import 'package:epicpay/services/node_service.dart';
-import 'package:epicpay/services/swap/swap_data_service.dart';
 import 'package:epicpay/utilities/constants.dart';
 import 'package:epicpay/utilities/db_version_migration.dart';
 import 'package:epicpay/utilities/logger.dart';
@@ -66,10 +60,6 @@ void main() async {
     final isar = await Isar.open(
       [
         LogSchema,
-        TradeSchema,
-        PairSchema,
-        CurrencySchema,
-        GuardarianTransactionSchema,
       ],
       directory: appDirectory.path,
       inspector: false,
@@ -172,10 +162,6 @@ class _MaterialAppWithThemeState extends ConsumerState<MaterialAppWithTheme>
       }
       didLoad = true;
 
-      final geoFuture = GeoService.load();
-
-      final swapDataLoadingFuture = ref.read(pSwapDataService).updateAll();
-
       await DB.instance.init();
       await _prefs.init();
 
@@ -214,9 +200,6 @@ class _MaterialAppWithThemeState extends ConsumerState<MaterialAppWithTheme>
         ref.read(txCountOnStartUpProvider.state).state =
             ref.read(walletProvider)!.txCount;
       }
-
-      await swapDataLoadingFuture;
-      await geoFuture;
 
       loadingCompleter.complete();
     } catch (e, s) {
