@@ -1,7 +1,9 @@
 import 'package:epicpay/pages/wallet_view/sub_widgets/transactions_list.dart';
+import 'package:epicpay/pages/wallet_view/sub_widgets/wallet_refresh_button.dart';
 import 'package:epicpay/pages/wallet_view/sub_widgets/wallet_summary_info.dart';
 import 'package:epicpay/pages/wallet_view/transaction_views/transaction_search_filter_view.dart';
 import 'package:epicpay/providers/providers.dart';
+import 'package:epicpay/services/event_bus/events/global/wallet_sync_status_changed_event.dart';
 import 'package:epicpay/utilities/assets.dart';
 import 'package:epicpay/utilities/enums/coin_enum.dart';
 import 'package:epicpay/utilities/text_styles.dart';
@@ -55,14 +57,26 @@ class _WalletViewState extends ConsumerState<WalletView> {
             const SizedBox(
               height: 10,
             ),
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: WalletSummaryInfo(
-                walletId: widget.walletId,
-                isSendView: false,
+          Stack(
+            children: [
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: WalletSummaryInfo(
+                    walletId: widget.walletId,
+                    isSendView: false,
+                  ),
+                ),
               ),
-            ),
+              Positioned(
+                top: 15,
+                right: 30,
+                child: WalletRefreshButton(
+                  walletId: widget.walletId,
+                  initialSyncStatus: WalletSyncStatus.syncing,
+                ),
+              ),
+            ],
           ),
           SizedBox(
             height: height > 600 ? 20 : 6,
