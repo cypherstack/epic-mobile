@@ -400,33 +400,38 @@ class _HomeViewState extends ConsumerState<HomeView> {
                         .buttonBackPrimary,
                   ),
                 ),
-                body: Column(
-                  children: [
-                    Expanded(
-                      child: PageView(
-                        controller: _pageController,
-                        children: _children,
-                        onPageChanged: (pageIndex) {
-                          _pageLock = true;
-                          if (pageIndex !=
-                              ref
-                                  .read(
-                                      prevHomeViewPageIndexStateProvider.state)
-                                  .state) {
-                            ref
-                                    .read(prevHomeViewPageIndexStateProvider.state)
-                                    .state =
+                body: SafeArea(
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: PageView(
+                          controller: _pageController,
+                          children: _children,
+                          onPageChanged: (pageIndex) {
+                            _pageLock = true;
+                            if (pageIndex !=
                                 ref
-                                    .read(homeViewPageIndexStateProvider.state)
-                                    .state;
-                          }
-                          ref.read(homeViewPageIndexStateProvider.state).state =
-                              pageIndex;
-                          _pageLock = false;
-                        },
+                                    .read(prevHomeViewPageIndexStateProvider
+                                        .state)
+                                    .state) {
+                              ref
+                                      .read(prevHomeViewPageIndexStateProvider
+                                          .state)
+                                      .state =
+                                  ref
+                                      .read(
+                                          homeViewPageIndexStateProvider.state)
+                                      .state;
+                            }
+                            ref
+                                .read(homeViewPageIndexStateProvider.state)
+                                .state = pageIndex;
+                            _pageLock = false;
+                          },
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ],

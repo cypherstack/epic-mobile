@@ -48,189 +48,194 @@ class SettingsView extends StatelessWidget {
             style: STextStyles.titleH4(context),
           ),
         ),
-        body: LayoutBuilder(
-          builder: (builderContext, constraints) {
-            return Padding(
-              padding: const EdgeInsets.only(
-                left: 12,
-                top: 12,
-                right: 12,
-              ),
-              child: SingleChildScrollView(
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(
-                    minHeight: constraints.maxHeight - 24,
-                  ),
-                  child: IntrinsicHeight(
-                    child: Padding(
-                      padding: const EdgeInsets.all(4),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          const _Div(),
-                          SettingsListButton(
-                            iconAssetName: Assets.svg.wifi,
-                            iconSize: 16,
-                            title: "Connections",
-                            onPressed: () {
-                              Navigator.of(context).pushNamed(
-                                NetworkSettingsView.routeName,
-                              );
-                            },
-                          ),
-                          const _Div(),
-                          // Consumer(builder: (context, ref, __) {
-                          //   return SettingsListButton(
-                          //     iconAssetName: Assets.svg.addressBook,
-                          //     iconSize: 16,
-                          //     title: "Address Book",
-                          //     onPressed: () {
-                          //       Navigator.of(context).pushNamed(
-                          //           AddressBookView.routeName,
-                          //           arguments: (String name, String address) {
-                          //         Navigator.of(context).popUntil(
-                          //             ModalRoute.withName(HomeView.routeName));
-                          //         ref
-                          //             .read(
-                          //                 homeViewPageIndexStateProvider.state)
-                          //             .state = 0;
-                          //
-                          //         ref
-                          //             .read(sendViewFillDataProvider.state)
-                          //             .state = SendViewAutoFillData(
-                          //           address: address,
-                          //           contactLabel: name,
-                          //         );
-                          //       });
-                          //     },
-                          //   );
-                          // }),
-                          // const _Div(),
-                          SettingsListButton(
-                            iconAssetName: Assets.svg.lock,
-                            iconSize: 16,
-                            title: "Security",
-                            onPressed: () async {
-                              final nav = Navigator.of(context);
-                              final bio = await Biometrics.hasBiometrics;
+        body: SafeArea(
+          child: LayoutBuilder(
+            builder: (builderContext, constraints) {
+              return Padding(
+                padding: const EdgeInsets.only(
+                  left: 12,
+                  top: 12,
+                  right: 12,
+                ),
+                child: SingleChildScrollView(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(
+                      minHeight: constraints.maxHeight - 24,
+                    ),
+                    child: IntrinsicHeight(
+                      child: Padding(
+                        padding: const EdgeInsets.all(4),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            const _Div(),
+                            SettingsListButton(
+                              iconAssetName: Assets.svg.wifi,
+                              iconSize: 16,
+                              title: "Connections",
+                              onPressed: () {
+                                Navigator.of(context).pushNamed(
+                                  NetworkSettingsView.routeName,
+                                );
+                              },
+                            ),
+                            const _Div(),
+                            // Consumer(builder: (context, ref, __) {
+                            //   return SettingsListButton(
+                            //     iconAssetName: Assets.svg.addressBook,
+                            //     iconSize: 16,
+                            //     title: "Address Book",
+                            //     onPressed: () {
+                            //       Navigator.of(context).pushNamed(
+                            //           AddressBookView.routeName,
+                            //           arguments: (String name, String address) {
+                            //         Navigator.of(context).popUntil(
+                            //             ModalRoute.withName(HomeView.routeName));
+                            //         ref
+                            //             .read(
+                            //                 homeViewPageIndexStateProvider.state)
+                            //             .state = 0;
+                            //
+                            //         ref
+                            //             .read(sendViewFillDataProvider.state)
+                            //             .state = SendViewAutoFillData(
+                            //           address: address,
+                            //           contactLabel: name,
+                            //         );
+                            //       });
+                            //     },
+                            //   );
+                            // }),
+                            // const _Div(),
+                            SettingsListButton(
+                              iconAssetName: Assets.svg.lock,
+                              iconSize: 16,
+                              title: "Security",
+                              onPressed: () async {
+                                final nav = Navigator.of(context);
+                                final bio = await Biometrics.hasBiometrics;
 
-                              await nav.pushNamed(
-                                SecurityView.routeName,
-                                arguments: bio,
-                              );
-                            },
-                          ),
-                          const _Div(),
-                          Consumer(
-                            builder: (_, ref, __) {
-                              return SettingsListButton(
-                                iconAssetName: Assets.svg.key,
-                                iconSize: 18,
-                                title: "Backup Wallet",
-                                onPressed: () async {
-                                  final navigator = Navigator.of(context);
-                                  final mnemonic =
-                                      await ref.read(walletProvider)!.mnemonic;
-                                  await navigator.push(
-                                    RouteGenerator.getRoute(
-                                      shouldUseMaterialRoute:
-                                          RouteGenerator.useMaterialPageRoute,
-                                      builder: (_) => LockscreenView(
-                                        routeOnSuccessArguments: Tuple2(
-                                          ref.read(walletProvider)!.walletId,
-                                          mnemonic,
+                                await nav.pushNamed(
+                                  SecurityView.routeName,
+                                  arguments: bio,
+                                );
+                              },
+                            ),
+                            const _Div(),
+                            Consumer(
+                              builder: (_, ref, __) {
+                                return SettingsListButton(
+                                  iconAssetName: Assets.svg.key,
+                                  iconSize: 18,
+                                  title: "Backup Wallet",
+                                  onPressed: () async {
+                                    final navigator = Navigator.of(context);
+                                    final mnemonic = await ref
+                                        .read(walletProvider)!
+                                        .mnemonic;
+                                    await navigator.push(
+                                      RouteGenerator.getRoute(
+                                        shouldUseMaterialRoute:
+                                            RouteGenerator.useMaterialPageRoute,
+                                        builder: (_) => LockscreenView(
+                                          routeOnSuccessArguments: Tuple2(
+                                            ref.read(walletProvider)!.walletId,
+                                            mnemonic,
+                                          ),
+                                          showBackButton: true,
+                                          routeOnSuccess:
+                                              WalletBackupView.routeName,
+                                          biometricsCancelButtonString:
+                                              "CANCEL",
+                                          biometricsLocalizedReason:
+                                              "Authenticate to view recovery phrase",
+                                          biometricsAuthenticationTitle:
+                                              "View recovery phrase",
                                         ),
-                                        showBackButton: true,
-                                        routeOnSuccess:
-                                            WalletBackupView.routeName,
-                                        biometricsCancelButtonString: "CANCEL",
-                                        biometricsLocalizedReason:
-                                            "Authenticate to view recovery phrase",
-                                        biometricsAuthenticationTitle:
-                                            "View recovery phrase",
+                                        settings: const RouteSettings(
+                                            name:
+                                                "/viewRecoverPhraseLockscreen"),
                                       ),
-                                      settings: const RouteSettings(
-                                          name: "/viewRecoverPhraseLockscreen"),
-                                    ),
+                                    );
+                                  },
+                                );
+                              },
+                            ),
+                            const _Div(),
+                            SettingsListButton(
+                              iconAssetName: Assets.svg.gear,
+                              iconSize: 16,
+                              title: "Wallet Settings",
+                              onPressed: () {
+                                Navigator.of(context).pushNamed(
+                                  WalletSettingsView.routeName,
+                                );
+                              },
+                            ),
+                            const _Div(),
+                            Consumer(builder: (context, ref, __) {
+                              return SettingsListButton(
+                                iconAssetName: Assets.svg.globe,
+                                iconSize: 16,
+                                title: "Epic Box Server",
+                                onPressed: () {
+                                  Navigator.of(context).pushNamed(
+                                    EpicBoxSettingsView.routeName,
                                   );
                                 },
                               );
-                            },
-                          ),
-                          const _Div(),
-                          SettingsListButton(
-                            iconAssetName: Assets.svg.gear,
-                            iconSize: 16,
-                            title: "Wallet Settings",
-                            onPressed: () {
-                              Navigator.of(context).pushNamed(
-                                WalletSettingsView.routeName,
-                              );
-                            },
-                          ),
-                          const _Div(),
-                          Consumer(builder: (context, ref, __) {
-                            return SettingsListButton(
-                              iconAssetName: Assets.svg.globe,
-                              iconSize: 16,
-                              title: "Epic Box Server",
+                            }),
+                            if (Platform.isIOS) const _Div(),
+                            if (Platform.isIOS)
+                              SettingsListButton(
+                                iconAssetName: Assets.svg.alertCircle,
+                                iconSize: 18,
+                                title: "Delete Account",
+                                onPressed: () async {
+                                  await Navigator.of(context)
+                                      .pushNamed(DeleteAccountView.routeName);
+                                },
+                              ),
+                            const _Div(),
+                            SettingsListButton(
+                              iconAssetName: Assets.svg.dollarSign,
+                              iconSize: 18,
+                              title: "Currency",
                               onPressed: () {
                                 Navigator.of(context).pushNamed(
-                                  EpicBoxSettingsView.routeName,
-                                );
+                                    BaseCurrencySettingsView.routeName);
                               },
-                            );
-                          }),
-                          if (Platform.isIOS) const _Div(),
-                          if (Platform.isIOS)
+                            ),
+                            const _Div(),
+                            SettingsListButton(
+                              iconAssetName: Assets.svg.globe,
+                              iconSize: 18,
+                              title: "Language",
+                              onPressed: () {
+                                Navigator.of(context)
+                                    .pushNamed(LanguageSettingsView.routeName);
+                              },
+                            ),
+                            const _Div(),
                             SettingsListButton(
                               iconAssetName: Assets.svg.alertCircle,
                               iconSize: 18,
-                              title: "Delete Account",
-                              onPressed: () async {
-                                await Navigator.of(context)
-                                    .pushNamed(DeleteAccountView.routeName);
+                              title: "Debug",
+                              onPressed: () {
+                                Navigator.of(context)
+                                    .pushNamed(DebugView.routeName);
                               },
                             ),
-                          const _Div(),
-                          SettingsListButton(
-                            iconAssetName: Assets.svg.dollarSign,
-                            iconSize: 18,
-                            title: "Currency",
-                            onPressed: () {
-                              Navigator.of(context).pushNamed(
-                                  BaseCurrencySettingsView.routeName);
-                            },
-                          ),
-                          const _Div(),
-                          SettingsListButton(
-                            iconAssetName: Assets.svg.globe,
-                            iconSize: 18,
-                            title: "Language",
-                            onPressed: () {
-                              Navigator.of(context)
-                                  .pushNamed(LanguageSettingsView.routeName);
-                            },
-                          ),
-                          const _Div(),
-                          SettingsListButton(
-                            iconAssetName: Assets.svg.alertCircle,
-                            iconSize: 18,
-                            title: "Debug",
-                            onPressed: () {
-                              Navigator.of(context)
-                                  .pushNamed(DebugView.routeName);
-                            },
-                          ),
-                          const _Div(),
-                        ],
+                            const _Div(),
+                          ],
+                        ),
                       ),
                     ),
                   ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         ),
       ),
     );

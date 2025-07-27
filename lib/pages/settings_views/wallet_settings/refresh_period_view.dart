@@ -110,159 +110,166 @@ class _RefreshPeriodViewState extends ConsumerState<RefreshPeriodView>
           //   ),
           // ],
         ),
-        body: Padding(
-          padding: const EdgeInsets.only(
-            top: 12,
-            left: 12,
-            right: 12,
-            bottom: 12,
-          ),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              return SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.all(4),
-                  child: ConstrainedBox(
-                    constraints:
-                        BoxConstraints(minHeight: constraints.maxHeight - 8),
-                    child: IntrinsicHeight(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Text(
-                            "REFRESH PERIOD (IN SECONDS)",
-                            textAlign: TextAlign.left,
-                            style: STextStyles.overLineBold(context),
-                          ),
-                          const SizedBox(
-                            height: 14,
-                          ),
-                          TextField(
-                            textAlignVertical: TextAlignVertical.center,
-                            autocorrect: false,
-                            enableSuggestions: false,
-                            controller: _refreshPeriodController,
-                            // readOnly: widget.readOnly,
-                            // enabled: enableField(_refreshPeriodController),\
-                            focusNode: _refreshPeriodFocusNode,
-                            style: STextStyles.body(context),
-                            decoration: InputDecoration(
-                              hintText: "Refresh period (in seconds)",
-                              fillColor: _refreshPeriodFocusNode.hasFocus
-                                  ? Theme.of(context)
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.only(
+              top: 12,
+              left: 12,
+              right: 12,
+              bottom: 12,
+            ),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.all(4),
+                    child: ConstrainedBox(
+                      constraints:
+                          BoxConstraints(minHeight: constraints.maxHeight - 8),
+                      child: IntrinsicHeight(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Text(
+                              "REFRESH PERIOD (IN SECONDS)",
+                              textAlign: TextAlign.left,
+                              style: STextStyles.overLineBold(context),
+                            ),
+                            const SizedBox(
+                              height: 14,
+                            ),
+                            TextField(
+                              textAlignVertical: TextAlignVertical.center,
+                              autocorrect: false,
+                              enableSuggestions: false,
+                              controller: _refreshPeriodController,
+                              // readOnly: widget.readOnly,
+                              // enabled: enableField(_refreshPeriodController),\
+                              focusNode: _refreshPeriodFocusNode,
+                              style: STextStyles.body(context),
+                              decoration: InputDecoration(
+                                hintText: "Refresh period (in seconds)",
+                                fillColor: _refreshPeriodFocusNode.hasFocus
+                                    ? Theme.of(context)
+                                        .extension<StackColors>()!
+                                        .textFieldActiveBG
+                                    : Theme.of(context)
+                                        .extension<StackColors>()!
+                                        .textFieldDefaultBG,
+                                isCollapsed: true,
+                                hintStyle: STextStyles.body(context).copyWith(
+                                  color: Theme.of(context)
                                       .extension<StackColors>()!
-                                      .textFieldActiveBG
-                                  : Theme.of(context)
-                                      .extension<StackColors>()!
-                                      .textFieldDefaultBG,
-                              isCollapsed: true,
-                              hintStyle: STextStyles.body(context).copyWith(
-                                color: Theme.of(context)
-                                    .extension<StackColors>()!
-                                    .textMedium,
-                              ),
-                              suffixIcon: Padding(
-                                padding: const EdgeInsets.only(right: 0),
-                                child: UnconstrainedBox(
-                                  child: Row(
-                                    children: [
-                                      if (/*!widget.readOnly &&*/
-                                      _refreshPeriodController.text.isNotEmpty)
-                                        TextFieldIconButton(
-                                          child: const XIcon(),
-                                          onTap: () async {
-                                            _refreshPeriodController.text = "";
-                                            // _updateState();
-                                          },
+                                      .textMedium,
+                                ),
+                                suffixIcon: Padding(
+                                  padding: const EdgeInsets.only(right: 0),
+                                  child: UnconstrainedBox(
+                                    child: Row(
+                                      children: [
+                                        if (/*!widget.readOnly &&*/
+                                            _refreshPeriodController
+                                                .text.isNotEmpty)
+                                          TextFieldIconButton(
+                                            child: const XIcon(),
+                                            onTap: () async {
+                                              _refreshPeriodController.text =
+                                                  "";
+                                              // _updateState();
+                                            },
+                                          ),
+                                        const SizedBox(
+                                          height: 40,
                                         ),
-                                      const SizedBox(
-                                        height: 40,
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
                                 ),
                               ),
+                              onChanged: (newValue) {
+                                // _updateState();
+                                setState(() {});
+                              },
+                              inputFormatters: [
+                                // Thank you Julian
+                                TextInputFormatter.withFunction(
+                                    (oldValue, newValue) =>
+                                        RegExp(r'^([0-9]*)$')
+                                                .hasMatch(newValue.text)
+                                            ? newValue
+                                            : oldValue),
+                              ],
+                              keyboardType:
+                                  const TextInputType.numberWithOptions(
+                                signed: false,
+                                decimal: false,
+                              ),
                             ),
-                            onChanged: (newValue) {
-                              // _updateState();
-                              setState(() {});
-                            },
-                            inputFormatters: [
-                              // Thank you Julian
-                              TextInputFormatter.withFunction((oldValue,
-                                      newValue) =>
-                                  RegExp(r'^([0-9]*)$').hasMatch(newValue.text)
-                                      ? newValue
-                                      : oldValue),
-                            ],
-                            keyboardType: const TextInputType.numberWithOptions(
-                              signed: false,
-                              decimal: false,
-                            ),
-                          ),
-                          const Spacer(),
-                          Row(
-                            children: [
-                              // Expanded(
-                              //   child: SecondaryButton(
-                              //     label: "TEST",
-                              //     // enabled: editable,
-                              //     desktopMed: true,
-                              //     onPressed: () {
-                              //       print(222);
-                              //     },
-                              //   ),
-                              // ),
-                              // const SizedBox(
-                              //   width: 16,
-                              // ),
-                              Expanded(
-                                child: PrimaryButton(
-                                  label: "SAVE",
-                                  // enabled: editable,
-                                  onPressed: () {
-                                    Logging.instance.log(
-                                        'Update refresh button pushed',
-                                        level: LogLevel.Info);
-                                    try {
-                                      int? refreshPeriod = int.parse(
-                                          _refreshPeriodController.text);
-                                      if (refreshPeriod !=
+                            const Spacer(),
+                            Row(
+                              children: [
+                                // Expanded(
+                                //   child: SecondaryButton(
+                                //     label: "TEST",
+                                //     // enabled: editable,
+                                //     desktopMed: true,
+                                //     onPressed: () {
+                                //       print(222);
+                                //     },
+                                //   ),
+                                // ),
+                                // const SizedBox(
+                                //   width: 16,
+                                // ),
+                                Expanded(
+                                  child: PrimaryButton(
+                                    label: "SAVE",
+                                    // enabled: editable,
+                                    onPressed: () {
+                                      Logging.instance.log(
+                                          'Update refresh button pushed',
+                                          level: LogLevel.Info);
+                                      try {
+                                        int? refreshPeriod = int.parse(
+                                            _refreshPeriodController.text);
+                                        if (refreshPeriod !=
+                                            ref
+                                                .read(
+                                                    prefsChangeNotifierProvider)
+                                                .refreshPeriod) {
+                                          Logging.instance.log(
+                                              'Attempting to update refresh period',
+                                              level: LogLevel.Info);
                                           ref
                                               .read(prefsChangeNotifierProvider)
-                                              .refreshPeriod) {
+                                              .refreshPeriod = refreshPeriod;
+                                          Logging.instance.log(
+                                              "Updated refresh period to $refreshPeriod",
+                                              level: LogLevel.Info);
+                                        } else {
+                                          Logging.instance.log(
+                                              "No need to update refresh period; already $refreshPeriod",
+                                              level: LogLevel.Info);
+                                        }
+                                        Navigator.of(context).pop();
+                                      } catch (e, s) {
                                         Logging.instance.log(
-                                            'Attempting to update refresh period',
-                                            level: LogLevel.Info);
-                                        ref
-                                            .read(prefsChangeNotifierProvider)
-                                            .refreshPeriod = refreshPeriod;
-                                        Logging.instance.log(
-                                            "Updated refresh period to $refreshPeriod",
-                                            level: LogLevel.Info);
-                                      } else {
-                                        Logging.instance.log(
-                                            "No need to update refresh period; already $refreshPeriod",
-                                            level: LogLevel.Info);
+                                            "Error updating refresh period: $e, $s",
+                                            level: LogLevel.Error);
                                       }
-                                      Navigator.of(context).pop();
-                                    } catch (e, s) {
-                                      Logging.instance.log(
-                                          "Error updating refresh period: $e, $s",
-                                          level: LogLevel.Error);
-                                    }
-                                  },
+                                    },
+                                  ),
                                 ),
-                              ),
-                            ],
-                          ),
-                        ],
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           ),
         ),
       ),

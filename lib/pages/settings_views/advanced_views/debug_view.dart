@@ -202,371 +202,377 @@ class _DebugViewState extends ConsumerState<DebugView> {
             ),
           ],
         ),
-        body: Padding(
-          padding: const EdgeInsets.only(
-            top: 12,
-            left: 16,
-            right: 16,
-          ),
-          child: NestedScrollView(
-            floatHeaderSlivers: true,
-            headerSliverBuilder: (context, innerBoxIsScrolled) {
-              return [
-                SliverOverlapAbsorber(
-                  handle:
-                      NestedScrollView.sliverOverlapAbsorberHandleFor(context),
-                  sliver: SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 16),
-                      child: Column(
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(
-                              Constants.size.circularBorderRadius,
-                            ),
-                            child: TextField(
-                              autocorrect: Util.isDesktop ? false : true,
-                              enableSuggestions: Util.isDesktop ? false : true,
-                              controller: _searchController,
-                              focusNode: _searchFocusNode,
-                              onChanged: (newString) {
-                                setState(() => _searchTerm = newString);
-                              },
-                              style: STextStyles.field(context),
-                              decoration: standardInputDecoration(
-                                "Search",
-                                _searchFocusNode,
-                                context,
-                              ).copyWith(
-                                prefixIcon: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 10,
-                                    vertical: 16,
-                                  ),
-                                  child: SvgPicture.asset(
-                                    Assets.svg.search,
-                                    width: 16,
-                                    height: 16,
-                                  ),
-                                ),
-                                suffixIcon: _searchController.text.isNotEmpty
-                                    ? Padding(
-                                        padding:
-                                            const EdgeInsets.only(right: 0),
-                                        child: UnconstrainedBox(
-                                          child: Row(
-                                            children: [
-                                              TextFieldIconButton(
-                                                child: const XIcon(),
-                                                onTap: () async {
-                                                  setState(() {
-                                                    _searchController.text = "";
-                                                    _searchTerm = "";
-                                                  });
-                                                },
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      )
-                                    : null,
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.only(
+              top: 12,
+              left: 16,
+              right: 16,
+            ),
+            child: NestedScrollView(
+              floatHeaderSlivers: true,
+              headerSliverBuilder: (context, innerBoxIsScrolled) {
+                return [
+                  SliverOverlapAbsorber(
+                    handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
+                        context),
+                    sliver: SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: Column(
+                          children: [
+                            ClipRRect(
+                              borderRadius: BorderRadius.circular(
+                                Constants.size.circularBorderRadius,
                               ),
-                            ),
-                          ),
-                          const SizedBox(
-                            height: 12,
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              BlueTextButton(
-                                text: "Save Debug Info to clipboard",
-                                onTap: () async {
-                                  try {
-                                    final packageInfo =
-                                        await PackageInfo.fromPlatform();
-                                    final version = packageInfo.version;
-                                    final build = packageInfo.buildNumber;
-                                    final signature =
-                                        packageInfo.buildSignature;
-                                    final appName = packageInfo.appName;
-                                    String epicCashCommit =
-                                        EPIC_VERSIONS.getPluginVersion();
-                                    DeviceInfoPlugin deviceInfoPlugin =
-                                        DeviceInfoPlugin();
-                                    final deviceInfo =
-                                        await deviceInfoPlugin.deviceInfo;
-                                    var deviceInfoMap = deviceInfo.toMap();
-                                    deviceInfoMap.remove("systemFeatures");
-
-                                    final logs = filtered(
-                                            ref.watch(debugServiceProvider
-                                                .select((value) =>
-                                                    value.recentLogs)),
-                                            _searchTerm)
-                                        .reversed
-                                        .toList(growable: false);
-                                    List<String> errorLogs = [];
-                                    for (var log in logs) {
-                                      if (log.logLevel == LogLevel.Error ||
-                                          log.logLevel == LogLevel.Fatal) {
-                                        errorLogs.add(
-                                            "${log.logLevel}: ${log.message}");
-                                      }
-                                    }
-
-                                    final finalDebugMap = {
-                                      "version": version,
-                                      "build": build,
-                                      "signature": signature,
-                                      "appName": appName,
-                                      "epicCashCommit": epicCashCommit,
-                                      "deviceInfoMap": deviceInfoMap,
-                                      "errorLogs": errorLogs,
-                                    };
-                                    Logging.instance.log(
-                                        json.encode(finalDebugMap),
-                                        level: LogLevel.Info,
-                                        printFullLength: true);
-                                    const ClipboardInterface clipboard =
-                                        ClipboardWrapper();
-                                    await clipboard.setData(
-                                      ClipboardData(
-                                          text: json.encode(finalDebugMap)),
-                                    );
-                                  } catch (e, s) {
-                                    Logging.instance
-                                        .log("$e $s", level: LogLevel.Error);
-                                  }
+                              child: TextField(
+                                autocorrect: Util.isDesktop ? false : true,
+                                enableSuggestions:
+                                    Util.isDesktop ? false : true,
+                                controller: _searchController,
+                                focusNode: _searchFocusNode,
+                                onChanged: (newString) {
+                                  setState(() => _searchTerm = newString);
                                 },
+                                style: STextStyles.field(context),
+                                decoration: standardInputDecoration(
+                                  "Search",
+                                  _searchFocusNode,
+                                  context,
+                                ).copyWith(
+                                  prefixIcon: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 10,
+                                      vertical: 16,
+                                    ),
+                                    child: SvgPicture.asset(
+                                      Assets.svg.search,
+                                      width: 16,
+                                      height: 16,
+                                    ),
+                                  ),
+                                  suffixIcon: _searchController.text.isNotEmpty
+                                      ? Padding(
+                                          padding:
+                                              const EdgeInsets.only(right: 0),
+                                          child: UnconstrainedBox(
+                                            child: Row(
+                                              children: [
+                                                TextFieldIconButton(
+                                                  child: const XIcon(),
+                                                  onTap: () async {
+                                                    setState(() {
+                                                      _searchController.text =
+                                                          "";
+                                                      _searchTerm = "";
+                                                    });
+                                                  },
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        )
+                                      : null,
+                                ),
                               ),
-                              const Spacer(),
-                              BlueTextButton(
-                                text: "Save logs to file",
-                                onTap: () async {
-                                  final systemfile = StackFileSystem();
-                                  await systemfile.prepareStorage();
-                                  Directory rootPath =
-                                      (await getApplicationDocumentsDirectory());
-
-                                  if (Platform.isAndroid) {
-                                    rootPath =
-                                        Directory("/storage/emulated/0/");
-                                  }
-
-                                  Directory dir =
-                                      Directory('${rootPath.path}/Documents');
-                                  if (Platform.isIOS) {
-                                    dir = Directory(rootPath.path);
-                                  }
-                                  try {
-                                    if (!dir.existsSync()) {
-                                      dir.createSync();
-                                    }
-                                  } catch (e, s) {
-                                    Logging.instance
-                                        .log("$e\n$s", level: LogLevel.Error);
-                                  }
-                                  String? path;
-                                  if (Platform.isAndroid) {
-                                    path = dir.path;
-                                  } else {
-                                    path = await FilePicker.platform
-                                        .getDirectoryPath(
-                                      dialogTitle: "Choose Log Save Location",
-                                      initialDirectory:
-                                          systemfile.startPath!.path,
-                                      lockParentWindow: true,
-                                    );
-                                  }
-
-                                  if (path != null) {
-                                    final eventBus = EventBus();
-                                    bool shouldPop = false;
-                                    unawaited(showDialog<dynamic>(
-                                      barrierDismissible: false,
-                                      context: context,
-                                      builder: (_) => WillPopScope(
-                                        onWillPop: () async {
-                                          return shouldPop;
-                                        },
-                                        child: CustomLoadingOverlay(
-                                          message: "Generating Stack logs file",
-                                          eventBus: eventBus,
-                                        ),
-                                      ),
-                                    ));
-
-                                    bool logsSaved = true;
-                                    String? filename;
+                            ),
+                            const SizedBox(
+                              height: 12,
+                            ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                BlueTextButton(
+                                  text: "Save Debug Info to clipboard",
+                                  onTap: () async {
                                     try {
-                                      filename = await ref
-                                          .read(debugServiceProvider)
-                                          .exportToFile(path, eventBus);
+                                      final packageInfo =
+                                          await PackageInfo.fromPlatform();
+                                      final version = packageInfo.version;
+                                      final build = packageInfo.buildNumber;
+                                      final signature =
+                                          packageInfo.buildSignature;
+                                      final appName = packageInfo.appName;
+                                      String epicCashCommit =
+                                          EPIC_VERSIONS.getPluginVersion();
+                                      DeviceInfoPlugin deviceInfoPlugin =
+                                          DeviceInfoPlugin();
+                                      final deviceInfo =
+                                          await deviceInfoPlugin.deviceInfo;
+                                      var deviceInfoMap = deviceInfo.toMap();
+                                      deviceInfoMap.remove("systemFeatures");
+
+                                      final logs = filtered(
+                                              ref.watch(debugServiceProvider
+                                                  .select((value) =>
+                                                      value.recentLogs)),
+                                              _searchTerm)
+                                          .reversed
+                                          .toList(growable: false);
+                                      List<String> errorLogs = [];
+                                      for (var log in logs) {
+                                        if (log.logLevel == LogLevel.Error ||
+                                            log.logLevel == LogLevel.Fatal) {
+                                          errorLogs.add(
+                                              "${log.logLevel}: ${log.message}");
+                                        }
+                                      }
+
+                                      final finalDebugMap = {
+                                        "version": version,
+                                        "build": build,
+                                        "signature": signature,
+                                        "appName": appName,
+                                        "epicCashCommit": epicCashCommit,
+                                        "deviceInfoMap": deviceInfoMap,
+                                        "errorLogs": errorLogs,
+                                      };
+                                      Logging.instance.log(
+                                          json.encode(finalDebugMap),
+                                          level: LogLevel.Info,
+                                          printFullLength: true);
+                                      const ClipboardInterface clipboard =
+                                          ClipboardWrapper();
+                                      await clipboard.setData(
+                                        ClipboardData(
+                                            text: json.encode(finalDebugMap)),
+                                      );
                                     } catch (e, s) {
-                                      logsSaved = false;
                                       Logging.instance
                                           .log("$e $s", level: LogLevel.Error);
                                     }
+                                  },
+                                ),
+                                const Spacer(),
+                                BlueTextButton(
+                                  text: "Save logs to file",
+                                  onTap: () async {
+                                    final systemfile = StackFileSystem();
+                                    await systemfile.prepareStorage();
+                                    Directory rootPath =
+                                        (await getApplicationDocumentsDirectory());
 
-                                    shouldPop = true;
+                                    if (Platform.isAndroid) {
+                                      rootPath =
+                                          Directory("/storage/emulated/0/");
+                                    }
 
-                                    if (mounted) {
-                                      Navigator.pop(context);
+                                    Directory dir =
+                                        Directory('${rootPath.path}/Documents');
+                                    if (Platform.isIOS) {
+                                      dir = Directory(rootPath.path);
+                                    }
+                                    try {
+                                      if (!dir.existsSync()) {
+                                        dir.createSync();
+                                      }
+                                    } catch (e, s) {
+                                      Logging.instance
+                                          .log("$e\n$s", level: LogLevel.Error);
+                                    }
+                                    String? path;
+                                    if (Platform.isAndroid) {
+                                      path = dir.path;
+                                    } else {
+                                      path = await FilePicker.platform
+                                          .getDirectoryPath(
+                                        dialogTitle: "Choose Log Save Location",
+                                        initialDirectory:
+                                            systemfile.startPath!.path,
+                                        lockParentWindow: true,
+                                      );
+                                    }
 
-                                      if (Platform.isAndroid) {
-                                        unawaited(
-                                          showDialog(
-                                            context: context,
-                                            builder: (context) => OkDialog(
-                                              title: logsSaved
-                                                  ? "Logs saved to"
-                                                  : "Error Saving Logs",
-                                              message: "${path!}/$filename",
-                                            ),
+                                    if (path != null) {
+                                      final eventBus = EventBus();
+                                      bool shouldPop = false;
+                                      unawaited(showDialog<dynamic>(
+                                        barrierDismissible: false,
+                                        context: context,
+                                        builder: (_) => WillPopScope(
+                                          onWillPop: () async {
+                                            return shouldPop;
+                                          },
+                                          child: CustomLoadingOverlay(
+                                            message:
+                                                "Generating Stack logs file",
+                                            eventBus: eventBus,
                                           ),
-                                        );
-                                      } else {
-                                        // unawaited(
-                                        //   showFloatingFlushBar(
-                                        //     type: FlushBarType.info,
-                                        //     context: context,
-                                        //     message: logssaved
-                                        //         ? 'Logs file saved'
-                                        //         : "Error Saving Logs",
-                                        //   ),
-                                        // );
+                                        ),
+                                      ));
+
+                                      bool logsSaved = true;
+                                      String? filename;
+                                      try {
+                                        filename = await ref
+                                            .read(debugServiceProvider)
+                                            .exportToFile(path, eventBus);
+                                      } catch (e, s) {
+                                        logsSaved = false;
+                                        Logging.instance.log("$e $s",
+                                            level: LogLevel.Error);
+                                      }
+
+                                      shouldPop = true;
+
+                                      if (mounted) {
+                                        Navigator.pop(context);
+
+                                        if (Platform.isAndroid) {
+                                          unawaited(
+                                            showDialog(
+                                              context: context,
+                                              builder: (context) => OkDialog(
+                                                title: logsSaved
+                                                    ? "Logs saved to"
+                                                    : "Error Saving Logs",
+                                                message: "${path!}/$filename",
+                                              ),
+                                            ),
+                                          );
+                                        } else {
+                                          // unawaited(
+                                          //   showFloatingFlushBar(
+                                          //     type: FlushBarType.info,
+                                          //     context: context,
+                                          //     message: logssaved
+                                          //         ? 'Logs file saved'
+                                          //         : "Error Saving Logs",
+                                          //   ),
+                                          // );
+                                        }
                                       }
                                     }
-                                  }
-                                },
-                              ),
-                            ],
-                          )
-                        ],
+                                  },
+                                ),
+                              ],
+                            )
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ];
-            },
-            body: Builder(
-              builder: (context) {
-                final logs = filtered(
-                        ref.watch(debugServiceProvider
-                            .select((value) => value.recentLogs)),
-                        _searchTerm)
-                    .reversed
-                    .toList(growable: false);
+                ];
+              },
+              body: Builder(
+                builder: (context) {
+                  final logs = filtered(
+                          ref.watch(debugServiceProvider
+                              .select((value) => value.recentLogs)),
+                          _searchTerm)
+                      .reversed
+                      .toList(growable: false);
 
-                return CustomScrollView(
-                  reverse: true,
-                  // shrinkWrap: true,
-                  controller: scrollController,
-                  slivers: [
-                    SliverOverlapInjector(
-                      handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
-                        context,
+                  return CustomScrollView(
+                    reverse: true,
+                    // shrinkWrap: true,
+                    controller: scrollController,
+                    slivers: [
+                      SliverOverlapInjector(
+                        handle: NestedScrollView.sliverOverlapAbsorberHandleFor(
+                          context,
+                        ),
                       ),
-                    ),
-                    SliverList(
-                      delegate: SliverChildBuilderDelegate(
-                        (context, index) {
-                          final log = logs[index];
+                      SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) {
+                            final log = logs[index];
 
-                          return Container(
-                            key: Key(
-                                "log_${log.id}_${log.timestampInMillisUTC}"),
-                            decoration: BoxDecoration(
-                              color: Theme.of(context)
-                                  .extension<StackColors>()!
-                                  .popupBG,
-                              borderRadius: _borderRadius(index, logs.length),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.all(4),
-                              child: RoundedContainer(
-                                padding: const EdgeInsets.all(0),
+                            return Container(
+                              key: Key(
+                                  "log_${log.id}_${log.timestampInMillisUTC}"),
+                              decoration: BoxDecoration(
                                 color: Theme.of(context)
                                     .extension<StackColors>()!
                                     .popupBG,
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        Text(
-                                          " [${log.logLevel.name}]",
-                                          style: STextStyles.baseXS(context)
-                                              .copyWith(
-                                            fontSize: 8,
-                                            color: (log.logLevel ==
-                                                    LogLevel.Info
-                                                ? Theme.of(context)
-                                                    .extension<StackColors>()!
-                                                    .topNavIconGreen
-                                                : (log.logLevel ==
-                                                        LogLevel.Warning
-                                                    ? Theme.of(context)
-                                                        .extension<
-                                                            StackColors>()!
-                                                        .topNavIconYellow
-                                                    : (log.logLevel ==
-                                                            LogLevel.Error
-                                                        ? Colors.orange
-                                                        : Theme.of(context)
-                                                            .extension<
-                                                                StackColors>()!
-                                                            .topNavIconRed))),
+                                borderRadius: _borderRadius(index, logs.length),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(4),
+                                child: RoundedContainer(
+                                  padding: const EdgeInsets.all(0),
+                                  color: Theme.of(context)
+                                      .extension<StackColors>()!
+                                      .popupBG,
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Text(
+                                            " [${log.logLevel.name}]",
+                                            style: STextStyles.baseXS(context)
+                                                .copyWith(
+                                              fontSize: 8,
+                                              color: (log.logLevel ==
+                                                      LogLevel.Info
+                                                  ? Theme.of(context)
+                                                      .extension<StackColors>()!
+                                                      .topNavIconGreen
+                                                  : (log.logLevel ==
+                                                          LogLevel.Warning
+                                                      ? Theme.of(context)
+                                                          .extension<
+                                                              StackColors>()!
+                                                          .topNavIconYellow
+                                                      : (log.logLevel ==
+                                                              LogLevel.Error
+                                                          ? Colors.orange
+                                                          : Theme.of(context)
+                                                              .extension<
+                                                                  StackColors>()!
+                                                              .topNavIconRed))),
+                                            ),
                                           ),
-                                        ),
-                                        Text(
-                                          "[${DateTime.fromMillisecondsSinceEpoch(log.timestampInMillisUTC, isUtc: true)}]: ",
-                                          style: STextStyles.baseXS(context)
-                                              .copyWith(
-                                            fontSize: 8,
-                                            color: Theme.of(context)
-                                                .extension<StackColors>()!
-                                                .textDark,
+                                          Text(
+                                            "[${DateTime.fromMillisecondsSinceEpoch(log.timestampInMillisUTC, isUtc: true)}]: ",
+                                            style: STextStyles.baseXS(context)
+                                                .copyWith(
+                                              fontSize: 8,
+                                              color: Theme.of(context)
+                                                  .extension<StackColors>()!
+                                                  .textDark,
+                                            ),
                                           ),
-                                        ),
-                                      ],
-                                    ),
-                                    Row(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        const SizedBox(
-                                          width: 20,
-                                        ),
-                                        Flexible(
-                                          child: Column(
-                                            crossAxisAlignment:
-                                                CrossAxisAlignment.start,
-                                            children: [
-                                              SelectableText(
-                                                log.message,
-                                                style:
-                                                    STextStyles.baseXS(context)
-                                                        .copyWith(fontSize: 8),
-                                              ),
-                                            ],
+                                        ],
+                                      ),
+                                      Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          const SizedBox(
+                                            width: 20,
                                           ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
+                                          Flexible(
+                                            child: Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                SelectableText(
+                                                  log.message,
+                                                  style: STextStyles.baseXS(
+                                                          context)
+                                                      .copyWith(fontSize: 8),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
-                            ),
-                          );
-                        },
-                        childCount: logs.length,
+                            );
+                          },
+                          childCount: logs.length,
+                        ),
                       ),
-                    ),
-                  ],
-                );
-              },
+                    ],
+                  );
+                },
+              ),
             ),
           ),
         ),

@@ -121,349 +121,357 @@ class _SendViewState extends ConsumerState<SendView> {
 
     return Scaffold(
       backgroundColor: Theme.of(context).extension<StackColors>()!.background,
-      body: LayoutBuilder(
-        builder: (builderContext, constraints) {
-          return Padding(
-            padding: const EdgeInsets.only(
-              left: 12,
-              top: 12,
-              right: 12,
-            ),
-            child: SingleChildScrollView(
-              child: ConstrainedBox(
-                constraints: BoxConstraints(
-                  // subtract top and bottom padding set in parent
-                  minHeight: constraints.maxHeight - 24,
-                ),
-                child: IntrinsicHeight(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 4),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        const Spacer(
-                          flex: 2,
-                        ),
-                        Text(
-                          "Send EPIC",
-                          style: STextStyles.titleH3(context).copyWith(
+      body: SafeArea(
+        child: LayoutBuilder(
+          builder: (builderContext, constraints) {
+            return Padding(
+              padding: const EdgeInsets.only(
+                left: 12,
+                top: 12,
+                right: 12,
+              ),
+              child: SingleChildScrollView(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    // subtract top and bottom padding set in parent
+                    minHeight: constraints.maxHeight - 24,
+                  ),
+                  child: IntrinsicHeight(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          const Spacer(
+                            flex: 2,
+                          ),
+                          Text(
+                            "Send EPIC",
+                            style: STextStyles.titleH3(context).copyWith(
+                              color: Theme.of(context)
+                                  .extension<StackColors>()!
+                                  .textGold,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(
+                            height: 8,
+                          ),
+                          Text(
+                            "Enter your recipient's address:",
+                            style: STextStyles.bodySmallBold(context).copyWith(
+                              color: Theme.of(context)
+                                  .extension<StackColors>()!
+                                  .textMedium,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(
+                            height: 40,
+                          ),
+                          RoundedContainer(
                             color: Theme.of(context)
                                 .extension<StackColors>()!
-                                .textGold,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(
-                          height: 8,
-                        ),
-                        Text(
-                          "Enter your recipient's address:",
-                          style: STextStyles.bodySmallBold(context).copyWith(
-                            color: Theme.of(context)
-                                .extension<StackColors>()!
-                                .textMedium,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(
-                          height: 40,
-                        ),
-                        RoundedContainer(
-                          color:
-                              Theme.of(context).extension<StackColors>()!.coal,
-                          child: Column(
-                            children: [
-                              TextField(
-                                key: const Key("sendViewAddressFieldKey"),
-                                controller: sendToController,
-                                readOnly: false,
-                                autocorrect: false,
-                                enableSuggestions: false,
-                                keyboardType: TextInputType.multiline,
-                                minLines: 3,
-                                maxLines: 3,
-                                toolbarOptions: const ToolbarOptions(
-                                  copy: false,
-                                  cut: false,
-                                  paste: true,
-                                  selectAll: false,
-                                ),
-                                onChanged: (newValue) {
-                                  _address = newValue;
-
-                                  setState(() {
-                                    _addressToggleFlag = ref
-                                        .read(walletProvider)!
-                                        .validateAddress(newValue);
-                                  });
-                                },
-                                focusNode: _addressFocusNode,
-                                style: STextStyles.body(context),
-                                decoration: InputDecoration(
-                                  hintText: "Paste address...",
-                                  hintStyle: STextStyles.body(context).copyWith(
-                                    color: Theme.of(context)
-                                        .extension<StackColors>()!
-                                        .textMedium,
+                                .coal,
+                            child: Column(
+                              children: [
+                                TextField(
+                                  key: const Key("sendViewAddressFieldKey"),
+                                  controller: sendToController,
+                                  readOnly: false,
+                                  autocorrect: false,
+                                  enableSuggestions: false,
+                                  keyboardType: TextInputType.multiline,
+                                  minLines: 3,
+                                  maxLines: 3,
+                                  toolbarOptions: const ToolbarOptions(
+                                    copy: false,
+                                    cut: false,
+                                    paste: true,
+                                    selectAll: false,
                                   ),
-                                  isCollapsed: true,
-                                  border: InputBorder.none,
-                                  focusColor: Colors.transparent,
-                                  fillColor: Colors.transparent,
-                                  filled: true,
-                                  contentPadding: const EdgeInsets.symmetric(
-                                    vertical: 4,
-                                    horizontal: 4,
-                                  ),
-                                ),
-                              ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  _addressToggleFlag
-                                      ? TextFieldIconButton(
-                                          key: const Key(
-                                              "sendViewClearAddressFieldButtonKey"),
-                                          onTap: () {
-                                            sendToController.text = "";
-                                            _address = "";
-                                            setState(() {
-                                              _addressToggleFlag = false;
-                                            });
-                                          },
-                                          child: const XIcon(),
-                                        )
-                                      : TextFieldIconButton(
-                                          key: const Key(
-                                              "sendViewPasteAddressFieldButtonKey"),
-                                          onTap: () async {
-                                            final ClipboardData? data =
-                                                await widget.clipboard?.getData(
-                                                    Clipboard.kTextPlain);
-                                            if (data?.text != null &&
-                                                data!.text!.isNotEmpty) {
-                                              String content =
-                                                  data.text!.trim();
-                                              if (content.contains("\n")) {
-                                                content = content.substring(
-                                                    0, content.indexOf("\n"));
-                                              }
-                                              content = formatAddress(content);
+                                  onChanged: (newValue) {
+                                    _address = newValue;
 
-                                              sendToController.text = content;
-                                              _address = content;
-
-                                              setState(() {
-                                                _addressToggleFlag =
-                                                    sendToController
-                                                        .text.isNotEmpty;
-                                              });
-                                            }
-                                          },
-                                          child: sendToController.text.isEmpty
-                                              ? const ClipboardIcon()
-                                              : const XIcon(),
-                                        ),
-                                  //
-                                  TextFieldIconButton(
-                                    key: const Key("sendViewScanQrButtonKey"),
-                                    onTap: () async {
-                                      try {
-                                        if (FocusScope.of(context).hasFocus) {
-                                          FocusScope.of(context).unfocus();
-                                          await Future<void>.delayed(
-                                              const Duration(milliseconds: 75));
-                                        }
-
-                                        final qrResult = await scanner.scan();
-
-                                        Logging.instance.log(
-                                            "qrResult content: ${qrResult.rawContent}",
-                                            level: LogLevel.Info);
-
-                                        final results = AddressUtils.parseUri(
-                                            qrResult.rawContent);
-
-                                        Logging.instance.log(
-                                            "qrResult parsed: $results",
-                                            level: LogLevel.Info);
-
-                                        if (results.isNotEmpty &&
-                                            results["scheme"] ==
-                                                coin.uriScheme) {
-                                          // auto fill address
-                                          _address = results["address"] ?? "";
-                                          sendToController.text = _address!;
-
-                                          setState(() {
-                                            _addressToggleFlag =
-                                                sendToController
-                                                    .text.isNotEmpty;
-                                          });
-
-                                          // now check for non standard encoded basic address
-                                        } else if (ref
-                                            .read(walletProvider)!
-                                            .validateAddress(
-                                                qrResult.rawContent)) {
-                                          _address = qrResult.rawContent;
-                                          sendToController.text =
-                                              _address ?? "";
-
-                                          setState(() {
-                                            _addressToggleFlag =
-                                                sendToController
-                                                    .text.isNotEmpty;
-                                          });
-                                        }
-                                      } on PlatformException catch (e, s) {
-                                        // here we ignore the exception caused by not giving permission
-                                        // to use the camera to scan a qr code
-                                        Logging.instance.log(
-                                            "Failed to get camera permissions while trying to scan qr code in SendView: $e\n$s",
-                                            level: LogLevel.Warning);
-                                      }
-                                    },
-                                    child: const QrCodeIcon(),
-                                  ),
-                                  // TextFieldIconButton(
-                                  //   key: const Key(
-                                  //       "sendViewAddressBookButtonKey"),
-                                  //   onTap: () async {
-                                  //     FocusScope.of(context).unfocus();
-                                  //
-                                  //     await Navigator.of(context).pushNamed(
-                                  //       AddressBookView.routeName,
-                                  //       arguments:
-                                  //           (String name, String address) {
-                                  //         _address = address;
-                                  //         sendToController.text = name;
-                                  //
-                                  //         Navigator.of(context).popUntil(
-                                  //             ModalRoute.withName(
-                                  //                 HomeView.routeName));
-                                  //         ref
-                                  //             .read(
-                                  //                 homeViewPageIndexStateProvider
-                                  //                     .state)
-                                  //             .state = 0;
-                                  //       },
-                                  //     );
-                                  //
-                                  //     setState(() {
-                                  //       _addressToggleFlag = _address != null &&
-                                  //           _address!.isNotEmpty;
-                                  //     });
-                                  //   },
-                                  //   child: AddressBookIcon(
-                                  //     width: 24,
-                                  //     height: 24,
-                                  //     color: Theme.of(context)
-                                  //         .extension<StackColors>()!
-                                  //         .textFieldActiveSearchIconRight,
-                                  //   ),
-                                  // ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                        Builder(
-                          builder: (_) {
-                            final error = _updateInvalidAddressText(
-                              _address ?? "",
-                              ref.read(walletProvider)!,
-                            );
-
-                            if (error == null || error.isEmpty) {
-                              return Container();
-                            } else {
-                              return Align(
-                                alignment: Alignment.topLeft,
-                                child: Padding(
-                                  padding: const EdgeInsets.only(
-                                    left: 12.0,
-                                    top: 4.0,
-                                  ),
-                                  child: Text(
-                                    error,
-                                    textAlign: TextAlign.left,
-                                    style: STextStyles.label(context).copyWith(
+                                    setState(() {
+                                      _addressToggleFlag = ref
+                                          .read(walletProvider)!
+                                          .validateAddress(newValue);
+                                    });
+                                  },
+                                  focusNode: _addressFocusNode,
+                                  style: STextStyles.body(context),
+                                  decoration: InputDecoration(
+                                    hintText: "Paste address...",
+                                    hintStyle:
+                                        STextStyles.body(context).copyWith(
                                       color: Theme.of(context)
                                           .extension<StackColors>()!
-                                          .textError,
+                                          .textMedium,
+                                    ),
+                                    isCollapsed: true,
+                                    border: InputBorder.none,
+                                    focusColor: Colors.transparent,
+                                    fillColor: Colors.transparent,
+                                    filled: true,
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      vertical: 4,
+                                      horizontal: 4,
                                     ),
                                   ),
                                 ),
-                              );
-                            }
-                          },
-                        ),
-                        const SizedBox(
-                          height: 24,
-                        ),
-                        PrimaryButton(
-                          label: "NEXT",
-                          enabled: _addressToggleFlag,
-                          onPressed: () async {
-                            final bool isAddress = await ref
-                                .read(walletProvider)
-                                ?.isOwnAddress(_address!) as bool;
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    _addressToggleFlag
+                                        ? TextFieldIconButton(
+                                            key: const Key(
+                                                "sendViewClearAddressFieldButtonKey"),
+                                            onTap: () {
+                                              sendToController.text = "";
+                                              _address = "";
+                                              setState(() {
+                                                _addressToggleFlag = false;
+                                              });
+                                            },
+                                            child: const XIcon(),
+                                          )
+                                        : TextFieldIconButton(
+                                            key: const Key(
+                                                "sendViewPasteAddressFieldButtonKey"),
+                                            onTap: () async {
+                                              final ClipboardData? data =
+                                                  await widget.clipboard
+                                                      ?.getData(
+                                                          Clipboard.kTextPlain);
+                                              if (data?.text != null &&
+                                                  data!.text!.isNotEmpty) {
+                                                String content =
+                                                    data.text!.trim();
+                                                if (content.contains("\n")) {
+                                                  content = content.substring(
+                                                      0, content.indexOf("\n"));
+                                                }
+                                                content =
+                                                    formatAddress(content);
 
-                            isAddress
-                                ? await showDialog<dynamic>(
-                                    context: context,
-                                    useSafeArea: false,
-                                    barrierDismissible: true,
-                                    builder: (context) {
-                                      return StackDialog(
-                                        title: "Transaction failed",
-                                        message:
-                                            "Sending to self is currently disabled",
-                                        rightButton: TextButton(
-                                          style: Theme.of(context)
-                                              .extension<StackColors>()!
-                                              .getSecondaryEnabledButtonColor(
-                                                  context),
-                                          child: Text(
-                                            "Ok",
-                                            style:
-                                                STextStyles.buttonText(context)
-                                                    .copyWith(
-                                              color: Theme.of(context)
-                                                  .extension<StackColors>()!
-                                                  .accentColorDark,
-                                            ),
+                                                sendToController.text = content;
+                                                _address = content;
+
+                                                setState(() {
+                                                  _addressToggleFlag =
+                                                      sendToController
+                                                          .text.isNotEmpty;
+                                                });
+                                              }
+                                            },
+                                            child: sendToController.text.isEmpty
+                                                ? const ClipboardIcon()
+                                                : const XIcon(),
                                           ),
-                                          onPressed: () {
-                                            Navigator.of(context).pop();
-                                          },
-                                        ),
-                                      );
-                                    },
-                                  )
-                                : Navigator.of(context).pushNamed(
-                                    SendAmountView.routeName,
-                                    arguments: Tuple3(
-                                      ref.read(walletProvider)!.walletId,
-                                      _address!,
-                                      Coin.epicCash,
+                                    //
+                                    TextFieldIconButton(
+                                      key: const Key("sendViewScanQrButtonKey"),
+                                      onTap: () async {
+                                        try {
+                                          if (FocusScope.of(context).hasFocus) {
+                                            FocusScope.of(context).unfocus();
+                                            await Future<void>.delayed(
+                                                const Duration(
+                                                    milliseconds: 75));
+                                          }
+
+                                          final qrResult = await scanner.scan();
+
+                                          Logging.instance.log(
+                                              "qrResult content: ${qrResult.rawContent}",
+                                              level: LogLevel.Info);
+
+                                          final results = AddressUtils.parseUri(
+                                              qrResult.rawContent);
+
+                                          Logging.instance.log(
+                                              "qrResult parsed: $results",
+                                              level: LogLevel.Info);
+
+                                          if (results.isNotEmpty &&
+                                              results["scheme"] ==
+                                                  coin.uriScheme) {
+                                            // auto fill address
+                                            _address = results["address"] ?? "";
+                                            sendToController.text = _address!;
+
+                                            setState(() {
+                                              _addressToggleFlag =
+                                                  sendToController
+                                                      .text.isNotEmpty;
+                                            });
+
+                                            // now check for non standard encoded basic address
+                                          } else if (ref
+                                              .read(walletProvider)!
+                                              .validateAddress(
+                                                  qrResult.rawContent)) {
+                                            _address = qrResult.rawContent;
+                                            sendToController.text =
+                                                _address ?? "";
+
+                                            setState(() {
+                                              _addressToggleFlag =
+                                                  sendToController
+                                                      .text.isNotEmpty;
+                                            });
+                                          }
+                                        } on PlatformException catch (e, s) {
+                                          // here we ignore the exception caused by not giving permission
+                                          // to use the camera to scan a qr code
+                                          Logging.instance.log(
+                                              "Failed to get camera permissions while trying to scan qr code in SendView: $e\n$s",
+                                              level: LogLevel.Warning);
+                                        }
+                                      },
+                                      child: const QrCodeIcon(),
                                     ),
-                                  );
-                            debugPrint(_address!);
-                          },
-                        ),
-                        const Spacer(
-                          flex: 2,
-                        ),
-                      ],
+                                    // TextFieldIconButton(
+                                    //   key: const Key(
+                                    //       "sendViewAddressBookButtonKey"),
+                                    //   onTap: () async {
+                                    //     FocusScope.of(context).unfocus();
+                                    //
+                                    //     await Navigator.of(context).pushNamed(
+                                    //       AddressBookView.routeName,
+                                    //       arguments:
+                                    //           (String name, String address) {
+                                    //         _address = address;
+                                    //         sendToController.text = name;
+                                    //
+                                    //         Navigator.of(context).popUntil(
+                                    //             ModalRoute.withName(
+                                    //                 HomeView.routeName));
+                                    //         ref
+                                    //             .read(
+                                    //                 homeViewPageIndexStateProvider
+                                    //                     .state)
+                                    //             .state = 0;
+                                    //       },
+                                    //     );
+                                    //
+                                    //     setState(() {
+                                    //       _addressToggleFlag = _address != null &&
+                                    //           _address!.isNotEmpty;
+                                    //     });
+                                    //   },
+                                    //   child: AddressBookIcon(
+                                    //     width: 24,
+                                    //     height: 24,
+                                    //     color: Theme.of(context)
+                                    //         .extension<StackColors>()!
+                                    //         .textFieldActiveSearchIconRight,
+                                    //   ),
+                                    // ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                          Builder(
+                            builder: (_) {
+                              final error = _updateInvalidAddressText(
+                                _address ?? "",
+                                ref.read(walletProvider)!,
+                              );
+
+                              if (error == null || error.isEmpty) {
+                                return Container();
+                              } else {
+                                return Align(
+                                  alignment: Alignment.topLeft,
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(
+                                      left: 12.0,
+                                      top: 4.0,
+                                    ),
+                                    child: Text(
+                                      error,
+                                      textAlign: TextAlign.left,
+                                      style:
+                                          STextStyles.label(context).copyWith(
+                                        color: Theme.of(context)
+                                            .extension<StackColors>()!
+                                            .textError,
+                                      ),
+                                    ),
+                                  ),
+                                );
+                              }
+                            },
+                          ),
+                          const SizedBox(
+                            height: 24,
+                          ),
+                          PrimaryButton(
+                            label: "NEXT",
+                            enabled: _addressToggleFlag,
+                            onPressed: () async {
+                              final bool isAddress = await ref
+                                  .read(walletProvider)
+                                  ?.isOwnAddress(_address!) as bool;
+
+                              isAddress
+                                  ? await showDialog<dynamic>(
+                                      context: context,
+                                      useSafeArea: false,
+                                      barrierDismissible: true,
+                                      builder: (context) {
+                                        return StackDialog(
+                                          title: "Transaction failed",
+                                          message:
+                                              "Sending to self is currently disabled",
+                                          rightButton: TextButton(
+                                            style: Theme.of(context)
+                                                .extension<StackColors>()!
+                                                .getSecondaryEnabledButtonColor(
+                                                    context),
+                                            child: Text(
+                                              "Ok",
+                                              style: STextStyles.buttonText(
+                                                      context)
+                                                  .copyWith(
+                                                color: Theme.of(context)
+                                                    .extension<StackColors>()!
+                                                    .accentColorDark,
+                                              ),
+                                            ),
+                                            onPressed: () {
+                                              Navigator.of(context).pop();
+                                            },
+                                          ),
+                                        );
+                                      },
+                                    )
+                                  : Navigator.of(context).pushNamed(
+                                      SendAmountView.routeName,
+                                      arguments: Tuple3(
+                                        ref.read(walletProvider)!.walletId,
+                                        _address!,
+                                        Coin.epicCash,
+                                      ),
+                                    );
+                              debugPrint(_address!);
+                            },
+                          ),
+                          const Spacer(
+                            flex: 2,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }

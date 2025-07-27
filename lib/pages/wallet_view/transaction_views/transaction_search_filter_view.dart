@@ -430,304 +430,312 @@ class _TransactionSearchViewState
             ),
           ],
         ),
-        body: Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: Constants.size.standardPadding,
-          ),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              return SingleChildScrollView(
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
-                  child: IntrinsicHeight(
-                    child: Column(
-                      children: [
-                        Text(
-                          "Filter transactions",
-                          style: STextStyles.titleH4(context),
-                        ),
-                        const SizedBox(
-                          height: 36,
-                        ),
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: FittedBox(
-                            child: Text(
-                              "TRANSACTION TYPE",
-                              style: STextStyles.overLineBold(context),
+        body: SafeArea(
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: Constants.size.standardPadding,
+            ),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return SingleChildScrollView(
+                  child: ConstrainedBox(
+                    constraints:
+                        BoxConstraints(minHeight: constraints.maxHeight),
+                    child: IntrinsicHeight(
+                      child: Column(
+                        children: [
+                          Text(
+                            "Filter transactions",
+                            style: STextStyles.titleH4(context),
+                          ),
+                          const SizedBox(
+                            height: 36,
+                          ),
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: FittedBox(
+                              child: Text(
+                                "TRANSACTION TYPE",
+                                style: STextStyles.overLineBold(context),
+                              ),
                             ),
                           ),
-                        ),
-                        const SizedBox(
-                          height: 16,
-                        ),
-                        RoundedContainer(
-                          padding: const EdgeInsets.all(0),
-                          color:
-                              Theme.of(context).extension<StackColors>()!.coal,
-                          child: Expandable(
-                            controller: _expandableController,
-                            onExpandChanged: (expanded) {
-                              setState(() {
-                                _expandableState = expanded;
-                              });
-                            },
-                            header: Padding(
-                              padding: const EdgeInsets.all(16),
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    header,
-                                    style: STextStyles.body(context).copyWith(
+                          const SizedBox(
+                            height: 16,
+                          ),
+                          RoundedContainer(
+                            padding: const EdgeInsets.all(0),
+                            color: Theme.of(context)
+                                .extension<StackColors>()!
+                                .coal,
+                            child: Expandable(
+                              controller: _expandableController,
+                              onExpandChanged: (expanded) {
+                                setState(() {
+                                  _expandableState = expanded;
+                                });
+                              },
+                              header: Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Text(
+                                      header,
+                                      style: STextStyles.body(context).copyWith(
+                                        color: Theme.of(context)
+                                            .extension<StackColors>()!
+                                            .textMedium,
+                                      ),
+                                    ),
+                                    SvgPicture.asset(
+                                      Assets.svg.chevronDown,
                                       color: Theme.of(context)
                                           .extension<StackColors>()!
                                           .textMedium,
+                                      width: 14,
                                     ),
-                                  ),
-                                  SvgPicture.asset(
-                                    Assets.svg.chevronDown,
-                                    color: Theme.of(context)
-                                        .extension<StackColors>()!
-                                        .textMedium,
-                                    width: 14,
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
-                            ),
-                            body: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                ...options.where((e) => e != header).map(
-                                      (e) => Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.stretch,
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Container(
-                                            height: 1,
-                                            color: Theme.of(context)
-                                                .extension<StackColors>()!
-                                                .textDark
-                                                .withOpacity(0.1),
-                                          ),
-                                          GestureDetector(
-                                            onTap: () {
-                                              setState(() {
-                                                header = e;
-                                              });
-                                              _expandableController.toggle
-                                                  ?.call();
-                                            },
-                                            child: Container(
-                                              color: Colors.transparent,
-                                              child: Padding(
-                                                padding:
-                                                    const EdgeInsets.all(16),
-                                                child: Text(
-                                                  e,
-                                                  style:
-                                                      STextStyles.body(context)
-                                                          .copyWith(
-                                                    color: Theme.of(context)
-                                                        .extension<
-                                                            StackColors>()!
-                                                        .textMedium,
+                              body: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  ...options.where((e) => e != header).map(
+                                        (e) => Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.stretch,
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Container(
+                                              height: 1,
+                                              color: Theme.of(context)
+                                                  .extension<StackColors>()!
+                                                  .textDark
+                                                  .withOpacity(0.1),
+                                            ),
+                                            GestureDetector(
+                                              onTap: () {
+                                                setState(() {
+                                                  header = e;
+                                                });
+                                                _expandableController.toggle
+                                                    ?.call();
+                                              },
+                                              child: Container(
+                                                color: Colors.transparent,
+                                                child: Padding(
+                                                  padding:
+                                                      const EdgeInsets.all(16),
+                                                  child: Text(
+                                                    e,
+                                                    style: STextStyles.body(
+                                                            context)
+                                                        .copyWith(
+                                                      color: Theme.of(context)
+                                                          .extension<
+                                                              StackColors>()!
+                                                          .textMedium,
+                                                    ),
                                                   ),
                                                 ),
                                               ),
                                             ),
-                                          ),
-                                        ],
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        const SizedBox(
-                          height: 32,
-                        ),
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: FittedBox(
-                            child: Text(
-                              "DATE",
-                              style: STextStyles.overLineBold(context),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(
-                          height: 16,
-                        ),
-                        _buildDateRangePicker(),
-                        const SizedBox(
-                          height: 32,
-                        ),
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: FittedBox(
-                            child: Text(
-                              "AMOUNT",
-                              style: STextStyles.overLineBold(context),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(
-                          height: 16,
-                        ),
-                        TextField(
-                          autocorrect: false,
-                          enableSuggestions: false,
-                          key: const Key("transactionSearchViewAmountFieldKey"),
-                          controller: _amountTextEditingController,
-                          focusNode: amountTextFieldFocusNode,
-                          onChanged: (_) => setState(() {}),
-                          textAlignVertical: TextAlignVertical.center,
-                          style: STextStyles.body(context),
-                          keyboardType: const TextInputType.numberWithOptions(
-                            signed: false,
-                            decimal: true,
-                          ),
-                          inputFormatters: [
-                            // regex to validate a crypto amount with 8 decimal places
-                            TextInputFormatter.withFunction((oldValue,
-                                    newValue) =>
-                                RegExp(r'^([0-9]*[,.]?[0-9]{0,8}|[,.][0-9]{0,8})$')
-                                        .hasMatch(newValue.text)
-                                    ? newValue
-                                    : oldValue),
-                          ],
-                          decoration: InputDecoration(
-                            hintText: "Enter amount...",
-                            hintStyle: STextStyles.fieldLabel(context).copyWith(
-                              color: Theme.of(context)
-                                  .extension<StackColors>()!
-                                  .textFieldDefaultSearchIconLeft,
-                            ),
-                            suffixIcon: UnconstrainedBox(
-                              child: Row(
-                                children: [
-                                  if (_amountTextEditingController
-                                      .text.isNotEmpty)
-                                    TextFieldIconButton(
-                                      child: const XIcon(),
-                                      onTap: () async {
-                                        setState(() {
-                                          _amountTextEditingController.text =
-                                              "";
-                                        });
-                                      },
-                                    ),
-                                  if (_amountTextEditingController.text.isEmpty)
-                                    const SearchIcon(),
                                 ],
                               ),
                             ),
                           ),
-                        ),
-                        const SizedBox(
-                          height: 32,
-                        ),
-                        Align(
-                          alignment: Alignment.centerLeft,
-                          child: FittedBox(
-                            child: Text(
-                              "KEYWORD",
-                              style: STextStyles.overLineBold(context),
-                            ),
+                          const SizedBox(
+                            height: 32,
                           ),
-                        ),
-                        const SizedBox(
-                          height: 16,
-                        ),
-                        TextField(
-                          autocorrect: false,
-                          enableSuggestions: false,
-                          key:
-                              const Key("transactionSearchViewKeywordFieldKey"),
-                          controller: _keywordTextEditingController,
-                          focusNode: keywordTextFieldFocusNode,
-                          textAlignVertical: TextAlignVertical.center,
-                          style: STextStyles.body(context),
-                          onChanged: (_) => setState(() {}),
-                          decoration: InputDecoration(
-                            hintText: "Type keyword...",
-                            hintStyle: STextStyles.fieldLabel(context).copyWith(
-                              color: Theme.of(context)
-                                  .extension<StackColors>()!
-                                  .textFieldDefaultSearchIconLeft,
-                            ),
-                            suffixIcon: UnconstrainedBox(
-                              child: Row(
-                                children: [
-                                  if (_keywordTextEditingController
-                                      .text.isNotEmpty)
-                                    TextFieldIconButton(
-                                      child: const XIcon(),
-                                      onTap: () async {
-                                        setState(() {
-                                          _keywordTextEditingController.text =
-                                              "";
-                                        });
-                                      },
-                                    ),
-                                  if (_keywordTextEditingController
-                                      .text.isEmpty)
-                                    const SearchIcon(),
-                                ],
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: FittedBox(
+                              child: Text(
+                                "DATE",
+                                style: STextStyles.overLineBold(context),
                               ),
                             ),
                           ),
-                        ),
-                        const Spacer(),
-                        const SizedBox(
-                          height: 16,
-                        ),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: SecondaryButton(
-                                label: "Cancel",
-                                onPressed: () async {
-                                  if (FocusScope.of(context).hasFocus) {
-                                    FocusScope.of(context).unfocus();
-                                    await Future<void>.delayed(
-                                      const Duration(
-                                        milliseconds: 75,
+                          const SizedBox(
+                            height: 16,
+                          ),
+                          _buildDateRangePicker(),
+                          const SizedBox(
+                            height: 32,
+                          ),
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: FittedBox(
+                              child: Text(
+                                "AMOUNT",
+                                style: STextStyles.overLineBold(context),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(
+                            height: 16,
+                          ),
+                          TextField(
+                            autocorrect: false,
+                            enableSuggestions: false,
+                            key: const Key(
+                                "transactionSearchViewAmountFieldKey"),
+                            controller: _amountTextEditingController,
+                            focusNode: amountTextFieldFocusNode,
+                            onChanged: (_) => setState(() {}),
+                            textAlignVertical: TextAlignVertical.center,
+                            style: STextStyles.body(context),
+                            keyboardType: const TextInputType.numberWithOptions(
+                              signed: false,
+                              decimal: true,
+                            ),
+                            inputFormatters: [
+                              // regex to validate a crypto amount with 8 decimal places
+                              TextInputFormatter.withFunction((oldValue,
+                                      newValue) =>
+                                  RegExp(r'^([0-9]*[,.]?[0-9]{0,8}|[,.][0-9]{0,8})$')
+                                          .hasMatch(newValue.text)
+                                      ? newValue
+                                      : oldValue),
+                            ],
+                            decoration: InputDecoration(
+                              hintText: "Enter amount...",
+                              hintStyle:
+                                  STextStyles.fieldLabel(context).copyWith(
+                                color: Theme.of(context)
+                                    .extension<StackColors>()!
+                                    .textFieldDefaultSearchIconLeft,
+                              ),
+                              suffixIcon: UnconstrainedBox(
+                                child: Row(
+                                  children: [
+                                    if (_amountTextEditingController
+                                        .text.isNotEmpty)
+                                      TextFieldIconButton(
+                                        child: const XIcon(),
+                                        onTap: () async {
+                                          setState(() {
+                                            _amountTextEditingController.text =
+                                                "";
+                                          });
+                                        },
                                       ),
-                                    );
-                                  }
+                                    if (_amountTextEditingController
+                                        .text.isEmpty)
+                                      const SearchIcon(),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(
+                            height: 32,
+                          ),
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: FittedBox(
+                              child: Text(
+                                "KEYWORD",
+                                style: STextStyles.overLineBold(context),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(
+                            height: 16,
+                          ),
+                          TextField(
+                            autocorrect: false,
+                            enableSuggestions: false,
+                            key: const Key(
+                                "transactionSearchViewKeywordFieldKey"),
+                            controller: _keywordTextEditingController,
+                            focusNode: keywordTextFieldFocusNode,
+                            textAlignVertical: TextAlignVertical.center,
+                            style: STextStyles.body(context),
+                            onChanged: (_) => setState(() {}),
+                            decoration: InputDecoration(
+                              hintText: "Type keyword...",
+                              hintStyle:
+                                  STextStyles.fieldLabel(context).copyWith(
+                                color: Theme.of(context)
+                                    .extension<StackColors>()!
+                                    .textFieldDefaultSearchIconLeft,
+                              ),
+                              suffixIcon: UnconstrainedBox(
+                                child: Row(
+                                  children: [
+                                    if (_keywordTextEditingController
+                                        .text.isNotEmpty)
+                                      TextFieldIconButton(
+                                        child: const XIcon(),
+                                        onTap: () async {
+                                          setState(() {
+                                            _keywordTextEditingController.text =
+                                                "";
+                                          });
+                                        },
+                                      ),
+                                    if (_keywordTextEditingController
+                                        .text.isEmpty)
+                                      const SearchIcon(),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ),
+                          const Spacer(),
+                          const SizedBox(
+                            height: 16,
+                          ),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: SecondaryButton(
+                                  label: "Cancel",
+                                  onPressed: () async {
+                                    if (FocusScope.of(context).hasFocus) {
+                                      FocusScope.of(context).unfocus();
+                                      await Future<void>.delayed(
+                                        const Duration(
+                                          milliseconds: 75,
+                                        ),
+                                      );
+                                    }
 
-                                  if (mounted) {
-                                    Navigator.of(context).pop();
-                                  }
-                                },
+                                    if (mounted) {
+                                      Navigator.of(context).pop();
+                                    }
+                                  },
+                                ),
                               ),
-                            ),
-                            const SizedBox(
-                              width: 16,
-                            ),
-                            Expanded(
-                              child: PrimaryButton(
-                                onPressed: () async {
-                                  await _onApplyPressed();
-                                },
-                                label: "APPLY",
+                              const SizedBox(
+                                width: 16,
                               ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(
-                          height: 24,
-                        ),
-                      ],
+                              Expanded(
+                                child: PrimaryButton(
+                                  onPressed: () async {
+                                    await _onApplyPressed();
+                                  },
+                                  label: "APPLY",
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(
+                            height: 24,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           ),
         ),
       ),

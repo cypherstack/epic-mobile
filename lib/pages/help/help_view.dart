@@ -63,98 +63,100 @@ class _HelpViewState extends State<HelpView> {
           ),
           leading: const AppBarBackButton(),
         ),
-        body: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                "COMMUNITY SUPPORT",
-                style: STextStyles.overLineBold(context),
-              ),
-              const SizedBox(
-                height: 24,
-              ),
-              HelpItem(
-                label: "Telegram",
-                iconAsset: Assets.socials.telegram,
-                url: "http://t.me/epiccashhelpdesk",
-              ),
-              const SizedBox(
-                height: 32,
-              ),
-              HelpItem(
-                label: "Twitter",
-                iconAsset: Assets.socials.twitter,
-                url: "https://twitter.com/EpicCashTech",
-              ),
-              const SizedBox(
-                height: 32,
-              ),
-              HelpItem(
-                label: "Reddit",
-                iconAsset: Assets.socials.reddit,
-                url: "https://www.reddit.com/r/epiccash",
-              ),
-              const SizedBox(
-                height: 42,
-              ),
-              // Text(
-              //   "WALLET INFO",
-              //   style: STextStyles.overLineBold(context),
-              // ),
-              // const SizedBox(
-              //   height: 24,
-              // ),
-              // HelpItem(
-              //   label: "Wallet guide",
-              //   iconAsset: Assets.socials.compass,
-              //   url: "url",
-              // ),
-              const Spacer(),
-              FutureBuilder(
-                future: PackageInfo.fromPlatform(),
-                builder: (context, AsyncSnapshot<PackageInfo> snapshot) {
-                  final done =
-                      snapshot.connectionState == ConnectionState.done &&
-                          snapshot.hasData;
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "COMMUNITY SUPPORT",
+                  style: STextStyles.overLineBold(context),
+                ),
+                const SizedBox(
+                  height: 24,
+                ),
+                HelpItem(
+                  label: "Telegram",
+                  iconAsset: Assets.socials.telegram,
+                  url: "http://t.me/epiccashhelpdesk",
+                ),
+                const SizedBox(
+                  height: 32,
+                ),
+                HelpItem(
+                  label: "Twitter",
+                  iconAsset: Assets.socials.twitter,
+                  url: "https://twitter.com/EpicCashTech",
+                ),
+                const SizedBox(
+                  height: 32,
+                ),
+                HelpItem(
+                  label: "Reddit",
+                  iconAsset: Assets.socials.reddit,
+                  url: "https://www.reddit.com/r/epiccash",
+                ),
+                const SizedBox(
+                  height: 42,
+                ),
+                // Text(
+                //   "WALLET INFO",
+                //   style: STextStyles.overLineBold(context),
+                // ),
+                // const SizedBox(
+                //   height: 24,
+                // ),
+                // HelpItem(
+                //   label: "Wallet guide",
+                //   iconAsset: Assets.socials.compass,
+                //   url: "url",
+                // ),
+                const Spacer(),
+                FutureBuilder(
+                  future: PackageInfo.fromPlatform(),
+                  builder: (context, AsyncSnapshot<PackageInfo> snapshot) {
+                    final done =
+                        snapshot.connectionState == ConnectionState.done &&
+                            snapshot.hasData;
 
-                  return Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      if (done)
-                        Text(
-                          "Version: ${snapshot.data!.version}\nBuild ${snapshot.data!.buildNumber}",
-                          style: STextStyles.bodyBold(context).copyWith(
-                            color: Theme.of(context)
-                                .extension<StackColors>()!
-                                .textMedium,
+                    return Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        if (done)
+                          Text(
+                            "Version: ${snapshot.data!.version}\nBuild ${snapshot.data!.buildNumber}",
+                            style: STextStyles.bodyBold(context).copyWith(
+                              color: Theme.of(context)
+                                  .extension<StackColors>()!
+                                  .textMedium,
+                            ),
+                            textAlign: TextAlign.center,
                           ),
-                          textAlign: TextAlign.center,
-                        ),
-                      if (!done)
-                        AnimatedText(
-                          stringsToLoopThrough: const [
-                            "Loading",
-                            "Loading.",
-                            "Loading..",
-                            "Loading...",
-                          ],
-                          style: STextStyles.bodyBold(context).copyWith(
-                            color: Theme.of(context)
-                                .extension<StackColors>()!
-                                .textMedium,
+                        if (!done)
+                          AnimatedText(
+                            stringsToLoopThrough: const [
+                              "Loading",
+                              "Loading.",
+                              "Loading..",
+                              "Loading...",
+                            ],
+                            style: STextStyles.bodyBold(context).copyWith(
+                              color: Theme.of(context)
+                                  .extension<StackColors>()!
+                                  .textMedium,
+                            ),
                           ),
-                        ),
-                    ],
-                  );
-                },
-              ),
+                      ],
+                    );
+                  },
+                ),
 
-              const SizedBox(
-                height: 16,
-              ),
-            ],
+                const SizedBox(
+                  height: 16,
+                ),
+              ],
+            ),
           ),
         ),
       ),

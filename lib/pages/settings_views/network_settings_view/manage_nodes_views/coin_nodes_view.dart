@@ -176,16 +176,18 @@ class _CoinNodesViewState extends ConsumerState<CoinNodesView> {
               ),
             ],
           ),
-          body: Padding(
-            padding: const EdgeInsets.only(
-              top: 12,
-              left: 12,
-              right: 12,
-            ),
-            child: SingleChildScrollView(
-              child: NodesList(
-                coin: widget.coin,
-                popBackToRoute: CoinNodesView.routeName,
+          body: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.only(
+                top: 12,
+                left: 12,
+                right: 12,
+              ),
+              child: SingleChildScrollView(
+                child: NodesList(
+                  coin: widget.coin,
+                  popBackToRoute: CoinNodesView.routeName,
+                ),
               ),
             ),
           ),
