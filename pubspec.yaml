@@ -78,7 +78,7 @@ dependencies:
   uuid: ^3.0.5
   flutter_rounded_date_picker: ^3.0.4
   crypto: ^3.0.2
-  barcode_scan2: ^4.2.3
+  barcode_scan2: ^4.5.1
   wakelock_plus: ^1.2.8
   intl: ^0.17.0
   devicelocale: ^0.8.1
@@ -90,7 +90,10 @@ dependencies:
   share_plus: ^7.0.2
   package_info_plus: ^8.0.2
   lottie: ^2.3.2
-  file_picker: ^5.3.1
+  file_picker:
+    git:
+      url: https://github.com/cypherstack/flutter_file_picker.git
+      ref: b2849e63e1d418ad8d943c886cd3f4ed20d0ff23
   connectivity_plus: ^4.0.1
   isar:
     version: *isar_version
