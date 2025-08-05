@@ -405,80 +405,82 @@ class _AddEditEpicBoxViewState extends ConsumerState<AddEditEpicBoxView>
               ),
           ],
         ),
-        body: Padding(
-          padding: const EdgeInsets.only(
-            top: 12,
-            left: 12,
-            right: 12,
-            bottom: 12,
-          ),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              return SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.all(4),
-                  child: ConstrainedBox(
-                    constraints:
-                        BoxConstraints(minHeight: constraints.maxHeight - 8),
-                    child: IntrinsicHeight(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          EpicBoxForm(
-                            epicBox: epicBox,
-                            readOnly: false,
-                            onChanged: (canSave, canTest) {
-                              if (canSave != saveEnabled &&
-                                  canTest != testConnectionEnabled) {
-                                setState(() {
-                                  saveEnabled = canSave;
-                                  testConnectionEnabled = canTest;
-                                });
-                              } else if (canSave != saveEnabled) {
-                                setState(() {
-                                  saveEnabled = canSave;
-                                });
-                              } else if (canTest != testConnectionEnabled) {
-                                setState(() {
-                                  testConnectionEnabled = canTest;
-                                });
-                              }
-                            },
-                          ),
-                          const Spacer(),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: SecondaryButton(
-                                  label: "TEST",
-                                  enabled: testConnectionEnabled,
-                                  desktopMed: true,
-                                  onPressed: testConnectionEnabled
-                                      ? () async {
-                                          await _testConnection();
-                                        }
-                                      : null,
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.only(
+              top: 12,
+              left: 12,
+              right: 12,
+              bottom: 12,
+            ),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.all(4),
+                    child: ConstrainedBox(
+                      constraints:
+                          BoxConstraints(minHeight: constraints.maxHeight - 8),
+                      child: IntrinsicHeight(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            EpicBoxForm(
+                              epicBox: epicBox,
+                              readOnly: false,
+                              onChanged: (canSave, canTest) {
+                                if (canSave != saveEnabled &&
+                                    canTest != testConnectionEnabled) {
+                                  setState(() {
+                                    saveEnabled = canSave;
+                                    testConnectionEnabled = canTest;
+                                  });
+                                } else if (canSave != saveEnabled) {
+                                  setState(() {
+                                    saveEnabled = canSave;
+                                  });
+                                } else if (canTest != testConnectionEnabled) {
+                                  setState(() {
+                                    testConnectionEnabled = canTest;
+                                  });
+                                }
+                              },
+                            ),
+                            const Spacer(),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: SecondaryButton(
+                                    label: "TEST",
+                                    enabled: testConnectionEnabled,
+                                    desktopMed: true,
+                                    onPressed: testConnectionEnabled
+                                        ? () async {
+                                            await _testConnection();
+                                          }
+                                        : null,
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(
-                                width: 16,
-                              ),
-                              Expanded(
-                                child: PrimaryButton(
-                                  label: "SAVE",
-                                  enabled: testConnectionEnabled,
-                                  onPressed: saveEnabled ? attemptSave : null,
+                                const SizedBox(
+                                  width: 16,
                                 ),
-                              ),
-                            ],
-                          ),
-                        ],
+                                Expanded(
+                                  child: PrimaryButton(
+                                    label: "SAVE",
+                                    enabled: testConnectionEnabled,
+                                    onPressed: saveEnabled ? attemptSave : null,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           ),
         ),
       ),

@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:epicpay/utilities/theme/stack_colors.dart';
 import 'package:epicpay/widgets/background.dart';
+import 'package:flutter/material.dart';
 
 class DesktopScaffold extends StatelessWidget {
   const DesktopScaffold({
@@ -63,7 +63,7 @@ class MasterScaffold extends StatelessWidget {
           backgroundColor: background ??
               Theme.of(context).extension<StackColors>()!.background,
           appBar: appBar as PreferredSizeWidget?,
-          body: body,
+          body: SafeArea(child: body),
         ),
       );
     }

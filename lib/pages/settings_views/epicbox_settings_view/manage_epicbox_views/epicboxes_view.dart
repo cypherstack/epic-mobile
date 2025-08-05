@@ -142,15 +142,17 @@ class _EpicBoxesViewState extends ConsumerState<EpicBoxesView> {
               ),
             ],
           ),
-          body: const Padding(
-            padding: EdgeInsets.only(
-              top: 12,
-              left: 12,
-              right: 12,
-            ),
-            child: SingleChildScrollView(
-              child: EpicBoxList(
-                popBackToRoute: EpicBoxSettingsView.routeName,
+          body: const SafeArea(
+            child: Padding(
+              padding: EdgeInsets.only(
+                top: 12,
+                left: 12,
+                right: 12,
+              ),
+              child: SingleChildScrollView(
+                child: EpicBoxList(
+                  popBackToRoute: EpicBoxSettingsView.routeName,
+                ),
               ),
             ),
           ),

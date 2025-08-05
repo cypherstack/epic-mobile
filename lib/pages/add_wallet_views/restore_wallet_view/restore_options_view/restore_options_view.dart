@@ -209,66 +209,69 @@ class _RestoreOptionsViewState extends ConsumerState<RestoreOptionsView> {
             },
           ),
         ),
-        body: RestoreOptionsPlatformLayout(
-          isDesktop: false,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const Spacer(
-                flex: 1,
-              ),
-              Text(
-                "Restore options",
-                textAlign: TextAlign.center,
-                style: STextStyles.titleH2(context),
-              ),
-              const SizedBox(
-                height: 32,
-              ),
-              if (coin == Coin.epicCash ||
-                  ref.watch(mnemonicWordCountStateProvider.state).state == 25)
-                Text(
-                  "CHOOSE START DATE",
-                  style: STextStyles.bodySmallBold(context).copyWith(
-                    color:
-                        Theme.of(context).extension<StackColors>()!.textMedium,
-                  ),
-                  textAlign: TextAlign.left,
+        body: SafeArea(
+          child: RestoreOptionsPlatformLayout(
+            isDesktop: false,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Spacer(
+                  flex: 1,
                 ),
-              const SizedBox(
-                height: 16,
-              ),
+                Text(
+                  "Restore options",
+                  textAlign: TextAlign.center,
+                  style: STextStyles.titleH2(context),
+                ),
+                const SizedBox(
+                  height: 32,
+                ),
+                if (coin == Coin.epicCash ||
+                    ref.watch(mnemonicWordCountStateProvider.state).state == 25)
+                  Text(
+                    "CHOOSE START DATE",
+                    style: STextStyles.bodySmallBold(context).copyWith(
+                      color: Theme.of(context)
+                          .extension<StackColors>()!
+                          .textMedium,
+                    ),
+                    textAlign: TextAlign.left,
+                  ),
+                const SizedBox(
+                  height: 16,
+                ),
 
-              // if (!isDesktop)
-              RestoreFromDatePicker(
-                onTap: chooseDate,
-                controller: _dateController,
-              ),
+                // if (!isDesktop)
+                RestoreFromDatePicker(
+                  onTap: chooseDate,
+                  controller: _dateController,
+                ),
 
-              const SizedBox(
-                height: 16,
-              ),
-              RoundedWhiteContainer(
-                child: Center(
-                  child: Text(
-                    "Choose the date you made the wallet (approximate is fine)",
-                    style: STextStyles.smallMed12(context).copyWith(
-                      fontSize: 10,
+                const SizedBox(
+                  height: 16,
+                ),
+                RoundedWhiteContainer(
+                  child: Center(
+                    child: Text(
+                      "Choose the date you made the wallet (approximate is fine)",
+                      style: STextStyles.smallMed12(context).copyWith(
+                        fontSize: 10,
+                      ),
                     ),
                   ),
                 ),
-              ),
 
-              const Spacer(
-                flex: 3,
-              ),
+                const Spacer(
+                  flex: 3,
+                ),
 
-              PrimaryButton(
-                label: "NEXT",
-                enabled: _nextEnabled,
-                onPressed: nextPressed,
-              ),
-            ],
+                PrimaryButton(
+                  label: "NEXT",
+                  enabled: _nextEnabled,
+                  onPressed: nextPressed,
+                ),
+              ],
+            ),
           ),
         ),
       ),

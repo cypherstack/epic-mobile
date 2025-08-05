@@ -1,4 +1,3 @@
-import 'package:epicpay/services/swap/change_now/change_now_exchange.dart';
 import 'package:epicpay/utilities/enums/coin_enum.dart';
 import 'package:epicpay/utilities/theme/color_theme.dart';
 import 'package:epicpay/utilities/theme/stack_colors.dart';
@@ -9,7 +8,6 @@ abstract class Assets {
   static const png = _PNG();
   static const lottie = _ANIMATIONS();
   static const socials = _SOCIALS();
-  static const exchange = _EXCHANGE();
   static const cn = _CN();
 }
 
@@ -20,23 +18,6 @@ class _SOCIALS {
   String get reddit => "assets/svg/socials/reddit.svg";
   String get twitter => "assets/svg/socials/twitter.svg";
   String get telegram => "assets/svg/socials/telegram.svg";
-}
-
-class _EXCHANGE {
-  const _EXCHANGE();
-
-  String get changeNow => "assets/svg/change-now-logo.svg";
-  // String get simpleSwap => "assets/svg/exchange_icons/simpleswap-icon.svg";
-
-  String getIconFor({required String exchangeName}) {
-    switch (exchangeName) {
-      case ChangeNowExchange.exchangeName:
-        return changeNow;
-      default:
-        throw ArgumentError("Invalid exchange name passed to "
-            "Assets.exchange.getIconFor()");
-    }
-  }
 }
 
 class _SVG {

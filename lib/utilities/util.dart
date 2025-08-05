@@ -1,12 +1,15 @@
 import 'dart:io';
 
+import 'package:epicpay/services/coins/coin_service.dart';
+import 'package:epicpay/utilities/logger.dart';
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
 
 abstract class Util {
   static Directory? libraryPath;
   static bool get isDesktop {
-    if(Platform.isIOS && libraryPath != null && !libraryPath!.path.contains("/var/mobile/")){
+    if (Platform.isIOS &&
+        libraryPath != null &&
+        !libraryPath!.path.contains("/var/mobile/")) {
       return true;
     }
     return Platform.isLinux || Platform.isMacOS || Platform.isWindows;
@@ -30,5 +33,21 @@ abstract class Util {
       );
     }
     return MaterialColor(color.value, swatch);
+  }
+
+  static Future<void> refreshChain(CoinServiceAPI wallet) async {
+    try {
+      await wallet.refresh();
+      await Future<void>.delayed(const Duration(seconds: 1));
+      await wallet.refresh();
+      await Future<void>.delayed(const Duration(seconds: 2));
+      await wallet.refresh();
+      await Future<void>.delayed(const Duration(seconds: 5));
+      await wallet.refresh();
+      await Future<void>.delayed(const Duration(seconds: 10));
+      await wallet.refresh();
+    } catch (e, s) {
+      Logging.instance.log("$e\n$s", level: LogLevel.Warning);
+    }
   }
 }
