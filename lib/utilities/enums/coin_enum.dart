@@ -30,6 +30,13 @@ extension CoinExt on Coin {
     }
   }
 
+  String get coinGeckoId {
+    switch (this) {
+      case Coin.epicCash:
+        return "epic-cash";
+    }
+  }
+
   String get uriScheme {
     switch (this) {
       case Coin.epicCash:
