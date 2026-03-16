@@ -87,7 +87,7 @@ class PriceAPI {
       final uri = Uri.parse(
         "https://api.coingecko.com/api/v3/coins/markets?"
         "vs_currency=${baseCurrency.toLowerCase()}"
-        "&ids=epic-cash"
+        "&ids=${Coin.values.map((Coin c) => c.coinGeckoId).join(',')}"
         "&order=market_cap_desc"
         "&per_page=10"
         "&page=1"
@@ -106,9 +106,14 @@ class PriceAPI {
         level: LogLevel.Info,
       );
 
+      final coinGeckoIdMap = {
+        for (final coin in Coin.values) coin.coinGeckoId: coin,
+      };
+
       for (final map in coinGeckoData) {
-        final String coinName = map["name"] as String;
-        final coin = coinFromPrettyName(coinName);
+        final String id = map["id"] as String;
+        final coin = coinGeckoIdMap[id];
+        if (coin == null) continue;
 
         final price = Decimal.parse(map["current_price"].toString());
         final change24h =
