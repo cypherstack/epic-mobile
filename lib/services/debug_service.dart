@@ -5,7 +5,7 @@ import 'package:epicpay/models/isar/models/log.dart';
 import 'package:epicpay/utilities/logger.dart';
 import 'package:event_bus/event_bus.dart';
 import 'package:flutter/material.dart';
-import 'package:isar/isar.dart';
+import 'package:isar_community/isar.dart';
 
 class DebugService extends ChangeNotifier {
   DebugService._();

@@ -7,7 +7,7 @@ import 'package:epicpay/utilities/constants.dart';
 import 'package:epicpay/utilities/enums/log_level_enum.dart';
 import 'package:epicpay/widgets/ep_dialog.dart';
 import 'package:flutter/material.dart';
-import 'package:isar/isar.dart';
+import 'package:isar_community/isar.dart';
 
 export 'enums/log_level_enum.dart';
 

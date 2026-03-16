@@ -1,6 +1,6 @@
 // import 'package:epicpay/models/isar/type_converters/log_level_converter.dart';
 import 'package:epicpay/utilities/enums/log_level_enum.dart';
-import 'package:isar/isar.dart';
+import 'package:isar_community/isar.dart';
 
 part 'log.g.dart';
 

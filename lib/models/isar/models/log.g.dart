@@ -59,7 +59,7 @@ const LogSchema = CollectionSchema(
   getId: _logGetId,
   getLinks: _logGetLinks,
   attach: _logAttach,
-  version: '3.1.8',
+  version: '3.3.0-dev.2',
 );
 
 int _logEstimateSize(
