@@ -50,3 +50,4 @@ scripts/**/build
 /lib/external_api_keys.dart
 /test/services/coins/bitcoincash/bitcoincash_wallet_test_parameters.dart
 /test/services/coins/namecoin/namecoin_wallet_test_parameters.dart.txt
+/android
