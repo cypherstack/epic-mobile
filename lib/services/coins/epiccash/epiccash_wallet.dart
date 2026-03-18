@@ -1282,7 +1282,8 @@ class EpicCashWallet extends CoinServiceAPI {
         level: LogLevel.Info,
       );
       //Once scanner completes restart listener
-      await listenToEpicbox();
+      // await listenToEpicbox();
+      // Epicbox listener already started before scanning.
     } catch (e, s) {
       Logging.instance.log(
         "_startScans failed: $e\n$s",
@@ -1390,6 +1391,157 @@ class EpicCashWallet extends CoinServiceAPI {
 
     ListenerManager.pointer =
         epicboxListenerStart(wallet!, epicboxConfig.toString());
+  }
+
+  Future<void> _fetchEpicboxTransactions() async {
+    try {
+      final wallet = await _secureStore.read(key: '${_walletId}_wallet');
+
+      await m.protect(() async {
+        final receivePort = await getIsolate({
+          "function": "getTransactions",
+          "wallet": wallet!,
+          "refreshFromNode": 0, // Use cached/epicbox data only.
+        }, name: walletName);
+
+        final message = await receivePort.first;
+        stop(receivePort);
+
+        if (message is! String && message['result'] != null) {
+          // Process and update transaction data using existing method.
+          final newTxData = await _processEpicboxTransactionData(
+              message['result'].toString());
+          _transactionData = Future(() => newTxData);
+          txCount = newTxData.getAllTransactions().length;
+
+          // Notify UI of updates.
+          GlobalEventBus.instance.fire(UpdatedInBackgroundEvent(
+              "Epicbox transactions loaded", walletId));
+
+          Logging.instance.log(
+            "Epicbox transactions fetched successfully: ${newTxData.getAllTransactions().length} transactions",
+            level: LogLevel.Info,
+          );
+        }
+      });
+    } catch (e, s) {
+      Logging.instance.log(
+        "Epicbox transaction fetch failed: $e",
+        level: LogLevel.Warning,
+      );
+      // Don't rethrow - this shouldn't break the normal sync flow.
+    }
+  }
+
+  Future<TransactionData> _processEpicboxTransactionData(
+      String transactionJson) async {
+    // Process epicbox transaction data using simplified version of _fetchTransactionData logic.
+    final jsonTransactions = json.decode(transactionJson) as List;
+
+    final priceData =
+        await _priceAPI.getPricesAnd24hChange(baseCurrency: _prefs.currency);
+    Decimal currentPrice = priceData[coin]?.item1 ?? Decimal.zero;
+    final List<Map<String, dynamic>> midSortedArray = [];
+
+    final slatesToCommits = await getSlatesToCommits();
+
+    for (var tx in jsonTransactions) {
+      final txHeight = tx["kernel_lookup_min_height"] as int? ?? 0;
+      final isConfirmed = tx["confirmed"] as bool;
+
+      int amt = 0;
+      if (tx["tx_type"] == "TxReceived" ||
+          tx["tx_type"] == "TxReceivedCancelled") {
+        amt = int.parse(tx['amount_credited'] as String);
+      } else {
+        int debit = int.parse(tx['amount_debited'] as String);
+        int credit = int.parse(tx['amount_credited'] as String);
+        amt = debit - credit;
+      }
+
+      final txType = tx["tx_type"] == "TxReceived" ||
+              tx["tx_type"] == "TxReceivedCancelled"
+          ? "Received"
+          : "Sent";
+
+      var date = DateTime.fromMillisecondsSinceEpoch(
+          (tx["creation_ts"] as String).length == 10
+              ? (int.parse(tx["creation_ts"] as String)) * 1000
+              : int.parse(tx["creation_ts"] as String));
+
+      int fee = 0;
+      if (tx["fee"] != null) {
+        fee = int.parse(tx["fee"] as String? ?? "0");
+      }
+
+      String? slateId = tx["tx_slate_id"] as String?;
+      String address = "";
+
+      // Extract address information.
+      if (slatesToCommits[slateId] != null) {
+        if (txType == "Received") {
+          address = slatesToCommits[slateId]["to"].toString() ?? "";
+        } else {
+          address = slatesToCommits[slateId]["from"].toString() ?? "";
+        }
+      }
+
+      String? onChainNote;
+      if (tx["messages"] != null) {
+        if ((tx["messages"]["messages"] as List).isNotEmpty) {
+          onChainNote = tx["messages"]["messages"][0]["message"] as String?;
+        }
+      }
+
+      int? numberOfMessages = tx["messages"] == null
+          ? null
+          : (tx["messages"]["messages"] as List).length;
+
+      midSortedArray.add({
+        "txid": tx["id"].toString(),
+        "confirmed_status": isConfirmed,
+        "timestamp": (date.millisecondsSinceEpoch ~/ 1000),
+        "txType": txType,
+        "amount": amt,
+        "aliens": <dynamic>[],
+        "worthNow": (currentPrice *
+                (Decimal.fromInt(amt) / Decimal.fromInt(100000000)).toDecimal())
+            .toString(),
+        "worthAtBlockTimestamp": (currentPrice *
+                (Decimal.fromInt(amt) / Decimal.fromInt(100000000)).toDecimal())
+            .toString(),
+        "fees": fee,
+        "inputSize": tx["num_inputs"],
+        "outputSize": tx["num_outputs"],
+        "inputs": <dynamic>[],
+        "outputs": <dynamic>[],
+        "address": address,
+        "height": txHeight,
+        "subType": "",
+        "confirmations": txHeight > 0 ? await chainHeight - txHeight : 0,
+        "isCancelled": tx["tx_type"] == "TxSentCancelled" ||
+            tx["tx_type"] == "TxReceivedCancelled",
+        "slateId": slateId,
+        "otherData": null,
+        "numberOfMessages": numberOfMessages,
+        "note": onChainNote,
+      });
+    }
+
+    midSortedArray.sort(
+        (a, b) => (b["timestamp"] as int).compareTo(a["timestamp"] as int));
+
+    Logging.instance.log(
+        "Processed ${midSortedArray.length} epicbox transactions",
+        level: LogLevel.Info);
+
+    final Map<String, Transaction> transactionMap = {};
+    for (final txData in midSortedArray) {
+      Transaction tx = Transaction.fromJson(txData);
+      transactionMap[tx.txid] = tx;
+    }
+
+    return TransactionData.fromMap(transactionMap);
   }
 
   Future<int> getRestoreHeight() async {
@@ -1585,6 +1737,12 @@ class EpicCashWallet extends CoinServiceAPI {
         await DB.instance.put<dynamic>(
             boxName: walletId, key: "creationHeight", value: await chainHeight);
       }
+
+      // Start epicbox listener first for instant transaction appearance.
+      await listenToEpicbox();
+
+      // Immediately fetch any pending transactions from epicbox.
+      await _fetchEpicboxTransactions();
 
       await _startScans();
 
